@@ -63,7 +63,7 @@ Texto da interface em minúsculas e em português: `arquivos`, `rede`, `captura:
 
 ## Forma
 
-- Cantos retos (`radius = 0`). O terminal é uma grade e a interface segue a grade.
+- Cantos levemente arredondados: `radius = 8` em janelas, barra e cartões, `radius_small = 4` em chips, cursor das workspaces e blocos do OSD. No Hyprland, `rounding_power = 3` dá um canto suave, sem virar bolha. Cantos retos pareciam agressivos; arredondar de leve ameniza sem enfeitar. No terminal, a seleção do hub e as teclas do guia são pílulas, com tampas redondas da Nerd Font.
 - Borda de 2 px na janela ativa (acento) e na inativa (`line`). Sem sombra, sem blur.
 - Espaçamentos: 6 px entre janelas, 12 px nas bordas da tela, barra de 28 px.
 - Notificação: faixa de 2 px no acento à esquerda, ou borda vermelha inteira se urgente.
@@ -111,11 +111,29 @@ A **shell** (Quickshell) desenha a barra, o OSD de volume e brilho, as notifica�
 ![barra, OSD e notificações, no escuro](img/shell-dark.png)
 ![os mesmos componentes no tema claro, com o acento azure](img/shell-light.png)
 
-A barra mostra só texto: workspaces ocupadas, título da janela, volume, rede, bateria, relógio. Cada trecho é clicável e abre a TUI correspondente numa janela flutuante.
+A barra mostra só texto: workspaces ocupadas, título da janela, o que estiver ligado (gravando, silêncio, noturno, café), volume, rede, bateria, relógio. Cada trecho é clicável e abre a TUI correspondente numa janela flutuante.
+
+## Papel de parede
+
+Oito estilos desenhados em tempo real com as cores do tema (`clios wallpaper`): grade, brilho, anéis, relevo, janelas, c gigante, diagonais e sólido. Mudou o modo ou o acento, o fundo muda junto, em qualquer resolução (a escala é relativa à altura). A shell cruza o fade entre imagens na curva `out`, e o hyprlock usa o mesmo fundo. Imagens suas também funcionam.
+
+![os oito estilos](img/wallpapers.png)
+
+![o seletor, com prévia ao vivo](img/wallpaper-picker.png)
+
+## O guia de boas-vindas
+
+`clios welcome` é o primeiro lugar onde o CLIOS se explica: os primeiros passos com o estado de cada um ao vivo, os atalhos agrupados e desenhados como teclas, o catálogo de apps (abre ou instala com Enter), a central do sistema, um baralho de dicas e o sobre. Abre sozinho no primeiro login e depois com `SUPER + F10`.
+
+![início](img/welcome-inicio.png)
+![atalhos](img/welcome-atalhos.png)
+![central do sistema](img/welcome-sistema.png)
+
+A **central do sistema** muda modo, acento, movimento, papel de parede, energia, café, noturno e não perturbe na hora, e tem as ações da sessão (bloquear, suspender, reiniciar, desligar, com confirmação).
 
 ## Regras para mudar
 
 - Cor nova entra em `tokens.toml` e passa pelos testes de contraste.
 - Nenhum app guarda valor próprio: se um programa precisa de cor, ele ganha um template em `templates/`.
-- Sem ícones, sem sombras, sem gradientes, sem cantos arredondados.
+- Sem ícones, sem sombras, sem gradientes (o único degradê é o do papel de parede *brilho*), e cantos só com os raios dos tokens.
 - Texto da interface em português, minúsculo, direto ("captura: região", não "Tirar uma captura de tela").

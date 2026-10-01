@@ -70,6 +70,9 @@ enum Command {
         query: String,
         #[arg(long, default_value_t = 60_000, hide = true)]
         at: u64,
+        /// Para capturas da documentação: só o que vem instalado de fábrica.
+        #[arg(long, hide = true)]
+        demo: bool,
     },
     /// Abre uma entrada do catálogo do hub numa janela de terminal (é o que os atalhos chamam).
     Open {
@@ -107,6 +110,9 @@ enum Command {
         /// Com --snapshot: o item selecionado da página (grupo, categoria, linha ou dica).
         #[arg(long, hide = true)]
         select: Option<usize>,
+        /// Com --snapshot: mostra o que vem instalado de fábrica e os primeiros passos adiantados.
+        #[arg(long, hide = true, requires = "snapshot")]
+        demo: bool,
     },
     /// O resumo do sistema, com a marca ao lado.
     Fetch,
@@ -297,8 +303,8 @@ fn run() -> Result<bool> {
         Command::Sync { copy, dry_run, no_theme } => {
             cmd::sync::run(&ctx, cmd::sync::Options { copy, dry_run, no_theme })?
         }
-        Command::Hub { dump, snapshot, query, at } => {
-            hub::run(&ctx, hub::Options { dump, snapshot, query, at_ms: at })?
+        Command::Hub { dump, snapshot, query, at, demo } => {
+            hub::run(&ctx, hub::Options { dump, snapshot, query, at_ms: at, demo })?
         }
         Command::Open { id, args } => hub::open(&ctx, &id, &args)?,
         Command::Status { what: StatusWhat::Net } => cmd::status::run_net()?,
@@ -337,8 +343,8 @@ fn run() -> Result<bool> {
                 return cmd::apps::install(&ctx, &ids, extras, dry_run);
             }
         },
-        Command::Welcome { page, first_run, snapshot, select } => {
-            welcome::run(ctx, welcome::Options { page, first_run, snapshot, select })?
+        Command::Welcome { page, first_run, snapshot, select, demo } => {
+            welcome::run(ctx, welcome::Options { page, first_run, snapshot, select, demo })?
         }
         Command::Fetch => cmd::fetch::run(&ctx)?,
         Command::Update { news, yes } => return cmd::update::run(&ctx, news, yes),

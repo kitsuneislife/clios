@@ -34,6 +34,8 @@ pub struct Options {
     pub query: String,
     /// Em que instante da animação (ms após abrir) o quadro é tirado.
     pub at_ms: u64,
+    /// Para a documentação: lista só o que vem instalado de fábrica.
+    pub demo: bool,
 }
 
 /// `clios open <id>`: abre uma entrada do catálogo (ou o próprio hub) numa janela de terminal.
@@ -57,7 +59,12 @@ pub fn open(ctx: &Ctx, id: &str, args: &[String]) -> Result<()> {
 pub fn run(ctx: &Ctx, opts: Options) -> Result<()> {
     let theme = ctx.theme()?;
     let (catalog, warning) = crate::catalog::load(&ctx.paths);
-    let items = sources::static_items(&catalog, &theme, &|t| t.installed());
+    // `--demo` (só para as capturas da documentação): o que vem instalado de fábrica, sem os apps deste computador.
+    let items = if opts.demo {
+        sources::static_items(&catalog, &theme, &|t| t.tier == crate::catalog::Tier::Core, false)
+    } else {
+        sources::static_items(&catalog, &theme, &|t| t.installed(), true)
+    };
     let history_path = ctx.paths.state.join("hub-history.toml");
     let mut app = App::new(theme, items, History::load(&history_path), Instant::now());
     app.notice = warning;

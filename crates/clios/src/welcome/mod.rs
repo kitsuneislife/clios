@@ -21,7 +21,7 @@ use ratatui::crossterm::event::{
 use ratatui::crossterm::execute;
 use ratatui::layout::Rect;
 
-use crate::catalog::{CATEGORIES, Catalog, TuiDef};
+use crate::catalog::{CATEGORIES, Catalog};
 use crate::cmd::toggles::{self, Switch, state_word};
 use crate::cmd::{theme as theme_cmd, wallpaper as wp};
 use crate::ctx::Ctx;
@@ -141,6 +141,7 @@ pub struct App {
     pub started: Instant,
     pub page_at: Instant,
     pub quit: bool,
+    pub demo: bool,
 }
 
 const POWER_PROFILES: [&str; 3] = ["power-saver", "balanced", "performance"];
@@ -201,6 +202,7 @@ impl App {
             started: now,
             page_at: now,
             quit: false,
+            demo: false,
             ctx,
         };
         app.refresh();
@@ -209,7 +211,13 @@ impl App {
 
     /// Relê o que muda fora do guia: o que está instalado, a rede, os primeiros passos.
     pub fn refresh(&mut self) {
-        self.installed = self.catalog.tui.iter().map(TuiDef::installed).collect();
+        let demo = self.demo;
+        self.installed = self
+            .catalog
+            .tui
+            .iter()
+            .map(|t| if demo { t.tier == crate::catalog::Tier::Core } else { t.installed() })
+            .collect();
         let extras_missing = self
             .catalog
             .tui
@@ -217,7 +225,9 @@ impl App {
             .zip(&self.installed)
             .filter(|(t, ok)| t.tier == crate::catalog::Tier::Extra && !**ok)
             .count();
-        let probes = if self.ctx.sandboxed {
+        let probes = if self.demo {
+            Probes { hub_used: true, online: true, aur_helper: true, extras_missing }
+        } else if self.ctx.sandboxed {
             Probes::default()
         } else {
             Probes {
@@ -530,6 +540,8 @@ pub struct Options {
     pub first_run: bool,
     pub snapshot: Option<String>,
     pub select: Option<usize>,
+    /// Para a documentação: o que vem de fábrica, com os primeiros passos adiantados.
+    pub demo: bool,
 }
 
 fn seen_marker(ctx: &Ctx) -> std::path::PathBuf {
@@ -558,6 +570,10 @@ pub fn run(ctx: Ctx, opts: Options) -> Result<()> {
 
     let now = Instant::now();
     let mut app = App::new(ctx, page, now)?;
+    if opts.demo {
+        app.demo = true;
+        app.refresh();
+    }
     if let Some(i) = opts.select {
         pages::set_sel(&mut app, i);
     }

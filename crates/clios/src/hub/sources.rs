@@ -12,7 +12,12 @@ use crate::catalog::{Catalog, TuiDef, category_name};
 ///
 /// `installed` diz se o binário de um app do catálogo existe: o que está instalado vira uma TUI
 /// normal; o que falta só aparece no escopo `+`, e abre o instalador numa janela flutuante.
-pub fn static_items(catalog: &Catalog, theme: &Theme, installed: &dyn Fn(&TuiDef) -> bool) -> Vec<Item> {
+pub fn static_items(
+    catalog: &Catalog,
+    theme: &Theme,
+    installed: &dyn Fn(&TuiDef) -> bool,
+    desktop_apps: bool,
+) -> Vec<Item> {
     let mut v = Vec::new();
 
     for t in &catalog.tui {
@@ -45,7 +50,7 @@ pub fn static_items(catalog: &Catalog, theme: &Theme, installed: &dyn Fn(&TuiDef
         v.push(Item::new(Kind::Action, format!("cmd:{}", c.id), c.name.clone(), action).keywords(c.keywords.clone()));
     }
 
-    for e in desktop::load_all() {
+    for e in if desktop_apps { desktop::load_all() } else { Vec::new() } {
         let cmd = desktop::strip_field_codes(&e.exec);
         let action = if e.terminal {
             Action::Tui { id: e.id.clone(), argv: vec!["sh".into(), "-c".into(), cmd], float: false, hold: false }
@@ -182,7 +187,7 @@ mod tests {
     #[test]
     fn installed_apps_are_launchable_and_missing_ones_only_installable() {
         let have = |t: &TuiDef| t.id == "files" || t.id == "git";
-        let items = static_items(&cat(), &theme(), &have);
+        let items = static_items(&cat(), &theme(), &have, false);
         let tui: Vec<_> = items.iter().filter(|i| i.kind == Kind::Tui).map(|i| i.id.as_str()).collect();
         assert!(tui.contains(&"tui:files") && tui.contains(&"tui:git"));
         assert!(!tui.contains(&"tui:disk"), "o que não está instalado não aparece como app");
@@ -194,7 +199,7 @@ mod tests {
 
     #[test]
     fn installing_opens_a_floating_terminal_that_waits_for_enter() {
-        let items = static_items(&cat(), &theme(), &|_| false);
+        let items = static_items(&cat(), &theme(), &|_| false, false);
         let cava = items.iter().find(|i| i.id == "install:visualizer").unwrap();
         match &cava.action {
             Action::Tui { id, argv, float, hold } => {
@@ -212,7 +217,7 @@ mod tests {
     fn install_search_finds_by_what_the_app_does_not_only_its_name() {
         use crate::hub::items::Scope;
         use crate::hub::search::{History, Ranker};
-        let items = static_items(&cat(), &theme(), &|_| false);
+        let items = static_items(&cat(), &theme(), &|_| false, false);
         let hits = Ranker::new().rank(&items, Scope::Install, "traceroute", &History::default(), 0);
         assert_eq!(items[hits[0].index].id, "install:route");
     }

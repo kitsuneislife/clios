@@ -13,25 +13,37 @@ Preto no branco e branco no preto, mais um acento que você escolhe. Uma fonte s
 
 ## O que tem aqui
 
-- **`clios`**, um binário em Rust, com os comandos do sistema: `theme`, `hub`, `open`, `sync`, `shot`, `status`, `motion`, `doctor`.
+- **`clios`**, um binário em Rust, com os comandos do sistema: `theme`, `hub`, `open`, `sync`, `shot`, `status`, `motion`, `doctor`, e, desde a V0.2, `welcome`, `wallpaper`, `apps`, `update`, `fetch`, `caffeine`, `night`, `dnd`, `rec`, `pick`, `power` e `saver`.
 - **Tokens de design** (`tokens/tokens.toml`) que controlam cor, movimento e tipografia. Hyprland, Quickshell, foot, helix, fish, btop, yazi, lazygit, mpv e a tela de bloqueio leem os mesmos valores. Trocar o acento ou o modo muda tudo junto, e os terminais abertos mudam na hora.
-- **O hub**, um lançador que roda dentro de um terminal (`SUPER + espaço`): apps, TUIs, ações, janelas abertas, atalhos e histórico da área de transferência numa busca só.
+- **O hub**, um lançador que roda dentro de um terminal (`SUPER + espaço`): apps, TUIs, ações, janelas abertas, atalhos e histórico da área de transferência numa busca só. Com `+`, ele mostra os apps curados que faltam e instala com Enter.
+- **O guia de boas-vindas** (`clios welcome`, `SUPER + F10`): primeiros passos ao vivo, atalhos desenhados como teclas, o catálogo de apps, a central do sistema, dicas e o sobre. Abre sozinho no primeiro login.
+- **Mais de cinquenta apps de terminal** curados, em dez categorias, com descrição e dica de uso; os essenciais já vêm, o resto instala sob demanda.
+- **Papel de parede que segue o tema**: oito estilos gerados em Rust com as cores do acento, mais as suas imagens (`SUPER + F4`).
 - **Configuração do Hyprland em Lua**, com todos os atalhos documentados (`SUPER + /` lista todos), e **uma shell em Quickshell** (barra, OSD, notificações, papel de parede).
 - **Instalação**: `scripts/bootstrap.sh` sobre um Arch mínimo, e um perfil de ISO ao vivo.
 
 ![o hub](docs/img/hub.png)
 
+![o guia de boas-vindas](docs/img/welcome-inicio.png)
+
+![os oito estilos de papel de parede](docs/img/wallpapers.png)
+
 ## Estado atual
 
 Leia isto antes de instalar.
 
-**Testado** (138 testes de Rust, mais os validadores abaixo, tudo rodando no CI):
+**Testado** (234 testes de Rust, mais os validadores abaixo, tudo rodando no CI):
 
 - Os tokens e o contraste: todo acento e toda cor de texto passa de 4.5:1 nos dois modos, e o build quebra se isso piorar.
 - Os templates de cada app renderizam em 48 combinações (modo × acento × nível de movimento), e JSON e TOML saem válidos.
 - O config Lua do Hyprland roda num interpretador contra o stub oficial da API do Hyprland 0.56. Funções, nome e tipo de cada opção, folhas de animação, efeitos de regra e conflitos de atalho são conferidos. O próprio validador é testado com 18 configurações erradas que ele precisa reprovar.
 - Os componentes visuais da shell renderizam fora do Quickshell (PySide6) sem nenhum aviso do QML, nos dois modos.
 - O hub: busca, histórico, teclado, mouse, confirmação em dois passos e o desenho de cada quadro da animação.
+- O guia, o seletor de papel de parede e a proteção de tela: renderizados em todos os tamanhos de terminal (inclusive minúsculos) sem pânico, navegação, cliques e configurações ao vivo.
+- Os atalhos que o guia mostra (`config/clios/keys.toml`) são conferidos contra o Lua: citar uma tecla que não existe quebra o teste.
+- Os papéis de parede: cada estilo, os dois modos, a escala por resolução, o recorte do contorno da marca, o PNG de ida e volta e a escolha de monitor.
+- O leitor de notícias do Arch (feed de exemplo, datas RFC 2822, `.pacnew`) e os pequenos liga-desliga (pid, estado, argumentos).
+- O catálogo: ids únicos, descrições completas, pacotes do bootstrap e dos extras separados, instalação com aspas.
 - Os scripts passam no `shellcheck`, e o `bootstrap.sh` tem `--dry-run`.
 
 **Nunca rodou de verdade**:
@@ -64,7 +76,10 @@ Para experimentar numa VM sem instalar, veja [`iso/`](iso/README.md).
 |---|---|
 | `SUPER + espaço` | o hub |
 | `SUPER + /` | todos os atalhos |
-| `SUPER + F1` / `F2` / `F3` | tema claro ou escuro / próximo acento / nível de movimento |
+| `SUPER + F1` / `F2` / `F3` / `F4` | claro ou escuro / próximo acento / movimento / papel de parede |
+| `SUPER + F9` / `F10` | central do sistema / guia de boas-vindas |
+| `SUPER + C / N / D` | modo café / noturno / não perturbe |
+| `SUPER + shift + R`, `SUPER + P`, `SUPER + U` | gravar a tela / conta-gotas / atualizar o sistema |
 | `SUPER + h j k l` | foco; com `shift`, move a janela |
 | `SUPER + 1…0` | workspaces |
 | `SUPER + E / G / A / I` | arquivos / git / áudio / rede |
@@ -77,6 +92,11 @@ clios theme set --mode light --accent azure
 clios theme set --accent "#7CFF00"        # qualquer cor; é ajustada para ter contraste
 clios motion reduced                      # só fades curtos
 clios doctor                              # o que falta no sistema
+clios wallpaper                           # escolher o papel de parede, com prévia
+clios apps list --missing                 # os apps curados que ainda não estão instalados
+clios apps install --extras               # instala todos os recomendados
+clios update                              # lê as notícias do Arch e atualiza
+clios fetch                               # o resumo do sistema, com a marca
 ```
 
 Para mudar o catálogo do hub (as TUIs que aparecem), copie `config/clios/hub.toml` para `~/.config/clios/hub.toml`. Monitores e teclado ficam em `~/.config/hypr/user.lua` (há um `user.lua.example`).
@@ -90,7 +110,9 @@ tokens/tokens.toml ──► clios theme apply ──┬─► ~/.config/hypr/th
                                            └─► OSC nos terminais abertos       (mudam sem reiniciar)
 
 config/hypr/conf/binds.lua ──► hyprctl binds ──► hub (`?`) e docs/KEYS.md
-config/clios/hub.toml ──────► hub  e  `clios open <id>`  ◄── atalhos do Hyprland
+config/clios/hub.toml ──────► hub, `clios apps`, o guia  e  `clios open <id>`  ◄── atalhos do Hyprland
+config/clios/keys.toml ─────► o guia (conferido contra o Lua nos testes)
+wallpaper (clios-core) ─────► ~/.local/state/clios/wallpaper.json ──► Quickshell cruza o fade; hyprlock usa o mesmo fundo
 ```
 
 Dois detalhes que mudam o dia a dia: os atalhos de TUI chamam `clios open <id>`, então o catálogo do hub é a única fonte dos comandos; e a documentação de atalhos sai do próprio Lua, então não envelhece.
@@ -118,20 +140,21 @@ pip install -r tests/requirements.txt
 ./tests/run.sh
 ```
 
-O runner executa `rustfmt`, `clippy`, os testes de Rust, os validadores de Lua e de QML, `shellcheck` e a sintaxe do fish. Etapas cujas ferramentas faltam são puladas com aviso. As imagens deste README saem de `clios hub --snapshot` e de `tests/qml/render.py`.
+O runner executa `rustfmt`, `clippy`, os testes de Rust, os validadores de Lua e de QML, `shellcheck` e a sintaxe do fish. Etapas cujas ferramentas faltam são puladas com aviso. As imagens da documentação saem de `tests/tools/shots.sh`, que usa os `--snapshot` do próprio binário e o harness de QML.
 
 ## Documentação
 
 - [`docs/STACK.md`](docs/STACK.md): cada escolha, o que ficou de fora e o que a escolha custa.
 - [`docs/DESIGN.md`](docs/DESIGN.md): a identidade: marca, cor, tipografia, forma e movimento.
 - [`docs/KEYS.md`](docs/KEYS.md): atalhos.
+- [`CHANGELOG.md`](CHANGELOG.md): o que mudou em cada versão.
 - [`docs/identidade.html`](docs/identidade.html): a identidade ao vivo. Abra no navegador, troque modo, acento e movimento, e use o hub dentro do desktop ilustrado.
 
 ## Roteiro
 
 - Um login em Rust (`greetd` + ratatui) com a marca e a animação do resto, no lugar do tuigreet.
 - Um instalador, para não depender do `archinstall`.
-- Papel de parede e tela de bloqueio opcionalmente animados pelos mesmos tokens.
+- Papel de parede animado (o cursor da marca já pisca na proteção de tela; falta o fundo).
 - Tema para o Firefox (`userChrome.css` gerado dos tokens).
 
 ## Licença

@@ -77,6 +77,31 @@ A barra mostra o volume pelo PipeWire diretamente, então o OSD aparece não imp
 - **ani-cli** para anime (AUR). Depende de sites de terceiros e quebra quando eles mudam; costuma ser corrigido rápido a montante.
 - **aerc** para e-mail, **newsboat** para RSS.
 
+## O catálogo de apps de terminal
+
+Mais de cinquenta apps curados em `config/clios/hub.toml`, em dez categorias, cada um com descrição, dica de uso e nível: *core* vem instalado, *extra* instala sob demanda pelo hub (`+`) ou por `clios apps install`. A escolha seguiu o mesmo critério do resto: um app por função, o que tem melhor UX no terminal, e que combine com o tema.
+
+| função | app | por quê |
+|---|---|---|
+| arquivos | yazi, gdu, television | prévia de imagens, uso de disco, busca difusa |
+| código | helix, lazygit, lazydocker, atac, rainfrog | edição, git, contêineres, API, banco |
+| sistema | btop, wiremix, lnav, fend | monitor, áudio, logs, calculadora com unidades |
+| rede | impala, bluetui, wavemon, bandwhich, trippy, sshs, termscp | wi-fi, bluetooth, sinal, tráfego, rota, SSH, transferência |
+| mídia | spotify-player, kew, cava, ani-cli, lobster, manga-tui, ytfzf | música, visualizador, anime, filmes, mangá, YouTube |
+| ler | newsboat, glow, presenterm, navi | feeds, markdown, apresentações, cheatsheets |
+| conversar | aerc, weechat, iamb, nchat, toot | e-mail, IRC, Matrix, mensageiros, Mastodon |
+| produtividade | calcurse, taskwarrior-tui, dijo | agenda, tarefas, hábitos |
+| pacotes | `clios update`, pacseek | atualização com notícias do Arch, busca de pacotes |
+| diversão | cbonsai, asciiquarium, cmatrix, genact | para olhar enquanto o resto compila |
+
+Os nomes dos pacotes foram conferidos contra os repositórios do Arch e o AUR (`tests/tools/pkgcheck.py`). O instalador usa `paru` quando existe (ele resolve oficial e AUR) e cai para `pacman`. O `bootstrap.sh` compila o paru sozinho.
+
+Também entram no shell: **atuin** (Ctrl+R com busca difusa e contexto, tudo local) e **tldr**.
+
+## Pequenas ferramentas
+
+`clios update` (lê o feed de notícias do Arch antes de atualizar e avisa de intervenção manual e de `.pacnew`), `caffeine` (systemd-inhibit), `night` (hyprsunset), `dnd` (a shell observa um arquivo), `rec` (wf-recorder), `pick` (hyprpicker), `power` (power-profiles-daemon) e `saver`, a proteção de tela própria. Cada uma é um comando, um atalho e uma ação no hub, e o que fica ligado aparece na barra.
+
 ## Login, bloqueio, idle
 
 - **greetd + tuigreet**: login em terminal, sem toolkit gráfico, nas cores do console do CLIOS. Um login próprio em Rust, com a marca e a animação do resto, está no roteiro.
