@@ -10,6 +10,7 @@ Rectangle {
     color: Tokens.bg
 
     property string themeJson: "{}"
+    property url wallpaper
     property int active: 2
     Component.onCompleted: Tokens.apply(JSON.parse(themeJson))
 
@@ -49,6 +50,7 @@ Rectangle {
             OsdView { id: osd; shown: true; label: "vol"; value: 0.7 }
             OsdView { id: osdMuted; shown: true; label: "vol"; value: 0.7; muted: true }
             Mark { size: 96; blink: false }
+            WallpaperView { id: wp; objectName: "wallpaper"; width: 256; height: 144; source: root.wallpaper }
         }
 
         Column {

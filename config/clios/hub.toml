@@ -456,6 +456,19 @@ tip = "/ busca; enter instala"
 keywords = "pacseek pacman aur instalar procurar apps loja"
 
 [[tui]]
+id = "wallpaper"
+name = "papel de parede"
+cmd = ["clios", "wallpaper"]
+bin = "clios"
+pkg = "clios"
+category = "sistema"
+tier = "core"
+float = true
+desc = "escolhe entre os estilos que seguem o tema ou usa uma imagem sua, com prévia"
+tip = "clios wallpaper add foto.jpg --set traz uma imagem sua"
+keywords = "wallpaper fundo background tela imagem"
+
+[[tui]]
 id = "update"
 name = "atualizar"
 cmd = ["clios", "update"]

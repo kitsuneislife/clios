@@ -21,6 +21,8 @@ pub struct Theme {
     pub c: Colors,
     /// Todos os acentos na variante do modo atual, para seletores.
     pub accents: Vec<Swatch>,
+    /// Onde mora o estado do usuário (para templates que apontam para arquivos gerados, como o papel de parede).
+    pub state_dir: String,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -181,6 +183,7 @@ impl Theme {
             motion: resolve_motion(tokens, level),
             c,
             accents,
+            state_dir: "~/.local/state/clios".into(),
         })
     }
 }

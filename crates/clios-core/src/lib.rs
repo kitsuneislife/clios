@@ -10,6 +10,7 @@ pub mod template;
 pub mod terminal;
 pub mod theme;
 pub mod tokens;
+pub mod wallpaper;
 
 pub use color::Rgb;
 pub use paths::Paths;

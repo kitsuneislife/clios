@@ -75,6 +75,17 @@ enum Command {
         /// Para `hub`: a consulta inicial.
         args: Vec<String>,
     },
+    /// Papel de parede: estilos que seguem o tema e as suas imagens (sem argumento, abre o seletor).
+    Wallpaper {
+        #[command(subcommand)]
+        command: Option<WallpaperCommand>,
+        /// Desenha um quadro do seletor em ANSI e sai: LARGURAxALTURA (docs e capturas).
+        #[arg(long, value_name = "LARGURAxALTURA", hide = true)]
+        snapshot: Option<String>,
+        /// Com --snapshot: o id do estilo selecionado.
+        #[arg(long, hide = true, requires = "snapshot")]
+        select: Option<String>,
+    },
     /// O catálogo de apps curados: lista, mostra e instala.
     Apps {
         #[command(subcommand)]
@@ -127,6 +138,31 @@ enum ThemeCommand {
     Show,
     /// Parâmetros `vt.default_*` para o console do kernel usar a mesma paleta.
     Cmdline,
+}
+
+#[derive(Subcommand)]
+enum WallpaperCommand {
+    /// Lista os estilos e as suas imagens, marcando o que está em uso.
+    List,
+    /// Aplica um estilo (veja `list`), uma imagem sua pelo nome, ou o caminho de uma imagem nova.
+    Set { what: String },
+    /// Passa para o próximo.
+    Next,
+    /// Volta para o anterior.
+    Prev,
+    /// Sorteia um diferente do atual.
+    Random,
+    /// Copia uma imagem para o CLIOS (em ~/.local/share/clios/wallpapers).
+    Add {
+        file: PathBuf,
+        /// Já aplica.
+        #[arg(long)]
+        set: bool,
+    },
+    /// Tira uma imagem sua do CLIOS.
+    Remove { name: String },
+    /// Garante que a imagem do tema atual existe e imprime o caminho dela.
+    Path,
 }
 
 #[derive(Subcommand)]
@@ -197,6 +233,21 @@ fn run() -> Result<bool> {
         }
         Command::Open { id, args } => hub::open(&ctx, &id, &args)?,
         Command::Status { what: StatusWhat::Net } => cmd::status::run_net()?,
+        Command::Wallpaper { command, snapshot: Some(size), select } => {
+            anyhow::ensure!(command.is_none(), "--snapshot não combina com subcomando");
+            cmd::wallpaper_tui::snapshot(&ctx, &size, select.as_deref())?
+        }
+        Command::Wallpaper { command, .. } => match command {
+            None => cmd::wallpaper::pick(&mut ctx)?,
+            Some(WallpaperCommand::List) => cmd::wallpaper::list(&ctx)?,
+            Some(WallpaperCommand::Set { what }) => cmd::wallpaper::set(&mut ctx, &what)?,
+            Some(WallpaperCommand::Next) => cmd::wallpaper::step_cmd(&mut ctx, 1)?,
+            Some(WallpaperCommand::Prev) => cmd::wallpaper::step_cmd(&mut ctx, -1)?,
+            Some(WallpaperCommand::Random) => cmd::wallpaper::random(&mut ctx)?,
+            Some(WallpaperCommand::Add { file, set }) => cmd::wallpaper::add(&mut ctx, &file, set)?,
+            Some(WallpaperCommand::Remove { name }) => cmd::wallpaper::remove(&mut ctx, &name)?,
+            Some(WallpaperCommand::Path) => cmd::wallpaper::path(&ctx)?,
+        },
         Command::Apps { command } => match command {
             AppsCommand::List { category, missing, installed } => {
                 let filter = if missing {

@@ -100,9 +100,6 @@ pub fn run(ctx: &Ctx, opts: Options) -> Result<()> {
 /// Um quadro do hub como texto ANSI de 24 bits.
 fn snapshot(mut app: App, size: &str, query: &str, at_ms: u64) -> Result<()> {
     use ratatui::buffer::Buffer;
-    use ratatui::style::{Color, Modifier};
-    use std::fmt::Write as _;
-
     let (w, h) = size
         .split_once('x')
         .and_then(|(w, h)| Some((w.parse::<u16>().ok()?, h.parse::<u16>().ok()?)))
@@ -119,21 +116,7 @@ fn snapshot(mut app: App, size: &str, query: &str, at_ms: u64) -> Result<()> {
     let mut buf = Buffer::empty(Rect::new(0, 0, w, h));
     ui::render(&mut buf, &app, now);
 
-    let mut out = String::new();
-    for y in 0..h {
-        for x in 0..w {
-            let c = &buf[(x, y)];
-            let rgb = |c: Color| match c {
-                Color::Rgb(r, g, b) => (r, g, b),
-                _ => (128, 128, 128),
-            };
-            let (fr, fg, fb) = rgb(c.fg);
-            let (br, bg, bb) = rgb(c.bg);
-            let bold = if c.modifier.contains(Modifier::BOLD) { "0;1;" } else { "0;" };
-            let _ = write!(out, "\x1b[{bold}38;2;{fr};{fg};{fb};48;2;{br};{bg};{bb}m{}", c.symbol());
-        }
-        out.push_str("\x1b[0m\n");
-    }
+    let out = crate::ui::buffer_ansi(&buf);
     print!("{out}");
     Ok(())
 }

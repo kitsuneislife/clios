@@ -5,3 +5,5 @@ pub mod shot;
 pub mod status;
 pub mod sync;
 pub mod theme;
+pub mod wallpaper;
+pub mod wallpaper_tui;

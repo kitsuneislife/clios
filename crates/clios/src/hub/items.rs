@@ -192,6 +192,13 @@ pub fn builtin_actions(theme: &Theme) -> Vec<Item> {
         a("motion-full", "movimento: completo", "motion animation full", &["motion", "full"]),
         a("motion-reduced", "movimento: reduzido", "motion reduced fade", &["motion", "reduced"]),
         a("motion-off", "movimento: desligado", "motion off none", &["motion", "off"]),
+        a("wallpaper-next", "papel de parede: próximo", "wallpaper fundo background", &["wallpaper", "next"]),
+        a(
+            "wallpaper-random",
+            "papel de parede: sortear",
+            "wallpaper fundo background random aleatorio",
+            &["wallpaper", "random"],
+        ),
         a("shot-region", "captura: região", "screenshot print screen recorte", &["shot", "region"]),
         a("shot-screen", "captura: tela inteira", "screenshot print screen", &["shot", "screen"]),
         a("shot-window", "captura: janela", "screenshot print window", &["shot", "window"]),
@@ -219,6 +226,14 @@ pub fn builtin_actions(theme: &Theme) -> Vec<Item> {
         sh("poweroff", "desligar", "shutdown poweroff", "systemctl poweroff").confirm(),
     ];
 
+    for s in clios_core::wallpaper::Style::ALL {
+        v.push(a(
+            &format!("wallpaper-{}", s.id()),
+            &format!("papel de parede: {}", s.name()),
+            "wallpaper fundo background tela",
+            &["wallpaper", "set", s.id()],
+        ));
+    }
     for s in &theme.accents {
         let current = s.name == theme.accent_name;
         v.push(

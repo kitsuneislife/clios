@@ -90,6 +90,8 @@ return function(_)
   bind(M .. " + F1", run("clios theme toggle"), "tema: claro ou escuro")
   bind(M .. " + F2", run("clios theme cycle"), "tema: próximo acento")
   bind(M .. " + F3", run("clios motion"), "movimento: completo, reduzido, desligado")
+  bind(M .. " + F4", open("wallpaper"), "papel de parede: escolher")
+  bind(M .. " + SHIFT + F4", run("clios wallpaper next"), "papel de parede: próximo")
 
   -- ── capturas ─────────────────────────────────────────────────────────────
   bind("Print", run("clios shot region"), "captura: região")

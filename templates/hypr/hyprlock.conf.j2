@@ -19,7 +19,11 @@ animations {
 
 background {
     monitor =
+    path = {{ state_dir }}/wallpaper/current.png
     color = {{ c.bg | hypr }}
+    blur_passes = 2
+    blur_size = 5
+    brightness = 0.75
 }
 
 # Hora, grande e quieta.

@@ -54,6 +54,11 @@ pub fn apply(ctx: &Ctx, mut opts: ApplyOptions) -> Result<Summary> {
         return Ok(Summary { changed, unchanged, terminals: 0 });
     }
 
+    // O papel de parede acompanha o tema (modo e acento). Falhar aqui não pode derrubar o resto do apply.
+    if let Err(e) = super::wallpaper::apply(ctx) {
+        eprintln!("aviso: papel de parede não atualizado: {e:#}");
+    }
+
     if opts.hooks && changed > 0 {
         run_hooks(&manifest);
     }
