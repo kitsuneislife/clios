@@ -1,86 +1,530 @@
-# Catálogo do hub. Copie para ~/.config/clios/hub.toml e edite para mudar o seu.
+# Catálogo do CLIOS: os apps de terminal curados, como abrir, como instalar.
 #
-# [[tui]]  programa de terminal. `float = true` abre numa janela flutuante e centralizada.
-#          `hold = true` espera um Enter antes de fechar (para comandos que só imprimem).
-# [[cmd]]  qualquer comando de shell, sem janela.
+# O hub (`SUPER + espaço`) lista o que está instalado; com `+` ele mostra o que falta e instala
+# com um Enter. O `clios apps` e o guia de boas-vindas leem este mesmo arquivo.
+# Para ter o seu: copie para ~/.config/clios/hub.toml e edite.
+#
+#   id        nome curto, usado em `clios open <id>` e nos atalhos do Hyprland
+#   name      como aparece (minúsculas, em português)
+#   cmd       o comando
+#   pkg       pacote(s) do Arch ou do AUR (o `paru` resolve os dois), separados por espaço
+#   bin       o executável que prova que está instalado (padrão: o primeiro item de cmd)
+#   category  arquivos | codigo | sistema | rede | midia | ler | falar | produtividade | pacotes | diversao
+#   desc      uma frase sobre o que o app faz, sem ponto final
+#   tip       uma dica de uso (como sair, a tecla mais útil)
+#   tier      core (vem instalado) | extra (instala sob demanda)
+#   float     abre numa janela flutuante e centralizada
+#   hold      espera um Enter antes de fechar (para comandos que só imprimem)
 #
 # Apps gráficos (.desktop) aparecem sozinhos; não precisa listar.
 
+# ── arquivos ────────────────────────────────────────────────────────────────
 [[tui]]
 id = "files"
 name = "arquivos"
 cmd = ["yazi"]
-keywords = "yazi files manager fm pastas gerenciador"
+pkg = "yazi"
+category = "arquivos"
+tier = "core"
+desc = "gerenciador de arquivos rápido, com prévia de imagens, vídeos e PDFs"
+tip = "y no fish leva o shell junto para a pasta onde você parou"
+keywords = "yazi files fm pastas gerenciador explorer"
 
+[[tui]]
+id = "disk"
+name = "disco"
+cmd = ["gdu"]
+pkg = "gdu"
+category = "arquivos"
+tier = "core"
+float = true
+desc = "mostra o que está ocupando espaço, das maiores pastas para as menores"
+tip = "d apaga o item selecionado; ? mostra todas as teclas"
+keywords = "gdu ncdu espaco armazenamento du tamanho"
+
+[[tui]]
+id = "find"
+name = "busca"
+cmd = ["tv"]
+pkg = "television"
+bin = "tv"
+category = "arquivos"
+float = true
+desc = "busca difusa em arquivos, repositórios git, variáveis, o que você quiser"
+tip = "ctrl + t troca de canal"
+keywords = "television tv fuzzy finder procurar fzf"
+
+# ── código ──────────────────────────────────────────────────────────────────
 [[tui]]
 id = "editor"
 name = "editor"
 cmd = ["hx"]
-keywords = "helix hx edit code texto"
+pkg = "helix"
+category = "codigo"
+tier = "core"
+desc = "editor modal com LSP, tree-sitter e seleção múltipla, sem plugins para manter"
+tip = ":tutor abre o tutorial dentro do próprio editor"
+keywords = "helix hx edit code texto programar"
 
 [[tui]]
 id = "git"
 name = "git"
 cmd = ["lazygit"]
+pkg = "lazygit"
+category = "codigo"
+tier = "core"
+desc = "commits, branches, rebase interativo e stash numa tela só"
+tip = "? mostra as teclas de cada painel"
 keywords = "lazygit commit repo repositorio versionamento"
 
+[[tui]]
+id = "docker"
+name = "docker"
+cmd = ["lazydocker"]
+pkg = "lazydocker"
+category = "codigo"
+desc = "contêineres, imagens, volumes e logs de uma vez"
+tip = "x abre o menu de ações do item selecionado"
+keywords = "lazydocker containers conteineres compose"
+
+[[tui]]
+id = "api"
+name = "api"
+cmd = ["atac"]
+pkg = "atac"
+category = "codigo"
+desc = "cliente de APIs HTTP no terminal, no lugar do Postman"
+tip = "ctrl + n cria uma requisição"
+keywords = "atac http rest postman insomnia requisicoes"
+
+[[tui]]
+id = "db"
+name = "banco"
+cmd = ["rainfrog"]
+pkg = "rainfrog"
+category = "codigo"
+desc = "cliente de Postgres, MySQL e SQLite com autocompletar"
+tip = "alt + enter executa a consulta"
+keywords = "rainfrog sql postgres mysql sqlite database dados"
+
+# ── sistema ─────────────────────────────────────────────────────────────────
 [[tui]]
 id = "monitor"
 name = "monitor"
 cmd = ["btop"]
+pkg = "btop"
+category = "sistema"
+tier = "core"
 float = true
-keywords = "btop cpu memoria ram processos top sistema"
+desc = "processador, memória, disco, rede e processos, com gráficos"
+tip = "f filtra processos, k mata o selecionado"
+keywords = "btop cpu memoria ram processos top htop sistema"
 
 [[tui]]
 id = "audio"
 name = "áudio"
 cmd = ["wiremix"]
+pkg = "wiremix"
+category = "sistema"
+tier = "core"
 float = true
+desc = "mixer do PipeWire: volume por app, saídas e entradas"
+tip = "tab troca entre reprodução, gravação e dispositivos"
 keywords = "wiremix volume som pipewire mixer audio saida entrada"
 
+[[tui]]
+id = "logs"
+name = "logs"
+cmd = ["sh", "-c", "journalctl --no-pager -b -n 20000 -o short-iso | lnav"]
+pkg = "lnav"
+bin = "lnav"
+category = "sistema"
+tier = "core"
+desc = "lê o diário do sistema com cor, filtros e busca, sem decorar flags do journalctl"
+tip = "/ busca, e e w pulam para o próximo erro e aviso"
+keywords = "lnav journal journalctl log erro depurar"
+
+[[tui]]
+id = "calc"
+name = "calculadora"
+cmd = ["fend"]
+pkg = "fend"
+category = "sistema"
+tier = "core"
+float = true
+desc = "calculadora que entende unidades: 5 km em milhas, 20% de 340"
+tip = "ctrl + d sai"
+keywords = "fend calculadora conta unidades converter"
+
+# ── rede ────────────────────────────────────────────────────────────────────
 [[tui]]
 id = "network"
 name = "rede"
 cmd = ["impala"]
+pkg = "impala"
+category = "rede"
+tier = "core"
 float = true
+desc = "escolhe e conecta redes wi-fi, direto no iwd"
+tip = "s procura redes, enter conecta"
 keywords = "impala wifi wi-fi wireless internet network conectar"
 
 [[tui]]
 id = "bluetooth"
 name = "bluetooth"
 cmd = ["bluetui"]
+pkg = "bluetui"
+category = "rede"
+tier = "core"
 float = true
+desc = "pareia e conecta fones, teclados e outros dispositivos"
+tip = "s procura dispositivos"
 keywords = "bluetui bt fone headset pareamento"
 
+[[tui]]
+id = "signal"
+name = "sinal wi-fi"
+cmd = ["wavemon"]
+pkg = "wavemon"
+category = "rede"
+float = true
+desc = "mede a força do sinal em tempo real, bom para achar o melhor lugar da casa"
+tip = "F2 mostra as redes ao redor"
+keywords = "wavemon wifi sinal potencia antena"
+
+[[tui]]
+id = "traffic"
+name = "tráfego"
+cmd = ["sudo", "bandwhich"]
+bin = "bandwhich"
+pkg = "bandwhich"
+category = "rede"
+float = true
+desc = "mostra qual programa está usando a internet agora e com quem fala"
+tip = "pede a senha de administrador; tab troca de painel"
+keywords = "bandwhich banda rede consumo conexoes"
+
+[[tui]]
+id = "route"
+name = "rota"
+cmd = ["sh", "-c", "printf 'host: '; read -r h; trip \"$h\""]
+bin = "trip"
+pkg = "trippy"
+category = "rede"
+float = true
+desc = "traceroute e ping contínuos, para ver onde a conexão engasga"
+tip = "informe um host, como archlinux.org"
+keywords = "trippy trip traceroute ping mtr latencia"
+
+[[tui]]
+id = "ssh"
+name = "ssh"
+cmd = ["sshs"]
+pkg = "sshs"
+category = "rede"
+desc = "lista os hosts do seu ~/.ssh/config e conecta com um Enter"
+tip = "/ filtra"
+keywords = "sshs servidor remoto conectar"
+
+[[tui]]
+id = "transfer"
+name = "transferir"
+cmd = ["termscp"]
+pkg = "termscp"
+category = "rede"
+desc = "copia arquivos por SCP, SFTP, FTP e S3 com duas colunas, como um gerenciador"
+tip = "tab troca entre o lado local e o remoto"
+keywords = "termscp scp sftp ftp copiar enviar"
+
+# ── mídia ───────────────────────────────────────────────────────────────────
 [[tui]]
 id = "music"
 name = "música"
 cmd = ["spotify_player"]
+pkg = "spotify-player"
+bin = "spotify_player"
+category = "midia"
+tier = "core"
 float = true
+desc = "Spotify completo no terminal, com letras e capas (precisa de conta Premium)"
+tip = "? mostra as teclas; ao primeiro uso pede login"
 keywords = "spotify player musica tocar playlist"
+
+[[tui]]
+id = "local-music"
+name = "música local"
+cmd = ["kew"]
+pkg = "kew"
+category = "midia"
+float = true
+desc = "toca a sua biblioteca de músicas, com capa do álbum no terminal"
+tip = "aponta para a pasta Music na primeira execução"
+keywords = "kew mp3 flac biblioteca album local"
+
+[[tui]]
+id = "visualizer"
+name = "visualizador"
+cmd = ["cava"]
+pkg = "cava"
+category = "midia"
+float = true
+desc = "barras que dançam com o som que está tocando"
+tip = "q sai; as cores seguem o acento do tema"
+keywords = "cava audio espectro visualizer barras"
 
 [[tui]]
 id = "anime"
 name = "anime"
 cmd = ["ani-cli"]
-keywords = "ani-cli assistir episodio mpv"
+pkg = "ani-cli"
+category = "midia"
+tier = "core"
+desc = "procura, assiste e baixa anime pelo terminal, tocando no mpv"
+tip = "escolha o título, depois o episódio; q volta"
+keywords = "ani-cli assistir episodio mpv animes"
 
 [[tui]]
-id = "mail"
-name = "e-mail"
-cmd = ["aerc"]
-keywords = "aerc email correio mensagens"
+id = "movies"
+name = "filmes"
+cmd = ["lobster"]
+pkg = "lobster"
+category = "midia"
+desc = "procura filmes e séries e toca no mpv, no mesmo estilo do ani-cli"
+tip = "digite o título e escolha na lista"
+keywords = "lobster filmes series cinema assistir"
 
+[[tui]]
+id = "manga"
+name = "mangá"
+cmd = ["manga-tui"]
+pkg = "manga-tui"
+category = "midia"
+desc = "lê e baixa mangás do MangaDex, com as páginas no próprio terminal"
+tip = "precisa de um terminal com imagens (o foot tem sixel)"
+keywords = "manga-tui mangadex ler quadrinhos hq"
+
+[[tui]]
+id = "youtube"
+name = "youtube"
+cmd = ["ytfzf"]
+pkg = "ytfzf"
+category = "midia"
+desc = "procura no YouTube com fzf e toca no mpv, sem abrir navegador"
+tip = "digite a busca; tab seleciona vários"
+keywords = "ytfzf youtube videos yt-dlp assistir"
+
+# ── ler ─────────────────────────────────────────────────────────────────────
 [[tui]]
 id = "feeds"
 name = "feeds"
 cmd = ["newsboat"]
-keywords = "newsboat rss noticias atom leitor"
+pkg = "newsboat"
+category = "ler"
+tier = "core"
+desc = "leitor de RSS e Atom: blogs e sites que você acompanha, sem algoritmo"
+tip = "a adiciona um feed em ~/.config/newsboat/urls"
+keywords = "newsboat rss noticias atom leitor blogs"
+
+[[tui]]
+id = "markdown"
+name = "markdown"
+cmd = ["glow"]
+pkg = "glow"
+category = "ler"
+tier = "core"
+float = true
+desc = "lê arquivos .md formatados, com cor, listas e blocos de código"
+tip = "enter abre o arquivo; / busca"
+keywords = "glow md readme documentacao"
+
+[[tui]]
+id = "slides"
+name = "apresentação"
+cmd = ["sh", "-c", "printf 'arquivo .md: '; read -r f; presenterm \"$f\""]
+bin = "presenterm"
+pkg = "presenterm"
+category = "ler"
+desc = "slides a partir de um arquivo markdown, com código, imagens e temas"
+tip = "setas ou espaço avançam; ctrl + c sai"
+keywords = "presenterm slides apresentacao palestra powerpoint"
+
+[[tui]]
+id = "cheats"
+name = "colas"
+cmd = ["navi"]
+pkg = "navi"
+category = "ler"
+float = true
+desc = "cheatsheets interativos: acha o comando certo e já preenche os argumentos"
+tip = "ctrl + g abre o navi a partir do shell"
+keywords = "navi cheatsheet colas comandos lembrar"
+
+# ── conversar ───────────────────────────────────────────────────────────────
+[[tui]]
+id = "mail"
+name = "e-mail"
+cmd = ["aerc"]
+pkg = "aerc"
+category = "falar"
+tier = "core"
+desc = "cliente de e-mail com abas, atalhos de vim e suporte a várias contas"
+tip = ":help abre o guia; a primeira execução cria a conta"
+keywords = "aerc email correio mensagens gmail"
+
+[[tui]]
+id = "irc"
+name = "irc"
+cmd = ["weechat"]
+pkg = "weechat"
+category = "falar"
+desc = "o cliente de IRC clássico, com scripts e buffers"
+tip = "/server add libera irc.libera.chat; /connect libera"
+keywords = "weechat irc chat canais libera"
+
+[[tui]]
+id = "matrix"
+name = "matrix"
+cmd = ["iamb"]
+pkg = "iamb"
+category = "falar"
+desc = "cliente de Matrix com teclas de vim, salas e mensagens diretas"
+tip = ":help lista os comandos"
+keywords = "iamb matrix element chat salas"
+
+[[tui]]
+id = "chat"
+name = "telegram"
+cmd = ["nchat"]
+pkg = "nchat"
+category = "falar"
+desc = "Telegram e WhatsApp no terminal, com listas de conversas"
+tip = "na primeira vez pede o número de telefone"
+keywords = "nchat telegram whatsapp mensagens conversas"
+
+[[tui]]
+id = "mastodon"
+name = "mastodon"
+cmd = ["toot", "tui"]
+pkg = "toot"
+bin = "toot"
+category = "falar"
+desc = "linha do tempo, notificações e posts do Mastodon"
+tip = "toot login antes da primeira vez"
+keywords = "toot mastodon fediverso timeline"
+
+# ── produtividade ───────────────────────────────────────────────────────────
+[[tui]]
+id = "agenda"
+name = "agenda"
+cmd = ["calcurse"]
+pkg = "calcurse"
+category = "produtividade"
+desc = "calendário, compromissos e lista de tarefas num só lugar"
+tip = "a adiciona um compromisso; ? mostra a ajuda"
+keywords = "calcurse calendario compromissos agenda eventos"
+
+[[tui]]
+id = "tasks"
+name = "tarefas"
+cmd = ["taskwarrior-tui"]
+pkg = "taskwarrior-tui task"
+category = "produtividade"
+desc = "gerenciador de tarefas com projetos, prazos e prioridades (Taskwarrior)"
+tip = "a adiciona, d marca como feita"
+keywords = "taskwarrior todo tarefas projetos prazos"
+
+[[tui]]
+id = "habits"
+name = "hábitos"
+cmd = ["dijo"]
+pkg = "dijo"
+category = "produtividade"
+desc = "rastreador de hábitos: marque o dia e veja a sequência crescer"
+tip = "enter marca o dia; a ou x acrescenta e remove"
+keywords = "dijo habitos rotina streak"
+
+# ── pacotes ─────────────────────────────────────────────────────────────────
+[[tui]]
+id = "packages"
+name = "pacotes"
+cmd = ["pacseek"]
+pkg = "pacseek"
+category = "pacotes"
+float = true
+desc = "procura, lê e instala pacotes do Arch e do AUR numa interface de listas"
+tip = "/ busca; enter instala"
+keywords = "pacseek pacman aur instalar procurar apps loja"
+
+[[tui]]
+id = "update"
+name = "atualizar"
+cmd = ["clios", "update"]
+bin = "clios"
+pkg = "clios"
+category = "pacotes"
+tier = "core"
+float = true
+hold = true
+desc = "lê as notícias do Arch antes e atualiza o sistema, avisando dos .pacnew"
+tip = "se uma notícia pedir intervenção manual, leia antes de continuar"
+keywords = "update upgrade paru pacman atualizar sistema"
+
+# ── diversão ────────────────────────────────────────────────────────────────
+[[tui]]
+id = "bonsai"
+name = "bonsai"
+cmd = ["cbonsai", "-li"]
+pkg = "cbonsai"
+bin = "cbonsai"
+category = "diversao"
+float = true
+desc = "uma árvore que cresce devagar, para olhar enquanto o café esfria"
+tip = "q sai"
+keywords = "cbonsai arvore relaxar zen"
+
+[[tui]]
+id = "aquarium"
+name = "aquário"
+cmd = ["asciiquarium"]
+pkg = "asciiquarium"
+category = "diversao"
+float = true
+desc = "um aquário em ASCII, com peixes, baleia e um tubarão"
+tip = "q sai"
+keywords = "asciiquarium peixes aquario"
+
+[[tui]]
+id = "matrix-rain"
+name = "chuva digital"
+cmd = ["cmatrix", "-ab"]
+pkg = "cmatrix"
+bin = "cmatrix"
+category = "diversao"
+float = true
+desc = "a chuva de caracteres verdes do filme, sem precisar de pílula"
+tip = "q sai"
+keywords = "cmatrix matrix chuva hacker"
+
+[[tui]]
+id = "genact"
+name = "hacker"
+cmd = ["genact"]
+pkg = "genact"
+category = "diversao"
+float = true
+desc = "simula uma máquina muito ocupada: compilando, baixando, quebrando senhas"
+tip = "ctrl + c sai"
+keywords = "genact fake hacker simular atividade"
 
 [[tui]]
 id = "terminal"
 name = "terminal"
 cmd = ["fish"]
+pkg = "fish"
+category = "sistema"
+tier = "core"
+desc = "uma janela nova de terminal, com o fish"
+tip = "super + return faz o mesmo, mais rápido"
 keywords = "shell fish console"
 
 [[cmd]]

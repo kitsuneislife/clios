@@ -10,6 +10,8 @@ pub enum Kind {
     Window,
     Key,
     Clip,
+    /// App do catálogo que ainda não está instalado.
+    Install,
 }
 
 impl Kind {
@@ -21,6 +23,7 @@ impl Kind {
             Kind::Window => "janela",
             Kind::Key => "atalho",
             Kind::Clip => "clip",
+            Kind::Install => "instalar",
         }
     }
 }
@@ -34,10 +37,12 @@ pub enum Scope {
     Keys,
     Actions,
     Clipboard,
+    Install,
 }
 
 impl Scope {
-    pub const CYCLE: [Scope; 5] = [Scope::All, Scope::Windows, Scope::Keys, Scope::Actions, Scope::Clipboard];
+    pub const CYCLE: [Scope; 6] =
+        [Scope::All, Scope::Windows, Scope::Keys, Scope::Actions, Scope::Clipboard, Scope::Install];
 
     pub fn prefix(self) -> &'static str {
         match self {
@@ -46,6 +51,7 @@ impl Scope {
             Scope::Keys => "?",
             Scope::Actions => ">",
             Scope::Clipboard => "\"",
+            Scope::Install => "+",
         }
     }
 
@@ -56,6 +62,7 @@ impl Scope {
             Scope::Keys => "atalhos",
             Scope::Actions => "ações",
             Scope::Clipboard => "clipboard",
+            Scope::Install => "instalar",
         }
     }
 
@@ -84,6 +91,7 @@ impl Scope {
             Scope::Keys => kind == Kind::Key,
             Scope::Actions => kind == Kind::Action,
             Scope::Clipboard => kind == Kind::Clip,
+            Scope::Install => kind == Kind::Install,
         }
     }
 }
@@ -237,6 +245,7 @@ mod tests {
         assert_eq!(Scope::split("? super"), (Scope::Keys, "super"));
         assert_eq!(Scope::split(">tema"), (Scope::Actions, "tema"));
         assert_eq!(Scope::split("\"senha"), (Scope::Clipboard, "senha"));
+        assert_eq!(Scope::split("+cava"), (Scope::Install, "cava"));
         assert_eq!(Scope::split("firefox"), (Scope::All, "firefox"));
         assert_eq!(Scope::split(""), (Scope::All, ""));
     }
@@ -244,8 +253,9 @@ mod tests {
     #[test]
     fn scope_cycle_wraps_both_ways() {
         assert_eq!(Scope::All.next(false), Scope::Windows);
-        assert_eq!(Scope::Clipboard.next(false), Scope::All);
-        assert_eq!(Scope::All.next(true), Scope::Clipboard);
+        assert_eq!(Scope::Install.next(false), Scope::All);
+        assert_eq!(Scope::Clipboard.next(false), Scope::Install);
+        assert_eq!(Scope::All.next(true), Scope::Install);
     }
 
     #[test]

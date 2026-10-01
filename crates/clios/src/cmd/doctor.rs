@@ -1,12 +1,11 @@
 //! `clios doctor`: o que falta para o desktop funcionar por inteiro.
 
-use std::env;
-use std::path::{Path, PathBuf};
 use std::process::Command;
 
 use anyhow::Result;
 
 use crate::ctx::Ctx;
+use crate::sys::find_in_path;
 use crate::ui;
 
 struct Check {
@@ -62,16 +61,6 @@ const OPTIONAL: &[Check] = &[
     Check { bin: "zathura", why: "PDF" },
     Check { bin: "imv", why: "imagens" },
 ];
-
-fn find_in_path(bin: &str) -> Option<PathBuf> {
-    let path = env::var_os("PATH")?;
-    env::split_paths(&path).map(|d| d.join(bin)).find(|p| is_executable(p))
-}
-
-fn is_executable(p: &Path) -> bool {
-    use std::os::unix::fs::PermissionsExt;
-    p.metadata().is_ok_and(|m| m.is_file() && m.permissions().mode() & 0o111 != 0)
-}
 
 fn has_font(family: &str) -> Option<bool> {
     let out = Command::new("fc-list").arg(":").arg("family").output().ok()?;

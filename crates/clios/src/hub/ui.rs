@@ -162,6 +162,7 @@ fn render_rows(buf: &mut Buffer, app: &App, now: Instant, lay: &Layout, x0: u16,
             (Scope::Windows, true) => "nenhuma janela aberta",
             (Scope::Keys, true) => "nenhum atalho com descrição (o Hyprland está rodando?)",
             (Scope::Clipboard, true) => "histórico vazio (o cliphist está rodando?)",
+            (Scope::Install, true) => "tudo do catálogo já está instalado",
             (_, true) => "digite para buscar",
             (_, false) => "nada encontrado",
         };
@@ -272,7 +273,7 @@ fn render_footer(buf: &mut Buffer, app: &App, now: Instant, lay: &Layout, x0: u1
     put(buf, x, y, " escopo", style(t.mute, t.bg));
 
     let tail = if app.query.is_empty() {
-        "@ janelas   ? atalhos   > ações   \" clip".to_string()
+        "@ janelas   ? atalhos   > ações   + apps".to_string()
     } else if app.hits.is_empty() {
         String::new()
     } else {

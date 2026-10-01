@@ -9,6 +9,8 @@ fish_add_path -g ~/.local/bin ~/.cargo/bin
 type -q starship; and starship init fish | source
 type -q zoxide; and zoxide init fish | source
 type -q fzf; and fzf --fish | source
+# Ctrl+R vira o histórico do atuin (fuzzy, com contexto); a seta para cima continua a do fish.
+type -q atuin; and atuin init fish --disable-up-arrow | source
 
 # ls, git e afins
 type -q eza; and begin
@@ -17,6 +19,10 @@ type -q eza; and begin
     alias la 'eza -la --group-directories-first --git'
 end
 abbr -a g lazygit
+abbr -a c clios
+abbr -a ap 'clios apps'
+type -q paru; and abbr -a yay paru
+type -q tldr; and abbr -a '?' tldr
 abbr -a e hx
 abbr -a .. 'cd ..'
 abbr -a ... 'cd ../..'

@@ -1,8 +1,10 @@
 //! clios: tema, hub e utilitários do desktop feito para o terminal.
 
+mod catalog;
 mod cmd;
 mod ctx;
 mod hub;
+mod sys;
 mod ui;
 
 use std::path::PathBuf;
@@ -73,6 +75,11 @@ enum Command {
         /// Para `hub`: a consulta inicial.
         args: Vec<String>,
     },
+    /// O catálogo de apps curados: lista, mostra e instala.
+    Apps {
+        #[command(subcommand)]
+        command: AppsCommand,
+    },
     /// Confere o que falta para o desktop funcionar.
     Doctor,
     /// Estado do sistema em JSON, para a barra.
@@ -123,6 +130,34 @@ enum ThemeCommand {
 }
 
 #[derive(Subcommand)]
+enum AppsCommand {
+    /// Lista os apps por categoria, marcando os instalados.
+    List {
+        /// Só uma categoria (arquivos, codigo, sistema, rede, midia, ler, falar, produtividade, pacotes, diversao).
+        #[arg(long, short)]
+        category: Option<String>,
+        /// Só os que faltam.
+        #[arg(long, conflicts_with = "installed")]
+        missing: bool,
+        /// Só os instalados.
+        #[arg(long)]
+        installed: bool,
+    },
+    /// Descrição, dica e comando de um app.
+    Info { id: String },
+    /// Instala por id; com --extras, todos os recomendados que faltam.
+    Install {
+        ids: Vec<String>,
+        /// Todos os apps de nível `extra` que ainda não estão instalados.
+        #[arg(long)]
+        extras: bool,
+        /// Mostra o comando e não executa.
+        #[arg(long)]
+        dry_run: bool,
+    },
+}
+
+#[derive(Subcommand)]
 enum StatusWhat {
     /// Conexão de rede: {"kind":"wifi|eth|none","label":"SSID"}.
     Net,
@@ -162,6 +197,25 @@ fn run() -> Result<bool> {
         }
         Command::Open { id, args } => hub::open(&ctx, &id, &args)?,
         Command::Status { what: StatusWhat::Net } => cmd::status::run_net()?,
+        Command::Apps { command } => match command {
+            AppsCommand::List { category, missing, installed } => {
+                let filter = if missing {
+                    cmd::apps::Filter::Missing
+                } else if installed {
+                    cmd::apps::Filter::Installed
+                } else {
+                    cmd::apps::Filter::All
+                };
+                cmd::apps::list(&ctx, filter, category.as_deref())?
+            }
+            AppsCommand::Info { id } => cmd::apps::info(&ctx, &id)?,
+            AppsCommand::Install { ids, extras, dry_run } => {
+                if ids.is_empty() && !extras {
+                    anyhow::bail!("diga o que instalar: clios apps install <id>... ou --extras");
+                }
+                return cmd::apps::install(&ctx, &ids, extras, dry_run);
+            }
+        },
         Command::Doctor => return cmd::doctor::run(&ctx),
         Command::Shot { target } => {
             let t = match target {

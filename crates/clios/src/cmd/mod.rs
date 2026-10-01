@@ -1,3 +1,4 @@
+pub mod apps;
 pub mod doctor;
 pub mod motion;
 pub mod shot;

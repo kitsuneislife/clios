@@ -33,6 +33,9 @@ bat
 eza
 git-delta
 jq
+atuin
+tealdeer
+pkgfile
 
 # ── ferramentas (as TUIs que substituem apps gráficos) ───────────────
 helix
@@ -41,6 +44,10 @@ lazygit
 btop
 aerc
 newsboat
+gdu
+lnav
+fend
+glow
 ffmpeg
 7zip
 poppler
@@ -69,6 +76,10 @@ zathura-pdf-mupdf
 # ── capturas, clipboard, notificações ────────────────────────────────
 grim
 slurp
+satty
+hyprpicker
+hyprsunset
+wf-recorder
 wl-clipboard
 cliphist
 libnotify
@@ -81,6 +92,8 @@ zram-generator
 power-profiles-daemon
 upower
 polkit
+pacman-contrib
+reflector
 
 # ── tipografia ────────────────────────────────────────────────────────
 otf-geist-mono-nerd

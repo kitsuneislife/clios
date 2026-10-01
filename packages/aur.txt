@@ -1,2 +1,3 @@
 # Pacotes do AUR. Precisam de um helper (paru ou yay). Opcionais: o desktop funciona sem eles.
 ani-cli
+# paru não está aqui: o bootstrap o compila sozinho (bootstrap_paru).

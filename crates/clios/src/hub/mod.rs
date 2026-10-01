@@ -43,7 +43,7 @@ pub fn open(ctx: &Ctx, id: &str, args: &[String]) -> Result<()> {
     let argv = if id == "hub" {
         exec::plan_hub(&env, &args.join(" "))
     } else {
-        let (catalog, _) = sources::load_catalog(&ctx.paths);
+        let (catalog, _) = crate::catalog::load(&ctx.paths);
         let Some(t) = catalog.tui.iter().find(|t| t.id == id) else {
             let ids: Vec<&str> = std::iter::once("hub").chain(catalog.tui.iter().map(|t| t.id.as_str())).collect();
             anyhow::bail!("não há entrada {id:?} no catálogo. Disponíveis: {}", ids.join(", "));
@@ -56,8 +56,8 @@ pub fn open(ctx: &Ctx, id: &str, args: &[String]) -> Result<()> {
 
 pub fn run(ctx: &Ctx, opts: Options) -> Result<()> {
     let theme = ctx.theme()?;
-    let (catalog, warning) = sources::load_catalog(&ctx.paths);
-    let items = sources::static_items(&catalog, &theme);
+    let (catalog, warning) = crate::catalog::load(&ctx.paths);
+    let items = sources::static_items(&catalog, &theme, &|t| t.installed());
     let history_path = ctx.paths.state.join("hub-history.toml");
     let mut app = App::new(theme, items, History::load(&history_path), Instant::now());
     app.notice = warning;

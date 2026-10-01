@@ -118,7 +118,7 @@ impl App {
             Scope::Windows => (Kind::Window, sources::windows()),
             Scope::Keys => (Kind::Key, sources::keys()),
             Scope::Clipboard => (Kind::Clip, sources::clipboard()),
-            Scope::All | Scope::Actions => return,
+            Scope::All | Scope::Actions | Scope::Install => return,
         };
         self.items.retain(|i| i.kind != kind);
         self.items.extend(fresh);
