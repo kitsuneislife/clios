@@ -44,7 +44,7 @@ Custo: sem splits no terminal. Para sessões remotas que sobrevivam a uma queda,
 
 ## Shell interativo: fish, starship, zoxide, fzf
 
-fish tem destaque de sintaxe, autosugestão e completação úteis sem configurar nada. O prompt (starship, em Rust) é uma linha: diretório, git, cursor. `zoxide` e `fzf` cuidam de navegação e histórico.
+fish tem destaque de sintaxe, autosugestão e completação úteis sem configurar nada. O prompt (starship, em Rust) tem três estilos, e o padrão é uma linha: diretório, git, cursor. `zoxide` e `fzf` cuidam de navegação e histórico.
 Custo: fish não é compatível com POSIX. Scripts continuam em `bash` ou em Rust; o fish é para uso interativo.
 
 ## Editor: Helix
@@ -79,28 +79,57 @@ A barra mostra o volume pelo PipeWire diretamente, então o OSD aparece não imp
 
 ## O catálogo de apps de terminal
 
-Mais de cinquenta apps curados em `config/clios/hub.toml`, em dez categorias, cada um com descrição, dica de uso e nível: *core* vem instalado, *extra* instala sob demanda pelo hub (`+`) ou por `clios apps install`. A escolha seguiu o mesmo critério do resto: um app por função, o que tem melhor UX no terminal, e que combine com o tema.
+44 apps curados em `config/clios/hub.toml`, em dez categorias, cada um com descrição, dica de uso e nível: *core* vem instalado, *extra* instala sob demanda pelo hub (`+`) ou por `clios apps install`. A escolha seguiu o mesmo critério do resto: o que tem melhor UX no terminal e combina com o tema.
 
-| função | app | por quê |
+**Um trabalho, um app.** Cada entrada declara um `job`, e o teste `one_job_one_app` reprova o catálogo se dois apps declararem o mesmo. Se aparece um segundo app para um trabalho que já tem dono, ele precisa ser melhor e tomar o lugar do primeiro. Na V0.3 a regra tirou quatro:
+
+| saiu | ficou | por quê |
 |---|---|---|
-| arquivos | yazi, gdu, television | prévia de imagens, uso de disco, busca difusa |
-| código | helix, lazygit, lazydocker, atac, rainfrog | edição, git, contêineres, API, banco |
-| sistema | btop, wiremix, lnav, fend | monitor, áudio, logs, calculadora com unidades |
-| rede | impala, bluetui, wavemon, bandwhich, trippy, sshs, termscp | wi-fi, bluetooth, sinal, tráfego, rota, SSH, transferência |
-| mídia | spotify-player, kew, cava, ani-cli, lobster, manga-tui, ytfzf | música, visualizador, anime, filmes, mangá, YouTube |
-| ler | newsboat, glow, presenterm, navi | feeds, markdown, apresentações, cheatsheets |
-| conversar | aerc, weechat, iamb, nchat, toot | e-mail, IRC, Matrix, mensageiros, Mastodon |
-| produtividade | calcurse, taskwarrior-tui, dijo | agenda, tarefas, hábitos |
-| pacotes | `clios update`, pacseek | atualização com notícias do Arch, busca de pacotes |
-| diversão | cbonsai, asciiquarium, cmatrix, genact | para olhar enquanto o resto compila |
+| television | fzf | o fzf já está ligado ao fish (`Ctrl+T`, `Alt+C`) e é dependência de outros apps do catálogo; dois buscadores difusos são um a mais |
+| wavemon | impala | o impala já mostra a força do sinal na lista de redes |
+| navi | tealdeer (`tldr`) | os dois respondem "como uso este comando"; o tldr é menor, vem instalado e tem a abreviação `?` |
+| lobster | mpv e Firefox | filmes e séries por scraping quebram toda hora, e o mpv já toca o que você tiver |
+
+Os pares que parecem repetidos e ficaram têm trabalhos diferentes: `spotify-player` (streaming) e `kew` (a sua biblioteca local); `weechat` (IRC), `iamb` (Matrix), `nchat` (Telegram e WhatsApp) e `toot` (Mastodon) falam protocolos que não se traduzem entre si; `calcurse` (agenda), `taskwarrior-tui` (tarefas) e `dijo` (hábitos).
+
+| categoria | apps |
+|---|---|
+| arquivos | yazi, gdu |
+| código | helix, lazygit, lazydocker, atac, rainfrog |
+| sistema | btop, wiremix, lnav, fend, e os do CLIOS (guia, central, notificações, papel de parede, resumo) |
+| rede | impala, bluetui, bandwhich, trippy, sshs, termscp |
+| mídia | spotify-player, kew, ani-cli, manga-tui, ytfzf |
+| ler | newsboat, glow, presenterm |
+| conversar | aerc, weechat, iamb, nchat, toot |
+| produtividade | calcurse, taskwarrior-tui, dijo |
+| pacotes | pacseek, e `clios update` e `clios self-update` |
+| diversão | cbonsai, asciiquarium, cmatrix, genact, lavat, csakura, pipes.sh, tty-clock, cava |
 
 Os nomes dos pacotes foram conferidos contra os repositórios do Arch e o AUR (`tests/tools/pkgcheck.py`). O instalador usa `paru` quando existe (ele resolve oficial e AUR) e cai para `pacman`. O `bootstrap.sh` compila o paru sozinho.
 
 Também entram no shell: **atuin** (Ctrl+R com busca difusa e contexto, tudo local) e **tldr**.
 
+## O terminal por dentro
+
+**Prompt.** O starship tem três estilos, e `clios prompt` troca na hora: *minimal* (uma linha, o padrão), *dev* (duas linhas, com as versões das linguagens quando o projeto usa) e *zen* (só a seta, com pasta e branch no canto direito). O fish usa o prompt transitório do starship: depois que o comando roda, o prompt antigo vira só a seta, e o histórico na tela fica limpo.
+
+**Fastfetch.** O `clios fetch` chama o fastfetch com uma config gerada do tema (acento nos rótulos, a marca do CLIOS como logo, redesenhada a cada troca de acento). Sem o fastfetch instalado, um desenho embutido cobre o essencial. Não há dois comandos para a mesma coisa: `ff` e `clios fetch` são a mesma entrada.
+
+**Quando o terminal se apresenta.** `clios greet` roda quando o fish abre e decide por uma função pura e testada. O primeiro terminal depois de ligar mostra o resumo do sistema. O primeiro terminal de uma workspace vazia mostra duas linhas: a saudação e uma dica do guia. O resto do tempo, nada. Terminais do scratchpad, janelas flutuantes e apps de terminal nunca são apresentados, e `ssh` também não. O que já foi mostrado fica em `$XDG_RUNTIME_DIR`, que zera a cada boot. `clios greet --mode boot` deixa só a primeira, e `--mode off` desliga.
+
+**Brinquedos.** Cada brinquedo do catálogo (`diversao`) que sabe rodar sozinho tem um campo `saver`, com `{color}` e `{n}` no lugar da cor: o CLIOS acha o matiz do seu acento e entrega a cor ANSI mais perto dele (a maioria dos brinquedos só fala as oito cores ANSI). A proteção de tela (`clios saver`) reveza entre a marca e os brinquedos instalados, ou fica numa cena só, ou desliga (`clios saver set`). O hypridle fecha a janela ao primeiro sinal de vida. `clios play` roda um aqui mesmo, e `SUPER + Z` abre um ao acaso.
+
 ## Pequenas ferramentas
 
-`clios update` (lê o feed de notícias do Arch antes de atualizar e avisa de intervenção manual e de `.pacnew`), `caffeine` (systemd-inhibit), `night` (hyprsunset), `dnd` (a shell observa um arquivo), `rec` (wf-recorder), `pick` (hyprpicker), `power` (power-profiles-daemon) e `saver`, a proteção de tela própria. Cada uma é um comando, um atalho e uma ação no hub, e o que fica ligado aparece na barra.
+`clios update` (lê o feed de notícias do Arch antes de atualizar e avisa de intervenção manual e de `.pacnew`), `caffeine` (systemd-inhibit), `night` (hyprsunset), `dnd` (a shell observa um arquivo), `focus` (um bloco de foco: liga o não perturbe, a barra conta o tempo e avisa no fim), `rec` (wf-recorder), `pick` (hyprpicker), `ocr` (grim, slurp e tesseract: copia o texto de uma região da tela), `notifs` (o histórico de notificações, inclusive as que o silêncio engoliu), `power` (power-profiles-daemon), `keys` (os atalhos no terminal) e `saver`, a proteção de tela própria. Cada uma é um comando, um atalho e uma ação no hub, e o que fica ligado aparece na barra.
+
+## Discos, arquivos, hora e firewall
+
+- **udiskie** monta pendrives e HDs externos sozinho e avisa; `udiskie-umount --all` ejeta tudo. Sem isso, um terminal puro não vê o pendrive.
+- **mimeapps**: `xdg-open`, o `open` do fish e os links do terminal abrem texto no helix, pastas no yazi e e-mail no aerc (por `.desktop` do CLIOS em `config/applications/`), PDF no zathura, imagens no imv e vídeo e áudio no mpv. Um teste confere que cada associação aponta para um `.desktop` que existe.
+- **systemd-timesyncd** acerta a hora sozinho.
+- **nftables**: entrada fechada, saída livre, numa tabela própria (`inet clios`) que não toca nas regras do Docker. Abrir uma porta é uma linha em `/etc/nftables.conf`.
+- **noto-fonts-cjk**: japonês, chinês e coreano no terminal e no navegador (os títulos de anime e mangá do catálogo precisam).
 
 ## Login, bloqueio, idle
 

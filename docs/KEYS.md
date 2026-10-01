@@ -14,7 +14,7 @@ Gerado de `config/hypr/conf/binds.lua` por `tests/hypr/dump_keys.py`. No sistema
 | `super + Return` | terminal |
 | `super + shift + Return` | terminal flutuante |
 | `super + S` | scratchpad: mostrar ou esconder |
-| `super + shift + S` | enviar janela ao scratchpad |
+| `super + ctrl + S` | enviar janela ao scratchpad |
 | `super + E` | arquivos |
 | `super + G` | git |
 | `super + B` | monitor do sistema |
@@ -29,18 +29,18 @@ Gerado de `config/hypr/conf/binds.lua` por `tests/hypr/dump_keys.py`. No sistema
 | `super + T` | alternar flutuante |
 | `super + comma` | trocar direção da divisão |
 | `super + period` | fixar em todas as workspaces |
-| `super + k` | foco: up |
-| `super + shift + k` | mover janela: up |
 | `super + j` | foco: down |
 | `super + shift + j` | mover janela: down |
 | `super + l` | foco: right |
 | `super + shift + l` | mover janela: right |
 | `super + h` | foco: left |
 | `super + shift + h` | mover janela: left |
-| `super + left` | foco: left |
-| `super + shift + left` | mover janela: left |
+| `super + k` | foco: up |
+| `super + shift + k` | mover janela: up |
 | `super + down` | foco: down |
 | `super + shift + down` | mover janela: down |
+| `super + left` | foco: left |
+| `super + shift + left` | mover janela: left |
 | `super + up` | foco: up |
 | `super + shift + up` | mover janela: up |
 | `super + right` | foco: right |
@@ -82,10 +82,15 @@ Gerado de `config/hypr/conf/binds.lua` por `tests/hypr/dump_keys.py`. No sistema
 | `super + C` | modo café: a tela não apaga |
 | `super + N` | modo noturno: tela mais quente |
 | `super + D` | não perturbe: silenciar notificações |
+| `super + shift + N` | histórico de notificações |
+| `super + X` | foco: 25 minutos em silêncio (de novo, para) |
 | `super + shift + R` | gravar a tela: começar ou parar |
 | `super + P` | conta-gotas: copiar uma cor da tela |
+| `super + shift + T` | texto da tela: selecionar e copiar (OCR) |
 | `super + U` | atualizar o sistema |
+| `super + Z` | brincar: um brinquedo para espairecer |
 | `Print` | captura: região |
+| `super + shift + S` | captura: região (o mesmo que Print) |
 | `shift + Print` | captura: tela inteira |
 | `ctrl + Print` | captura: janela |
 | `super + ctrl + Q` | bloquear a tela |
