@@ -24,7 +24,7 @@ Scope {
         screen: Quickshell.screens[0]
         visible: server.trackedNotifications.values.length > 0
         anchors { top: true; right: true }
-        margins { top: Tokens.barHeight + Tokens.gapOut; right: Tokens.gapOut }
+        margins { top: Tokens.barHeight + Tokens.gapIn + Tokens.gapOut; right: Tokens.gapOut }
         implicitWidth: 360
         implicitHeight: stack.implicitHeight
         exclusionMode: ExclusionMode.Ignore

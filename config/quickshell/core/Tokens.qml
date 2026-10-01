@@ -32,7 +32,8 @@ QtObject {
     property int gapIn: 6
     property int gapOut: 12
     property int border: 2
-    property int radius: 0
+    property int radius: 8
+    property int radiusSmall: 4
     property int barHeight: 28
 
     // ── movimento (ms) ─────────────────────────────────────────────────────
@@ -70,7 +71,7 @@ QtObject {
         if (c.onAccent !== undefined) accentInk = c.onAccent
         if (t.font && t.font.mono) mono = t.font.mono
         const u = t.ui || {}
-        for (const k of ["text", "textSmall", "gapIn", "gapOut", "border", "radius", "barHeight"]) {
+        for (const k of ["text", "textSmall", "gapIn", "gapOut", "border", "radius", "radiusSmall", "barHeight"]) {
             if (u[k] !== undefined) root[k] = u[k]
         }
         const m = t.motion || {}

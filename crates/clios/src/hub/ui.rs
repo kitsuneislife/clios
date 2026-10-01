@@ -6,7 +6,7 @@
 //!
 //!     ❯ busca▌
 //!     ───────────────────────────────────────────────────────
-//!     ▌ arquivos                                          tui
+//!    ❯ arquivos                                           tui      (a linha selecionada é uma pílula)
 //!       editor                                            tui
 //!       …
 //!
@@ -25,6 +25,9 @@ use super::app::App;
 use super::items::{Item, Scope};
 
 const PAD: u16 = 3;
+/// Tampas redondas da pílula: glifos powerline da Nerd Font (o foot usa a GeistMono Nerd Font).
+const CAP_L: &str = "\u{e0b6}";
+const CAP_R: &str = "\u{e0b4}";
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Layout {
@@ -113,7 +116,7 @@ pub fn render(buf: &mut Buffer, app: &App, now: Instant) {
         }
     }
 
-    let x0 = PAD + 2; // coluna do texto (a barra de seleção fica em PAD)
+    let x0 = PAD + 2; // coluna do texto (o marcador da seleção fica em PAD)
     let right = area.right().saturating_sub(PAD);
 
     // cabeçalho: nome + cursor de bloco (a marca) e o estado do tema
@@ -188,10 +191,17 @@ fn render_rows(buf: &mut Buffer, app: &App, now: Instant, lay: &Layout, x0: u16,
             0.0
         };
 
-        let bg = fade(t.bg, t.raised, sel_a * reveal);
-        fill_row(buf, y, bg);
+        // A seleção é uma pílula (tampas redondas) em vez de uma faixa de ponta a ponta.
+        fill_row(buf, y, t.bg);
+        let mut bg = t.bg;
         if sel_a > 0.0 {
-            put(buf, PAD, y, "▌", style(fade(bg, t.accent, sel_a * reveal), bg));
+            bg = fade(t.bg, t.raised, sel_a * reveal);
+            for x in PAD..right {
+                buf[(x, y)].set_bg(color(bg));
+            }
+            put(buf, PAD - 1, y, CAP_L, style(bg, t.bg));
+            put(buf, right, y, CAP_R, style(bg, t.bg));
+            put(buf, PAD, y, "❯", style(fade(bg, t.accent, sel_a * reveal), bg));
         }
 
         let base = fade(t.dim, t.fg, sel_a);
@@ -289,8 +299,14 @@ mod tests {
         buf
     }
 
+    /// O texto da linha, sem as tampas da pílula (glifos que não são conteúdo).
     fn line(buf: &Buffer, y: u16) -> String {
-        (0..buf.area.width).map(|x| buf[(x, y)].symbol().to_string()).collect::<String>().trim_end().to_string()
+        (0..buf.area.width)
+            .map(|x| buf[(x, y)].symbol().to_string())
+            .collect::<String>()
+            .replace(['\u{e0b6}', '\u{e0b4}'], " ")
+            .trim_end()
+            .to_string()
     }
 
     /// Um instante em que toda animação já terminou.
@@ -347,15 +363,28 @@ mod tests {
     }
 
     #[test]
-    fn selected_row_gets_accent_bar_and_raised_background() {
+    fn selected_row_is_a_rounded_pill_with_an_accent_marker() {
         let t0 = Instant::now();
         let a = app(t0);
         let b = draw(&a, settled(&a), 90, 26);
         let acc = &a.theme.c;
-        assert_eq!(b[(3, 5)].symbol(), "▌");
-        assert_eq!(b[(3, 5)].fg, color(acc.accent));
-        assert_eq!(b[(40, 5)].bg, color(acc.raised), "o realce vai de ponta a ponta");
-        // linha não selecionada: sem barra, fundo normal
+        // tampas redondas nas pontas, fundo `raised` entre elas, marcador no acento
+        assert_eq!(b[(2, 5)].symbol(), CAP_L);
+        assert_eq!(
+            (b[(2, 5)].fg, b[(2, 5)].bg),
+            (color(acc.raised), color(acc.bg)),
+            "a tampa é a cor da pílula sobre o fundo"
+        );
+        assert_eq!(b[(3, 5)].symbol(), "❯");
+        assert_eq!((b[(3, 5)].fg, b[(3, 5)].bg), (color(acc.accent), color(acc.raised)));
+        assert_eq!(b[(40, 5)].bg, color(acc.raised));
+        assert_eq!(b[(87, 5)].symbol(), CAP_R);
+        assert_eq!(b[(86, 5)].bg, color(acc.raised));
+        // e a pílula não vai de ponta a ponta: as margens ficam no fundo
+        assert_eq!(b[(0, 5)].bg, color(acc.bg));
+        assert_eq!(b[(89, 5)].bg, color(acc.bg));
+        assert_eq!(b[(88, 5)].bg, color(acc.bg), "margem simétrica: 2 colunas de cada lado");
+        // linha não selecionada: sem pílula
         assert_eq!(b[(3, 6)].symbol(), " ");
         assert_eq!(b[(40, 6)].bg, color(acc.bg));
     }
@@ -487,7 +516,7 @@ mod tests {
         a.live_sources = false;
         a.refresh(t0);
         let b = draw(&a, t0, 90, 26);
-        assert_eq!(b[(3, 5)].symbol(), "▌");
+        assert_eq!(b[(3, 5)].symbol(), "❯");
         assert_eq!(b[(5, 6)].fg, color(a.theme.c.dim), "sem esperar animação");
     }
 

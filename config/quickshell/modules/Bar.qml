@@ -24,6 +24,8 @@ Scope {
             screen: modelData
 
             anchors { top: true; left: true; right: true }
+            // a barra flutua: margem em volta, para o canto arredondado aparecer
+            margins { top: Tokens.gapIn; left: Tokens.gapOut; right: Tokens.gapOut }
             implicitHeight: Tokens.barHeight
             exclusionMode: ExclusionMode.Auto
             WlrLayershell.namespace: "clios-bar"

@@ -22,7 +22,7 @@ Rectangle {
     ]
 
     Column {
-        anchors { left: parent.left; right: parent.right; top: parent.top }
+        anchors { left: parent.left; right: parent.right; top: parent.top; leftMargin: Tokens.gapOut; rightMargin: Tokens.gapOut; topMargin: Tokens.gapIn }
         spacing: 0
 
         BarView {

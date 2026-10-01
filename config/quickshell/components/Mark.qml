@@ -1,9 +1,9 @@
 import QtQuick
+import QtQuick.Shapes
 import qs.core
 
-// A marca: um "c" de traço uniforme e o cursor de bloco dentro da boca.
-// Geometria igual a brand/mark.svg (grade de 64): corpo = quadrado menos a boca x 20..64, y 20..44;
-// cursor 12x24 em x=34. Os braços avançam meia unidade sobre a coluna para não deixar fresta.
+// A marca: um "c" de traço uniforme, com os cantos levemente arredondados, e o cursor de bloco
+// dentro da boca. O caminho é o mesmo de brand/mark.svg (grade de 64); um teste confere os dois.
 Item {
     id: root
     property int size: 96
@@ -14,12 +14,24 @@ Item {
     implicitHeight: size
 
     readonly property real u: size / 64
+    // MARK_PATH (gerado por brand/build.py --path)
+    readonly property string markPath: "M0 6A6 6 0 0 1 6 0L58 0A6 6 0 0 1 64 6L64 17A3 3 0 0 1 61 20L22 20A2 2 0 0 0 20 22L20 42A2 2 0 0 0 22 44L61 44A3 3 0 0 1 64 47L64 58A6 6 0 0 1 58 64L6 64A6 6 0 0 1 0 58Z"
 
-    Rectangle { x: 0; y: 0; width: 20 * root.u; height: root.size; color: root.body }
-    Rectangle { x: 19.5 * root.u; y: 0; width: 44.5 * root.u; height: 20 * root.u; color: root.body }
-    Rectangle { x: 19.5 * root.u; y: 44 * root.u; width: 44.5 * root.u; height: 20 * root.u; color: root.body }
+    Shape {
+        width: 64
+        height: 64
+        scale: root.u
+        transformOrigin: Item.TopLeft
+        ShapePath {
+            fillColor: root.body
+            strokeColor: "transparent"
+            PathSvg { path: root.markPath }
+        }
+    }
+
     Rectangle {
         x: 34 * root.u; y: 20 * root.u; width: 12 * root.u; height: 24 * root.u
+        radius: 2 * root.u
         color: root.cursor
         SequentialAnimation on opacity {
             running: root.blink && Tokens.motionEnabled

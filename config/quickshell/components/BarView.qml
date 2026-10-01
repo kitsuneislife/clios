@@ -25,20 +25,17 @@ Rectangle {
     signal clockClicked
 
     implicitHeight: Tokens.barHeight
-    color: Tokens.bg
+    // A barra flutua: superfície própria, canto arredondado e um filete de 1px. Sem sombra.
+    color: Tokens.surface
+    radius: Tokens.radius
+    border.color: Tokens.line
+    border.width: 1
     Behavior on color { ColorAnimation { duration: Tokens.motionEnabled ? Tokens.fast : 0 } }
-
-    // filete inferior de 1px: a barra se separa por linha, não por sombra
-    Rectangle {
-        anchors { left: parent.left; right: parent.right; bottom: parent.bottom }
-        height: 1
-        color: Tokens.line
-    }
 
     WorkspaceStrip {
         id: ws
         anchors { left: parent.left; leftMargin: Tokens.gapOut; verticalCenter: parent.verticalCenter }
-        height: parent.height - 1
+        height: parent.height
         workspaces: root.workspaces
         onActivated: id => root.workspaceActivated(id)
     }
@@ -56,7 +53,7 @@ Rectangle {
     Row {
         id: status
         anchors { right: parent.right; rightMargin: Tokens.gapOut - Tokens.gapIn / 2; verticalCenter: parent.verticalCenter }
-        height: parent.height - 1
+        height: parent.height
         spacing: 0
 
         Segment {

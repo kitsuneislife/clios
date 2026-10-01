@@ -42,6 +42,15 @@ def build_tree(dst: pathlib.Path):
     shutil.copy(HERE / "Scene.qml", dst / "Scene.qml")
 
 
+def check_mark_path():
+    """O caminho da marca no QML tem que ser o mesmo de brand/mark.svg (os dois vêm de brand/build.py)."""
+    want = subprocess.run([sys.executable, str(REPO / "brand/build.py"), "--path"], capture_output=True, text=True, check=True).stdout.strip()
+    qml = (REPO / "config/quickshell/components/Mark.qml").read_text()
+    got = re.search(r'markPath: "([^"]+)"', qml).group(1)
+    svg = (REPO / "brand/mark.svg").read_text()
+    return got == want and want in svg, want
+
+
 def theme_json(clios, mode, accent, motion):
     with tempfile.TemporaryDirectory() as home:
         base = [clios, "--root", str(REPO), "--home", home]
@@ -92,8 +101,10 @@ def main():
     tmp = pathlib.Path(tempfile.mkdtemp(prefix="clios-qml-"))
     build_tree(tmp)
 
+    ok_path, _ = check_mark_path()
+    print(("✓" if ok_path else "✗"), "marca: caminho do QML igual ao do SVG")
+    failures = 0 if ok_path else 1
     cases = [("dark", "ember", "full"), ("light", "azure", "full"), ("dark", "mint", "off")]
-    failures = 0
     for mode, accent, motion in cases:
         messages.clear()
         png = out / f"shell-{mode}-{accent}-{motion}.png"

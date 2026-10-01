@@ -1,4 +1,4 @@
--- Aparência: plana, reta, sem blur e sem sombra. O que não existe não custa GPU.
+-- Aparência: plana, com cantos levemente arredondados, sem blur e sem sombra. O que não existe não custa GPU.
 return function(T)
   hl.config({
     general = {
@@ -16,6 +16,7 @@ return function(T)
 
     decoration = {
       rounding = T.ui.radius,
+      rounding_power = T.ui.rounding_power,
       active_opacity = 1.0,
       inactive_opacity = 1.0,
       shadow = { enabled = false },
