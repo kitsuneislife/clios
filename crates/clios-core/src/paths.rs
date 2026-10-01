@@ -15,14 +15,16 @@ pub struct Paths {
     pub home: PathBuf,
     pub config: PathBuf,
     pub state: PathBuf,
+    /// ~/.local/share/clios: coisas do usuário que não são config nem estado (papéis de parede dele).
+    pub data: PathBuf,
 }
 
 impl Paths {
     /// `home_override` redireciona tudo para outra árvore (usado para montar a ISO e nos testes).
     pub fn discover(root: Option<&Path>, home_override: Option<&Path>) -> Result<Self> {
         let root = find_root(root)?;
-        let (home, config, state) = match home_override {
-            Some(h) => (h.to_path_buf(), h.join(".config"), h.join(".local/state/clios")),
+        let (home, config, state, data) = match home_override {
+            Some(h) => (h.to_path_buf(), h.join(".config"), h.join(".local/state/clios"), h.join(".local/share/clios")),
             None => {
                 let home = PathBuf::from(env::var_os("HOME").unwrap_or_default());
                 let xdg = |var: &str, fallback: &str| {
@@ -31,10 +33,15 @@ impl Paths {
                         .filter(|p| p.is_absolute())
                         .unwrap_or_else(|| home.join(fallback))
                 };
-                (home.clone(), xdg("XDG_CONFIG_HOME", ".config"), xdg("XDG_STATE_HOME", ".local/state").join("clios"))
+                (
+                    home.clone(),
+                    xdg("XDG_CONFIG_HOME", ".config"),
+                    xdg("XDG_STATE_HOME", ".local/state").join("clios"),
+                    xdg("XDG_DATA_HOME", ".local/share").join("clios"),
+                )
             }
         };
-        Ok(Self { root, home, config, state })
+        Ok(Self { root, home, config, state, data })
     }
 
     pub fn tokens_file(&self) -> PathBuf {
@@ -52,6 +59,10 @@ impl Paths {
     /// Arquivos que o app reescreve (btop, por exemplo): copiados uma vez, nunca ligados nem sobrescritos.
     pub fn seed_dir(&self) -> PathBuf {
         self.root.join("seed")
+    }
+
+    pub fn wallpapers_dir(&self) -> PathBuf {
+        self.data.join("wallpapers")
     }
 
     pub fn state_file(&self) -> PathBuf {
@@ -112,6 +123,7 @@ mod tests {
             home: "/h".into(),
             config: "/h/.config".into(),
             state: "/h/.local/state/clios".into(),
+            data: "/h/.local/share/clios".into(),
         };
         assert_eq!(p.resolve_dst("hypr/theme.lua"), PathBuf::from("/h/.config/hypr/theme.lua"));
         assert_eq!(p.resolve_dst("@state/theme.json"), PathBuf::from("/h/.local/state/clios/theme.json"));

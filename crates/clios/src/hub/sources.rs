@@ -2,74 +2,47 @@
 
 use std::process::{Command, Stdio};
 
-use clios_core::{Paths, Theme};
-use serde::Deserialize;
+use clios_core::Theme;
 
 use super::desktop;
 use super::items::{Action, Item, Kind, Scope, builtin_actions};
-
-const DEFAULT_CATALOG: &str = include_str!("../../../../config/clios/hub.toml");
-
-#[derive(Debug, Default, Deserialize)]
-pub struct Catalog {
-    #[serde(default)]
-    pub tui: Vec<TuiDef>,
-    #[serde(default)]
-    pub cmd: Vec<CmdDef>,
-}
-
-#[derive(Debug, Deserialize)]
-pub struct TuiDef {
-    pub id: String,
-    pub name: String,
-    pub cmd: Vec<String>,
-    #[serde(default)]
-    pub keywords: String,
-    #[serde(default)]
-    pub float: bool,
-    #[serde(default)]
-    pub hold: bool,
-}
-
-#[derive(Debug, Deserialize)]
-pub struct CmdDef {
-    pub id: String,
-    pub name: String,
-    pub shell: String,
-    #[serde(default)]
-    pub keywords: String,
-}
-
-/// O catálogo do usuário se existir e for válido; senão o embutido. O aviso diz por quê.
-pub fn load_catalog(paths: &Paths) -> (Catalog, Option<String>) {
-    let user = paths.config.join("clios/hub.toml");
-    if let Ok(text) = std::fs::read_to_string(&user) {
-        match toml::from_str::<Catalog>(&text) {
-            Ok(c) => return (c, None),
-            Err(e) => {
-                let fallback = toml::from_str(DEFAULT_CATALOG).unwrap_or_default();
-                let first = e.to_string().lines().next().unwrap_or_default().to_string();
-                return (fallback, Some(format!("hub.toml inválido, usando o padrão: {first}")));
-            }
-        }
-    }
-    (toml::from_str(DEFAULT_CATALOG).expect("catálogo embutido precisa ser válido"), None)
-}
+use crate::catalog::{Catalog, TuiDef, category_name};
 
 /// Linhas que não mudam enquanto o hub está aberto.
-pub fn static_items(catalog: &Catalog, theme: &Theme) -> Vec<Item> {
+///
+/// `installed` diz se o binário de um app do catálogo existe: o que está instalado vira uma TUI
+/// normal; o que falta só aparece no escopo `+`, e abre o instalador numa janela flutuante.
+pub fn static_items(
+    catalog: &Catalog,
+    theme: &Theme,
+    installed: &dyn Fn(&TuiDef) -> bool,
+    desktop_apps: bool,
+) -> Vec<Item> {
     let mut v = Vec::new();
 
     for t in &catalog.tui {
-        v.push(
-            Item::new(
-                Kind::Tui,
-                format!("tui:{}", t.id),
-                t.name.clone(),
-                Action::Tui { id: t.id.clone(), argv: t.cmd.clone(), float: t.float, hold: t.hold },
-            )
-            .keywords(t.keywords.clone()),
-        );
+        if installed(t) {
+            v.push(
+                Item::new(
+                    Kind::Tui,
+                    format!("tui:{}", t.id),
+                    t.name.clone(),
+                    Action::Tui { id: t.id.clone(), argv: t.cmd.clone(), float: t.float, hold: t.hold },
+                )
+                .keywords(format!("{} {}", t.keywords, t.desc)),
+            );
+        } else if !t.pkg.is_empty() {
+            v.push(
+                Item::new(
+                    Kind::Install,
+                    format!("install:{}", t.id),
+                    t.name.clone(),
+                    Action::Tui { id: "install".into(), argv: t.install_argv(), float: true, hold: true },
+                )
+                .hint(category_name(&t.category))
+                .keywords(format!("{} {} {}", t.keywords, t.desc, t.pkg)),
+            );
+        }
     }
     for c in &catalog.cmd {
         // O `clip` do catálogo é só um atalho para o escopo de clipboard.
@@ -77,7 +50,7 @@ pub fn static_items(catalog: &Catalog, theme: &Theme) -> Vec<Item> {
         v.push(Item::new(Kind::Action, format!("cmd:{}", c.id), c.name.clone(), action).keywords(c.keywords.clone()));
     }
 
-    for e in desktop::load_all() {
+    for e in if desktop_apps { desktop::load_all() } else { Vec::new() } {
         let cmd = desktop::strip_field_codes(&e.exec);
         let action = if e.terminal {
             Action::Tui { id: e.id.clone(), argv: vec!["sh".into(), "-c".into(), cmd], float: false, hold: false }
@@ -202,18 +175,51 @@ pub fn clips_from_list(list: &str) -> Vec<Item> {
 mod tests {
     use super::*;
 
+    fn cat() -> Catalog {
+        crate::catalog::builtin()
+    }
+
+    fn theme() -> Theme {
+        use clios_core::{Mode, MotionLevel, Tokens};
+        Theme::resolve(&Tokens::builtin(), Mode::Dark, "ember", MotionLevel::Full).unwrap()
+    }
+
     #[test]
-    fn embedded_catalog_is_valid_and_complete() {
-        let c: Catalog = toml::from_str(DEFAULT_CATALOG).unwrap();
-        assert!(c.tui.len() >= 10);
-        let mut ids: Vec<_> = c.tui.iter().map(|t| t.id.as_str()).chain(c.cmd.iter().map(|c| c.id.as_str())).collect();
-        let n = ids.len();
-        ids.sort();
-        ids.dedup();
-        assert_eq!(ids.len(), n, "ids duplicados no catálogo");
-        for t in &c.tui {
-            assert!(!t.cmd.is_empty(), "{} sem comando", t.id);
+    fn installed_apps_are_launchable_and_missing_ones_only_installable() {
+        let have = |t: &TuiDef| t.id == "files" || t.id == "git";
+        let items = static_items(&cat(), &theme(), &have, false);
+        let tui: Vec<_> = items.iter().filter(|i| i.kind == Kind::Tui).map(|i| i.id.as_str()).collect();
+        assert!(tui.contains(&"tui:files") && tui.contains(&"tui:git"));
+        assert!(!tui.contains(&"tui:disk"), "o que não está instalado não aparece como app");
+        let inst: Vec<_> = items.iter().filter(|i| i.kind == Kind::Install).collect();
+        assert!(inst.iter().any(|i| i.id == "install:disk"));
+        assert!(!inst.iter().any(|i| i.id == "install:files"), "o que está instalado não se oferece para instalar");
+        assert!(inst.len() >= 35);
+    }
+
+    #[test]
+    fn installing_opens_a_floating_terminal_that_waits_for_enter() {
+        let items = static_items(&cat(), &theme(), &|_| false, false);
+        let cava = items.iter().find(|i| i.id == "install:visualizer").unwrap();
+        match &cava.action {
+            Action::Tui { id, argv, float, hold } => {
+                assert_eq!(id, "install");
+                assert!(*float && *hold, "o usuário precisa ver a saída do paru até o fim");
+                assert!(argv[2].contains("paru -S --needed cava"), "{}", argv[2]);
+            }
+            other => panic!("ação inesperada: {other:?}"),
         }
+        assert_eq!(cava.hint, "mídia");
+        assert!(cava.keywords.contains("barras"), "a busca acha pela descrição");
+    }
+
+    #[test]
+    fn install_search_finds_by_what_the_app_does_not_only_its_name() {
+        use crate::hub::items::Scope;
+        use crate::hub::search::{History, Ranker};
+        let items = static_items(&cat(), &theme(), &|_| false, false);
+        let hits = Ranker::new().rank(&items, Scope::Install, "traceroute", &History::default(), 0);
+        assert_eq!(items[hits[0].index].id, "install:route");
     }
 
     #[test]

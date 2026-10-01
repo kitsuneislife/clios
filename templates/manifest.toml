@@ -45,6 +45,18 @@ dst = "lazygit/config.yml"
 src = "mpv/mpv.conf.j2"
 dst = "mpv/mpv.conf"
 
+[[template]]
+src = "cava/config.j2"
+dst = "cava/config"
+
+[[template]]
+src = "lazydocker/config.yml.j2"
+dst = "lazydocker/config.yml"
+
+[[template]]
+src = "atuin/clios.toml.j2"
+dst = "atuin/themes/clios.toml"
+
 # Hooks: avisam os apps que estão abertos. Falha de hook nunca derruba o `theme apply`.
 
 [[hook]]

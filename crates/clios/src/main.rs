@@ -1,9 +1,14 @@
 //! clios: tema, hub e utilitários do desktop feito para o terminal.
 
+mod art;
+mod catalog;
 mod cmd;
 mod ctx;
 mod hub;
+mod sys;
+mod sysinfo;
 mod ui;
+mod welcome;
 
 use std::path::PathBuf;
 use std::process::ExitCode;
@@ -65,6 +70,9 @@ enum Command {
         query: String,
         #[arg(long, default_value_t = 60_000, hide = true)]
         at: u64,
+        /// Para capturas da documentação: só o que vem instalado de fábrica.
+        #[arg(long, hide = true)]
+        demo: bool,
     },
     /// Abre uma entrada do catálogo do hub numa janela de terminal (é o que os atalhos chamam).
     Open {
@@ -72,6 +80,89 @@ enum Command {
         id: String,
         /// Para `hub`: a consulta inicial.
         args: Vec<String>,
+    },
+    /// Papel de parede: estilos que seguem o tema e as suas imagens (sem argumento, abre o seletor).
+    Wallpaper {
+        #[command(subcommand)]
+        command: Option<WallpaperCommand>,
+        /// Desenha um quadro do seletor em ANSI e sai: LARGURAxALTURA (docs e capturas).
+        #[arg(long, value_name = "LARGURAxALTURA", hide = true)]
+        snapshot: Option<String>,
+        /// Com --snapshot: o id do estilo selecionado.
+        #[arg(long, hide = true, requires = "snapshot")]
+        select: Option<String>,
+    },
+    /// O catálogo de apps curados: lista, mostra e instala.
+    Apps {
+        #[command(subcommand)]
+        command: AppsCommand,
+    },
+    /// O guia de boas-vindas e a central do sistema.
+    Welcome {
+        /// Página inicial: início, atalhos, apps, sistema, dicas ou sobre.
+        #[arg(long, short)]
+        page: Option<String>,
+        /// Para o autostart: abre uma janela só se o guia nunca foi visto.
+        #[arg(long)]
+        first_run: bool,
+        #[arg(long, value_name = "LARGURAxALTURA", hide = true)]
+        snapshot: Option<String>,
+        /// Com --snapshot: o item selecionado da página (grupo, categoria, linha ou dica).
+        #[arg(long, hide = true)]
+        select: Option<usize>,
+        /// Com --snapshot: mostra o que vem instalado de fábrica e os primeiros passos adiantados.
+        #[arg(long, hide = true, requires = "snapshot")]
+        demo: bool,
+    },
+    /// O resumo do sistema, com a marca ao lado.
+    Fetch,
+    /// Lê as notícias do Arch, atualiza o sistema e avisa dos .pacnew.
+    Update {
+        /// Só mostra as notícias, sem atualizar.
+        #[arg(long)]
+        news: bool,
+        /// Não pergunta antes de atualizar (as notícias continuam aparecendo).
+        #[arg(long, short)]
+        yes: bool,
+    },
+    /// Modo café: a tela não apaga e o sistema não suspende.
+    Caffeine {
+        #[arg(value_enum, default_value = "toggle")]
+        switch: cmd::toggles::Switch,
+    },
+    /// Modo noturno: tela mais quente (hyprsunset).
+    Night {
+        #[arg(value_enum, default_value = "toggle")]
+        switch: cmd::toggles::Switch,
+        /// Temperatura em kelvin (1000 a 10000).
+        #[arg(long, short)]
+        temp: Option<u32>,
+    },
+    /// Não perturbe: silencia as notificações (as urgentes passam).
+    Dnd {
+        #[arg(value_enum, default_value = "toggle")]
+        switch: cmd::toggles::Switch,
+    },
+    /// Grava a tela (sem argumento: começa por uma região, ou para se já está gravando).
+    Rec {
+        #[arg(value_enum, default_value = "toggle")]
+        what: cmd::toggles::RecWhat,
+        /// Grava também o áudio.
+        #[arg(long)]
+        audio: bool,
+    },
+    /// Conta-gotas: escolhe uma cor da tela e copia o hex.
+    Pick,
+    /// Perfil de energia (sem argumento, passa para o próximo).
+    Power {
+        #[arg(value_name = "power-saver|balanced|performance")]
+        profile: Option<String>,
+    },
+    /// Proteção de tela: a marca desliza e o cursor troca de acento a cada batida.
+    Saver {
+        /// Roda aqui, no terminal atual (é o que a janela em tela cheia executa).
+        #[arg(long)]
+        run: bool,
     },
     /// Confere o que falta para o desktop funcionar.
     Doctor,
@@ -123,9 +214,64 @@ enum ThemeCommand {
 }
 
 #[derive(Subcommand)]
+enum WallpaperCommand {
+    /// Lista os estilos e as suas imagens, marcando o que está em uso.
+    List,
+    /// Aplica um estilo (veja `list`), uma imagem sua pelo nome, ou o caminho de uma imagem nova.
+    Set { what: String },
+    /// Passa para o próximo.
+    Next,
+    /// Volta para o anterior.
+    Prev,
+    /// Sorteia um diferente do atual.
+    Random,
+    /// Copia uma imagem para o CLIOS (em ~/.local/share/clios/wallpapers).
+    Add {
+        file: PathBuf,
+        /// Já aplica.
+        #[arg(long)]
+        set: bool,
+    },
+    /// Tira uma imagem sua do CLIOS.
+    Remove { name: String },
+    /// Garante que a imagem do tema atual existe e imprime o caminho dela.
+    Path,
+}
+
+#[derive(Subcommand)]
+enum AppsCommand {
+    /// Lista os apps por categoria, marcando os instalados.
+    List {
+        /// Só uma categoria (arquivos, codigo, sistema, rede, midia, ler, falar, produtividade, pacotes, diversao).
+        #[arg(long, short)]
+        category: Option<String>,
+        /// Só os que faltam.
+        #[arg(long, conflicts_with = "installed")]
+        missing: bool,
+        /// Só os instalados.
+        #[arg(long)]
+        installed: bool,
+    },
+    /// Descrição, dica e comando de um app.
+    Info { id: String },
+    /// Instala por id; com --extras, todos os recomendados que faltam.
+    Install {
+        ids: Vec<String>,
+        /// Todos os apps de nível `extra` que ainda não estão instalados.
+        #[arg(long)]
+        extras: bool,
+        /// Mostra o comando e não executa.
+        #[arg(long)]
+        dry_run: bool,
+    },
+}
+
+#[derive(Subcommand)]
 enum StatusWhat {
     /// Conexão de rede: {"kind":"wifi|eth|none","label":"SSID"}.
     Net,
+    /// Rede e os liga-desliga (café, noturno, não perturbe, gravação), para a barra.
+    All,
 }
 
 #[derive(Clone, Copy, clap::ValueEnum)]
@@ -157,11 +303,70 @@ fn run() -> Result<bool> {
         Command::Sync { copy, dry_run, no_theme } => {
             cmd::sync::run(&ctx, cmd::sync::Options { copy, dry_run, no_theme })?
         }
-        Command::Hub { dump, snapshot, query, at } => {
-            hub::run(&ctx, hub::Options { dump, snapshot, query, at_ms: at })?
+        Command::Hub { dump, snapshot, query, at, demo } => {
+            hub::run(&ctx, hub::Options { dump, snapshot, query, at_ms: at, demo })?
         }
         Command::Open { id, args } => hub::open(&ctx, &id, &args)?,
         Command::Status { what: StatusWhat::Net } => cmd::status::run_net()?,
+        Command::Status { what: StatusWhat::All } => println!("{}", serde_json::to_string(&cmd::toggles::all(&ctx))?),
+        Command::Wallpaper { command, snapshot: Some(size), select } => {
+            anyhow::ensure!(command.is_none(), "--snapshot não combina com subcomando");
+            cmd::wallpaper_tui::snapshot(&ctx, &size, select.as_deref())?
+        }
+        Command::Wallpaper { command, .. } => match command {
+            None => cmd::wallpaper::pick(&mut ctx)?,
+            Some(WallpaperCommand::List) => cmd::wallpaper::list(&ctx)?,
+            Some(WallpaperCommand::Set { what }) => cmd::wallpaper::set(&mut ctx, &what)?,
+            Some(WallpaperCommand::Next) => cmd::wallpaper::step_cmd(&mut ctx, 1)?,
+            Some(WallpaperCommand::Prev) => cmd::wallpaper::step_cmd(&mut ctx, -1)?,
+            Some(WallpaperCommand::Random) => cmd::wallpaper::random(&mut ctx)?,
+            Some(WallpaperCommand::Add { file, set }) => cmd::wallpaper::add(&mut ctx, &file, set)?,
+            Some(WallpaperCommand::Remove { name }) => cmd::wallpaper::remove(&mut ctx, &name)?,
+            Some(WallpaperCommand::Path) => cmd::wallpaper::path(&ctx)?,
+        },
+        Command::Apps { command } => match command {
+            AppsCommand::List { category, missing, installed } => {
+                let filter = if missing {
+                    cmd::apps::Filter::Missing
+                } else if installed {
+                    cmd::apps::Filter::Installed
+                } else {
+                    cmd::apps::Filter::All
+                };
+                cmd::apps::list(&ctx, filter, category.as_deref())?
+            }
+            AppsCommand::Info { id } => cmd::apps::info(&ctx, &id)?,
+            AppsCommand::Install { ids, extras, dry_run } => {
+                if ids.is_empty() && !extras {
+                    anyhow::bail!("diga o que instalar: clios apps install <id>... ou --extras");
+                }
+                return cmd::apps::install(&ctx, &ids, extras, dry_run);
+            }
+        },
+        Command::Welcome { page, first_run, snapshot, select, demo } => {
+            welcome::run(ctx, welcome::Options { page, first_run, snapshot, select, demo })?
+        }
+        Command::Fetch => cmd::fetch::run(&ctx)?,
+        Command::Update { news, yes } => return cmd::update::run(&ctx, news, yes),
+        Command::Caffeine { switch } => {
+            println!("café {}", cmd::toggles::state_word(cmd::toggles::caffeine(&ctx, switch)?))
+        }
+        Command::Night { switch, temp } => {
+            println!("noturno {}", cmd::toggles::state_word(cmd::toggles::night(&ctx, switch, temp)?))
+        }
+        Command::Dnd { switch } => {
+            println!("não perturbe {}", cmd::toggles::state_word(cmd::toggles::dnd(&ctx, switch)?))
+        }
+        Command::Rec { what, audio } => cmd::toggles::rec(&ctx, what, audio)?,
+        Command::Pick => cmd::toggles::pick()?,
+        Command::Power { profile } => cmd::toggles::power(profile.as_deref())?,
+        Command::Saver { run } => {
+            if run {
+                cmd::saver::run(&ctx)?
+            } else {
+                cmd::saver::launch()?
+            }
+        }
         Command::Doctor => return cmd::doctor::run(&ctx),
         Command::Shot { target } => {
             let t = match target {

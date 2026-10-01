@@ -29,7 +29,7 @@ Item {
         width: root.cell
         height: Tokens.barHeight - Tokens.gapIn * 2
         anchors.verticalCenter: parent.verticalCenter
-        radius: Tokens.radius
+        radius: Tokens.radiusSmall
         color: Tokens.accent
         Behavior on x {
             enabled: Tokens.motionEnabled

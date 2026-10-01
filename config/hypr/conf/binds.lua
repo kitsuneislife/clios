@@ -90,6 +90,18 @@ return function(_)
   bind(M .. " + F1", run("clios theme toggle"), "tema: claro ou escuro")
   bind(M .. " + F2", run("clios theme cycle"), "tema: próximo acento")
   bind(M .. " + F3", run("clios motion"), "movimento: completo, reduzido, desligado")
+  bind(M .. " + F4", open("wallpaper"), "papel de parede: escolher")
+  bind(M .. " + SHIFT + F4", run("clios wallpaper next"), "papel de parede: próximo")
+  bind(M .. " + F9", open("central"), "central do sistema")
+  bind(M .. " + F10", open("welcome"), "guia de boas-vindas")
+
+  -- ── ferramentas do dia a dia ─────────────────────────────────────────────
+  bind(M .. " + C", run("clios caffeine"), "modo café: a tela não apaga")
+  bind(M .. " + N", run("clios night"), "modo noturno: tela mais quente")
+  bind(M .. " + D", run("clios dnd"), "não perturbe: silenciar notificações")
+  bind(M .. " + SHIFT + R", run("clios rec"), "gravar a tela: começar ou parar")
+  bind(M .. " + P", run("clios pick"), "conta-gotas: copiar uma cor da tela")
+  bind(M .. " + U", open("update"), "atualizar o sistema")
 
   -- ── capturas ─────────────────────────────────────────────────────────────
   bind("Print", run("clios shot region"), "captura: região")

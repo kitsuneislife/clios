@@ -35,15 +35,19 @@ Rectangle {
         NumberAnimation { duration: Tokens.motionEnabled ? (root.shown ? Tokens.fast : Tokens.exitMs(Tokens.fast)) : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: root.shown ? Tokens.curveOut : Tokens.curveIn }
     }
 
+    // a faixa é uma pílula recuada, não uma borda cortada pela quina
     Rectangle {
-        width: Tokens.border
-        height: parent.height
+        x: Tokens.gapIn
+        y: Tokens.gapOut
+        width: 3
+        height: parent.height - Tokens.gapOut * 2
+        radius: 2
         color: root.urgent ? Tokens.red : Tokens.accent
     }
 
     Column {
         id: col
-        anchors { left: parent.left; right: parent.right; verticalCenter: parent.verticalCenter; leftMargin: Tokens.gapOut + Tokens.border; rightMargin: Tokens.gapOut }
+        anchors { left: parent.left; right: parent.right; verticalCenter: parent.verticalCenter; leftMargin: Tokens.gapOut + 6; rightMargin: Tokens.gapOut }
         spacing: 2
         Mono { text: root.app; small: true; color: Tokens.mute; width: parent.width; elide: Text.ElideRight; visible: text !== "" }
         Mono { text: root.summary; font.bold: true; width: parent.width; wrapMode: Text.Wrap; maximumLineCount: 2; elide: Text.ElideRight }

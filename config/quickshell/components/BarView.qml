@@ -17,28 +17,31 @@ Rectangle {
     property real battery: -1          // 0..1, -1 sem bateria
     property bool charging: false
     property string clock: ""
+    // liga-desliga ativos: só aparecem enquanto estão ligados
+    property bool rec: false
+    property bool caffeine: false
+    property bool night: false
+    property bool dnd: false
 
     signal workspaceActivated(int id)
     signal audioClicked
     signal netClicked
     signal batteryClicked
     signal clockClicked
+    signal indicatorClicked(string name)
 
     implicitHeight: Tokens.barHeight
-    color: Tokens.bg
+    // A barra flutua: superfície própria, canto arredondado e um filete de 1px. Sem sombra.
+    color: Tokens.surface
+    radius: Tokens.radius
+    border.color: Tokens.line
+    border.width: 1
     Behavior on color { ColorAnimation { duration: Tokens.motionEnabled ? Tokens.fast : 0 } }
-
-    // filete inferior de 1px: a barra se separa por linha, não por sombra
-    Rectangle {
-        anchors { left: parent.left; right: parent.right; bottom: parent.bottom }
-        height: 1
-        color: Tokens.line
-    }
 
     WorkspaceStrip {
         id: ws
         anchors { left: parent.left; leftMargin: Tokens.gapOut; verticalCenter: parent.verticalCenter }
-        height: parent.height - 1
+        height: parent.height
         workspaces: root.workspaces
         onActivated: id => root.workspaceActivated(id)
     }
@@ -56,9 +59,33 @@ Rectangle {
     Row {
         id: status
         anchors { right: parent.right; rightMargin: Tokens.gapOut - Tokens.gapIn / 2; verticalCenter: parent.verticalCenter }
-        height: parent.height - 1
+        height: parent.height
         spacing: 0
 
+        Segment {
+            visible: root.rec
+            text: "● gravando"
+            color: Tokens.red
+            onClicked: root.indicatorClicked("rec")
+        }
+        Segment {
+            visible: root.dnd
+            text: "silêncio"
+            color: Tokens.accent
+            onClicked: root.indicatorClicked("dnd")
+        }
+        Segment {
+            visible: root.night
+            text: "noturno"
+            color: Tokens.accent
+            onClicked: root.indicatorClicked("night")
+        }
+        Segment {
+            visible: root.caffeine
+            text: "café"
+            color: Tokens.accent
+            onClicked: root.indicatorClicked("caffeine")
+        }
         Segment {
             visible: root.audioKnown
             text: root.muted ? "mudo" : "vol " + Math.round(root.volume * 100)

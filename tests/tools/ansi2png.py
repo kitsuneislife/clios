@@ -59,7 +59,12 @@ def to_html(rows, font, bold_font, px, pad):
             if fg: style += "color:%s;" % css(fg)
             if bg: style += "background:%s;" % css(bg)
             if bold: style += "font-weight:700;"
-            line += '<span style="%s">%s</span>' % (style, html.escape(text))
+            body = html.escape(text).replace("\ue0b6", '<i class="cl"></i>').replace("\ue0b4", '<i class="cr"></i>')
+            if "▀" in body:
+                # meio-bloco: dois pixels por célula, preenchendo a altura toda da linha (sem a fresta do line-height)
+                half = '<i class="hb" style="background:linear-gradient(%s 50%%,%s 50%%)"></i>' % (css(fg or (0, 0, 0)), css(bg or (0, 0, 0)))
+                body = body.replace("▀", half)
+            line += '<span style="%s">%s</span>' % (style, body)
         out.append('<div class="r">%s</div>' % line)
     import base64
     def face(path, weight):
@@ -73,7 +78,10 @@ def to_html(rows, font, bold_font, px, pad):
     return f"""<!doctype html><meta charset=utf-8><style>{ff}
     html,body{{margin:0;background:rgb({page_bg[0]},{page_bg[1]},{page_bg[2]})}}
     #t{{padding:{pad}px;display:inline-block;background:rgb({page_bg[0]},{page_bg[1]},{page_bg[2]});font-family:'GM','DejaVu Sans Mono',monospace;font-size:{px}px;line-height:1.35;white-space:pre}}
-    .r{{height:1.35em}}</style><div id=t>{''.join(out)}</div>"""
+    .r{{height:1.35em}}
+    .cl,.cr{{display:inline-block;width:1ch;height:1.35em;vertical-align:top;background:currentColor}}
+    .hb{{display:inline-block;width:1ch;height:1.35em;vertical-align:top}}
+    .cl{{border-radius:100% 0 0 100% / 50% 0 0 50%}} .cr{{border-radius:0 100% 100% 0 / 0 50% 50% 0}}</style><div id=t>{''.join(out)}</div>"""
 
 ap = argparse.ArgumentParser()
 ap.add_argument("inp"); ap.add_argument("out")

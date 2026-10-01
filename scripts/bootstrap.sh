@@ -8,6 +8,7 @@
 #   ./scripts/bootstrap.sh --dry-run    mostra o que faria, sem mudar nada
 #
 # Opções:
+#   --extras           instala também os apps recomendados (clios apps install --extras)
 #   --no-aur           não instala os pacotes do AUR
 #   --no-system        não mexe em /etc nem em serviços (só pacotes e dotfiles)
 #   --kernel-cmdline   acrescenta quiet + paleta do console às entradas do systemd-boot (com backup)
@@ -16,13 +17,14 @@
 set -euo pipefail
 
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-DRY=0 AUR=1 SYSTEM=1 CMDLINE=0
+DRY=0 AUR=1 SYSTEM=1 CMDLINE=0 EXTRAS=0 MISSING=()
 
 usage() { sed -n '2,/^set -euo/p' "${BASH_SOURCE[0]}" | sed '$d; s/^# \{0,1\}//'; }
 
 for arg in "$@"; do
   case "$arg" in
     --dry-run) DRY=1 ;;
+    --extras) EXTRAS=1 ;;
     --no-aur) AUR=0 ;;
     --no-system) SYSTEM=0 ;;
     --kernel-cmdline) CMDLINE=1 ;;
@@ -72,18 +74,41 @@ install_official() {
   for p in "${all[@]}"; do
     if pacman -Si "$p" >/dev/null 2>&1; then ok+=("$p"); else missing+=("$p"); fi
   done
-  ((${#missing[@]})) && warn "não estão nos repositórios oficiais (pulados): ${missing[*]}"
+  # O que o pacman não acha pode estar no AUR (pacotes novos, por exemplo): o install_aur tenta.
+  MISSING=("${missing[@]}")
+  ((${#missing[@]})) && note "fora dos repositórios oficiais, tentando no AUR: ${missing[*]}"
   $SUDO pacman -S --needed --noconfirm "${ok[@]}"
-  # `|| true`: sob `set -e` a lista vazia faria o script sair aqui.
-  printf '%s\n' "${missing[@]}" > "${XDG_CACHE_HOME:-$HOME/.cache}/clios-missing.txt" || true
+}
+
+# O paru é o helper do AUR (e o `clios apps` e o hub dependem dele). Vem do AUR, então compila.
+bootstrap_paru() {
+  command -v paru >/dev/null && return 0
+  command -v yay >/dev/null && return 0
+  say "paru (helper do AUR)"
+  local tmp
+  if ((DRY)); then
+    run git clone --depth 1 https://aur.archlinux.org/paru-bin.git /tmp/paru-bin
+    run makepkg -si --noconfirm
+    return
+  fi
+  tmp="$(mktemp -d)"
+  if git clone --depth 1 https://aur.archlinux.org/paru-bin.git "$tmp/paru-bin" &&
+    (cd "$tmp/paru-bin" && makepkg -si --noconfirm); then
+    note "paru instalado"
+  else
+    warn "não consegui instalar o paru. Tente depois: git clone https://aur.archlinux.org/paru-bin.git && cd paru-bin && makepkg -si"
+  fi
+  rm -rf "$tmp"
 }
 
 install_aur() {
   ((AUR)) || { note "AUR pulado (--no-aur)"; return; }
   say "pacotes do AUR"
+  bootstrap_paru
   local helper="" all
   for h in paru yay; do command -v "$h" >/dev/null && { helper="$h"; break; }; done
   mapfile -t all < <(read_list "$REPO/packages/aur.txt")
+  all+=("${MISSING[@]}")
   if [[ -z "$helper" ]]; then
     warn "nenhum helper do AUR (paru ou yay). Para instalar depois: ${all[*]}"
     return
@@ -116,6 +141,13 @@ sync_dotfiles() {
   fi
 }
 
+install_extras() {
+  ((EXTRAS)) || return 0
+  say "apps recomendados"
+  if ((DRY)); then run "$REPO/target/release/clios" --root "$REPO" apps install --extras --dry-run; return; fi
+  "$REPO/target/release/clios" --root "$REPO" apps install --extras || warn "alguns extras falharam; rode 'clios apps install --extras' de novo depois."
+}
+
 # ── sistema ───────────────────────────────────────────────────────────────
 install_system_file() {
   local src="$REPO/system/$1" dst="/$1"
@@ -135,6 +167,10 @@ configure_system() {
   say "serviços"
   for svc in greetd iwd bluetooth power-profiles-daemon upower systemd-resolved; do
     run $SUDO systemctl enable "$svc.service"
+  done
+  # Manutenção que ninguém lembra de fazer: cache do pacman, espelhos, índice do `pkgfile`.
+  for timer in paccache.timer reflector.timer pkgfile-update.timer; do
+    run $SUDO systemctl enable "$timer"
   done
   run $SUDO ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
 
@@ -168,6 +204,7 @@ install_official
 install_aur
 build_clios
 sync_dotfiles
+install_extras
 configure_system
 configure_cmdline
 

@@ -16,11 +16,13 @@ pub struct State {
     /// Nome de um acento dos tokens ou um hex `#RRGGBB`.
     pub accent: String,
     pub motion: MotionLevel,
+    /// Id de um estilo procedural (`grade`) ou `file:<nome>` para uma imagem do usuário.
+    pub wallpaper: String,
 }
 
 impl Default for State {
     fn default() -> Self {
-        Self { mode: Mode::Dark, accent: "ember".into(), motion: MotionLevel::Full }
+        Self { mode: Mode::Dark, accent: "ember".into(), motion: MotionLevel::Full, wallpaper: "grade".into() }
     }
 }
 
@@ -60,7 +62,12 @@ mod tests {
     #[test]
     fn roundtrip() {
         let d = tmp("roundtrip");
-        let s = State { mode: Mode::Light, accent: "#7CFF00".into(), motion: MotionLevel::Reduced };
+        let s = State {
+            mode: Mode::Light,
+            accent: "#7CFF00".into(),
+            motion: MotionLevel::Reduced,
+            wallpaper: "file:praia.jpg".into(),
+        };
         s.save(&d.join("a/b/state.toml")).unwrap();
         assert_eq!(State::load(&d.join("a/b/state.toml")).unwrap(), s);
     }

@@ -13,6 +13,15 @@ Item {
     implicitWidth: label.implicitWidth + Tokens.gapOut
     implicitHeight: parent ? parent.height : Tokens.barHeight
 
+    // no hover, uma pílula suave por trás do texto
+    Rectangle {
+        anchors { fill: parent; topMargin: 4; bottomMargin: 4; leftMargin: 2; rightMargin: 2 }
+        radius: Tokens.radiusSmall
+        color: Tokens.raised
+        opacity: area.containsMouse && root.hoverable ? 1 : 0
+        Behavior on opacity { NumberAnimation { duration: Tokens.motionEnabled ? Tokens.instant : 0 } }
+    }
+
     Mono {
         id: label
         anchors.centerIn: parent

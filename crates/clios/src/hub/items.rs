@@ -10,6 +10,8 @@ pub enum Kind {
     Window,
     Key,
     Clip,
+    /// App do catálogo que ainda não está instalado.
+    Install,
 }
 
 impl Kind {
@@ -21,6 +23,7 @@ impl Kind {
             Kind::Window => "janela",
             Kind::Key => "atalho",
             Kind::Clip => "clip",
+            Kind::Install => "instalar",
         }
     }
 }
@@ -34,10 +37,12 @@ pub enum Scope {
     Keys,
     Actions,
     Clipboard,
+    Install,
 }
 
 impl Scope {
-    pub const CYCLE: [Scope; 5] = [Scope::All, Scope::Windows, Scope::Keys, Scope::Actions, Scope::Clipboard];
+    pub const CYCLE: [Scope; 6] =
+        [Scope::All, Scope::Windows, Scope::Keys, Scope::Actions, Scope::Clipboard, Scope::Install];
 
     pub fn prefix(self) -> &'static str {
         match self {
@@ -46,6 +51,7 @@ impl Scope {
             Scope::Keys => "?",
             Scope::Actions => ">",
             Scope::Clipboard => "\"",
+            Scope::Install => "+",
         }
     }
 
@@ -56,6 +62,7 @@ impl Scope {
             Scope::Keys => "atalhos",
             Scope::Actions => "ações",
             Scope::Clipboard => "clipboard",
+            Scope::Install => "instalar",
         }
     }
 
@@ -84,6 +91,7 @@ impl Scope {
             Scope::Keys => kind == Kind::Key,
             Scope::Actions => kind == Kind::Action,
             Scope::Clipboard => kind == Kind::Clip,
+            Scope::Install => kind == Kind::Install,
         }
     }
 }
@@ -184,6 +192,22 @@ pub fn builtin_actions(theme: &Theme) -> Vec<Item> {
         a("motion-full", "movimento: completo", "motion animation full", &["motion", "full"]),
         a("motion-reduced", "movimento: reduzido", "motion reduced fade", &["motion", "reduced"]),
         a("motion-off", "movimento: desligado", "motion off none", &["motion", "off"]),
+        a("wallpaper-next", "papel de parede: próximo", "wallpaper fundo background", &["wallpaper", "next"]),
+        a(
+            "wallpaper-random",
+            "papel de parede: sortear",
+            "wallpaper fundo background random aleatorio",
+            &["wallpaper", "random"],
+        ),
+        a("caffeine", "modo café: ligar ou desligar", "caffeine cafe tela acordado inhibit", &["caffeine"]),
+        a("night", "modo noturno: ligar ou desligar", "night noturno quente hyprsunset redshift", &["night"]),
+        a("dnd", "não perturbe: ligar ou desligar", "dnd silencio notificacoes mute", &["dnd"]),
+        a("rec", "gravar a tela: região", "rec record gravar video wf-recorder", &["rec", "region"]),
+        a("rec-screen", "gravar a tela: inteira", "rec record gravar video", &["rec", "screen"]),
+        a("rec-stop", "gravar a tela: parar", "rec stop parar gravacao", &["rec", "stop"]),
+        a("pick", "conta-gotas: copiar uma cor da tela", "color picker cor hex hyprpicker", &["pick"]),
+        a("power-cycle", "energia: próximo perfil", "power profile bateria desempenho economia", &["power"]),
+        a("saver", "proteção de tela", "screensaver saver descanso", &["saver"]),
         a("shot-region", "captura: região", "screenshot print screen recorte", &["shot", "region"]),
         a("shot-screen", "captura: tela inteira", "screenshot print screen", &["shot", "screen"]),
         a("shot-window", "captura: janela", "screenshot print window", &["shot", "window"]),
@@ -211,6 +235,14 @@ pub fn builtin_actions(theme: &Theme) -> Vec<Item> {
         sh("poweroff", "desligar", "shutdown poweroff", "systemctl poweroff").confirm(),
     ];
 
+    for s in clios_core::wallpaper::Style::ALL {
+        v.push(a(
+            &format!("wallpaper-{}", s.id()),
+            &format!("papel de parede: {}", s.name()),
+            "wallpaper fundo background tela",
+            &["wallpaper", "set", s.id()],
+        ));
+    }
     for s in &theme.accents {
         let current = s.name == theme.accent_name;
         v.push(
@@ -237,6 +269,7 @@ mod tests {
         assert_eq!(Scope::split("? super"), (Scope::Keys, "super"));
         assert_eq!(Scope::split(">tema"), (Scope::Actions, "tema"));
         assert_eq!(Scope::split("\"senha"), (Scope::Clipboard, "senha"));
+        assert_eq!(Scope::split("+cava"), (Scope::Install, "cava"));
         assert_eq!(Scope::split("firefox"), (Scope::All, "firefox"));
         assert_eq!(Scope::split(""), (Scope::All, ""));
     }
@@ -244,8 +277,9 @@ mod tests {
     #[test]
     fn scope_cycle_wraps_both_ways() {
         assert_eq!(Scope::All.next(false), Scope::Windows);
-        assert_eq!(Scope::Clipboard.next(false), Scope::All);
-        assert_eq!(Scope::All.next(true), Scope::Clipboard);
+        assert_eq!(Scope::Install.next(false), Scope::All);
+        assert_eq!(Scope::Clipboard.next(false), Scope::Install);
+        assert_eq!(Scope::All.next(true), Scope::Install);
     }
 
     #[test]

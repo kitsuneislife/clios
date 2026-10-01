@@ -54,6 +54,11 @@ pub fn apply(ctx: &Ctx, mut opts: ApplyOptions) -> Result<Summary> {
         return Ok(Summary { changed, unchanged, terminals: 0 });
     }
 
+    // O papel de parede acompanha o tema (modo e acento). Falhar aqui não pode derrubar o resto do apply.
+    if let Err(e) = super::wallpaper::apply(ctx) {
+        eprintln!("aviso: papel de parede não atualizado: {e:#}");
+    }
+
     if opts.hooks && changed > 0 {
         run_hooks(&manifest);
     }
@@ -136,6 +141,17 @@ pub fn print_summary(ctx: &Ctx, s: &Summary) -> Result<()> {
 
 /// Salva a escolha, valida o resultado antes de gravar, e aplica.
 pub fn set(ctx: &mut Ctx, mode: Option<Mode>, accent: Option<String>, motion: Option<MotionLevel>) -> Result<()> {
+    let s = set_quiet(ctx, mode, accent, motion)?;
+    print_summary(ctx, &s)
+}
+
+/// O mesmo que `set`, sem imprimir (para as telas interativas).
+pub fn set_quiet(
+    ctx: &mut Ctx,
+    mode: Option<Mode>,
+    accent: Option<String>,
+    motion: Option<MotionLevel>,
+) -> Result<Summary> {
     let mut next = ctx.state.clone();
     if let Some(m) = mode {
         next.mode = m;
@@ -150,8 +166,7 @@ pub fn set(ctx: &mut Ctx, mode: Option<Mode>, accent: Option<String>, motion: Op
     ctx.theme_for(&next)?;
     ctx.state = next;
     ctx.save_state()?;
-    let s = apply(ctx, ApplyOptions::default())?;
-    print_summary(ctx, &s)
+    apply(ctx, ApplyOptions::default())
 }
 
 pub fn cycle_accent(ctx: &mut Ctx) -> Result<()> {

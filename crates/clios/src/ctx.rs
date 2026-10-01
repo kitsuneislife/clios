@@ -29,7 +29,9 @@ impl Ctx {
     }
 
     pub fn theme_for(&self, state: &State) -> Result<Theme> {
-        Theme::resolve(&self.tokens, state.mode, &state.accent, state.motion)
+        let mut theme = Theme::resolve(&self.tokens, state.mode, &state.accent, state.motion)?;
+        theme.state_dir = self.paths.state.display().to_string();
+        Ok(theme)
     }
 
     pub fn save_state(&self) -> Result<()> {

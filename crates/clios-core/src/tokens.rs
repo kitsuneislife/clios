@@ -32,6 +32,8 @@ pub struct Ui {
     pub gap_out: u32,
     pub border: u32,
     pub radius: u32,
+    pub radius_small: u32,
+    pub rounding_power: f64,
     pub bar_height: u32,
     pub text: u32,
     pub text_small: u32,

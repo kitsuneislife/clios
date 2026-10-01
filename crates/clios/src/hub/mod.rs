@@ -34,6 +34,8 @@ pub struct Options {
     pub query: String,
     /// Em que instante da animação (ms após abrir) o quadro é tirado.
     pub at_ms: u64,
+    /// Para a documentação: lista só o que vem instalado de fábrica.
+    pub demo: bool,
 }
 
 /// `clios open <id>`: abre uma entrada do catálogo (ou o próprio hub) numa janela de terminal.
@@ -43,7 +45,7 @@ pub fn open(ctx: &Ctx, id: &str, args: &[String]) -> Result<()> {
     let argv = if id == "hub" {
         exec::plan_hub(&env, &args.join(" "))
     } else {
-        let (catalog, _) = sources::load_catalog(&ctx.paths);
+        let (catalog, _) = crate::catalog::load(&ctx.paths);
         let Some(t) = catalog.tui.iter().find(|t| t.id == id) else {
             let ids: Vec<&str> = std::iter::once("hub").chain(catalog.tui.iter().map(|t| t.id.as_str())).collect();
             anyhow::bail!("não há entrada {id:?} no catálogo. Disponíveis: {}", ids.join(", "));
@@ -56,8 +58,13 @@ pub fn open(ctx: &Ctx, id: &str, args: &[String]) -> Result<()> {
 
 pub fn run(ctx: &Ctx, opts: Options) -> Result<()> {
     let theme = ctx.theme()?;
-    let (catalog, warning) = sources::load_catalog(&ctx.paths);
-    let items = sources::static_items(&catalog, &theme);
+    let (catalog, warning) = crate::catalog::load(&ctx.paths);
+    // `--demo` (só para as capturas da documentação): o que vem instalado de fábrica, sem os apps deste computador.
+    let items = if opts.demo {
+        sources::static_items(&catalog, &theme, &|t| t.tier == crate::catalog::Tier::Core, false)
+    } else {
+        sources::static_items(&catalog, &theme, &|t| t.installed(), true)
+    };
     let history_path = ctx.paths.state.join("hub-history.toml");
     let mut app = App::new(theme, items, History::load(&history_path), Instant::now());
     app.notice = warning;
@@ -100,9 +107,6 @@ pub fn run(ctx: &Ctx, opts: Options) -> Result<()> {
 /// Um quadro do hub como texto ANSI de 24 bits.
 fn snapshot(mut app: App, size: &str, query: &str, at_ms: u64) -> Result<()> {
     use ratatui::buffer::Buffer;
-    use ratatui::style::{Color, Modifier};
-    use std::fmt::Write as _;
-
     let (w, h) = size
         .split_once('x')
         .and_then(|(w, h)| Some((w.parse::<u16>().ok()?, h.parse::<u16>().ok()?)))
@@ -119,21 +123,7 @@ fn snapshot(mut app: App, size: &str, query: &str, at_ms: u64) -> Result<()> {
     let mut buf = Buffer::empty(Rect::new(0, 0, w, h));
     ui::render(&mut buf, &app, now);
 
-    let mut out = String::new();
-    for y in 0..h {
-        for x in 0..w {
-            let c = &buf[(x, y)];
-            let rgb = |c: Color| match c {
-                Color::Rgb(r, g, b) => (r, g, b),
-                _ => (128, 128, 128),
-            };
-            let (fr, fg, fb) = rgb(c.fg);
-            let (br, bg, bb) = rgb(c.bg);
-            let bold = if c.modifier.contains(Modifier::BOLD) { "0;1;" } else { "0;" };
-            let _ = write!(out, "\x1b[{bold}38;2;{fr};{fg};{fb};48;2;{br};{bg};{bb}m{}", c.symbol());
-        }
-        out.push_str("\x1b[0m\n");
-    }
+    let out = crate::ui::buffer_ansi(&buf);
     print!("{out}");
     Ok(())
 }

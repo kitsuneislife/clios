@@ -19,7 +19,11 @@ animations {
 
 background {
     monitor =
+    path = {{ state_dir }}/wallpaper/current.png
     color = {{ c.bg | hypr }}
+    blur_passes = 2
+    blur_size = 5
+    brightness = 0.75
 }
 
 # Hora, grande e quieta.
@@ -38,7 +42,7 @@ input-field {
     monitor =
     size = 320, 44
     outline_thickness = 1
-    rounding = 0
+    rounding = {{ ui.radius }}
     dots_size = 0.28
     dots_spacing = 0.3
     dots_center = true

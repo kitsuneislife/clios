@@ -48,7 +48,7 @@ Rectangle {
                     required property int index
                     width: 6
                     height: Tokens.text
-                    radius: Tokens.radius
+                    radius: Tokens.radiusSmall / 2
                     readonly property bool on: !root.muted && (index + 0.5) / root.blocks <= root.value
                     color: on ? Tokens.accent : Tokens.line
                     Behavior on color { ColorAnimation { duration: Tokens.motionEnabled ? Tokens.instant : 0 } }

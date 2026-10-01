@@ -42,18 +42,32 @@ def build_tree(dst: pathlib.Path):
     shutil.copy(HERE / "Scene.qml", dst / "Scene.qml")
 
 
+def check_mark_path():
+    """O caminho da marca no QML tem que ser o mesmo de brand/mark.svg (os dois vêm de brand/build.py)."""
+    want = subprocess.run([sys.executable, str(REPO / "brand/build.py"), "--path"], capture_output=True, text=True, check=True).stdout.strip()
+    qml = (REPO / "config/quickshell/components/Mark.qml").read_text()
+    got = re.search(r'markPath: "([^"]+)"', qml).group(1)
+    svg = (REPO / "brand/mark.svg").read_text()
+    return got == want and want in svg, want
+
+
 def theme_json(clios, mode, accent, motion):
+    """O theme.json e o papel de parede que o `clios` gera para essa combinação (numa home descartável)."""
     with tempfile.TemporaryDirectory() as home:
+        env = dict(os.environ, CLIOS_WALLPAPER_SIZE="640x360")
         base = [clios, "--root", str(REPO), "--home", home]
-        subprocess.run(base + ["theme", "set", "--mode", mode, "--accent", accent, "--motion", motion], check=True, capture_output=True)
-        return (pathlib.Path(home) / ".local/state/clios/theme.json").read_text()
+        subprocess.run(base + ["theme", "set", "--mode", mode, "--accent", accent, "--motion", motion], check=True, capture_output=True, env=env)
+        state = pathlib.Path(home) / ".local/state/clios"
+        wall = pathlib.Path(tempfile.mkdtemp(prefix="clios-wp-")) / "wallpaper.png"
+        shutil.copy(state / "wallpaper/current.png", wall)  # a home descartável some ao fim do bloco
+        return (state / "theme.json").read_text(), str(wall)
 
 
-def render(app, tree, font_family, tjson, out_png, active=2, settle_ms=700):
+def render(app, tree, font_family, tjson, out_png, active=2, settle_ms=1200, wallpaper=""):
     view = QQuickView()
     view.engine().addImportPath(str(tree))
     view.setResizeMode(QQuickView.SizeRootObjectToView)
-    view.setInitialProperties({"themeJson": tjson, "active": active})
+    view.setInitialProperties({"themeJson": tjson, "active": active, "wallpaper": QUrl.fromLocalFile(wallpaper) if wallpaper else QUrl()})
     view.setSource(QUrl.fromLocalFile(str(tree / "Scene.qml")))
     if view.status() != QQuickView.Ready:
         raise SystemExit("QML não carregou: " + "; ".join(str(e) for e in view.errors()))
@@ -92,12 +106,15 @@ def main():
     tmp = pathlib.Path(tempfile.mkdtemp(prefix="clios-qml-"))
     build_tree(tmp)
 
+    ok_path, _ = check_mark_path()
+    print(("✓" if ok_path else "✗"), "marca: caminho do QML igual ao do SVG")
+    failures = 0 if ok_path else 1
     cases = [("dark", "ember", "full"), ("light", "azure", "full"), ("dark", "mint", "off")]
-    failures = 0
     for mode, accent, motion in cases:
         messages.clear()
         png = out / f"shell-{mode}-{accent}-{motion}.png"
-        view, root = render(app, tmp, family, theme_json(a.clios, mode, accent, motion), png)
+        tjson, wall = theme_json(a.clios, mode, accent, motion)
+        view, root = render(app, tmp, family, tjson, png, wallpaper=wall)
         tok = view.engine().singletonInstance("qs.core", "Tokens")
         ok = True
         def check(cond, msg):
@@ -106,6 +123,8 @@ def main():
             if not cond:
                 ok = False; print("   ✗", msg)
         check(not messages, "avisos do QML: " + " | ".join(messages))
+        wp = root.findChild(type(root), "wallpaper")
+        check(wp is not None and wp.property("ready"), "o papel de parede carregou e terminou o fade")
         check(tok.property("mode") == mode, f"Tokens.mode = {tok.property('mode')}")
         check(tok.property("accentName") == accent, f"Tokens.accentName = {tok.property('accentName')}")
         check(tok.property("motionEnabled") == (motion != "off"), "Tokens.motionEnabled")

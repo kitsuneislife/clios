@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import Quickshell
+import Quickshell.Io
 import Quickshell.Services.Notifications
 import Quickshell.Wayland
 import qs.core
@@ -10,13 +11,29 @@ import qs.components
 // O servidor de notificações do desktop. Cartões no canto superior direito, empilhados.
 // Normal some em 7 s, baixa em 4 s, urgente fica até ser dispensada.
 Scope {
+    // Não perturbe: `clios dnd` grava 1 neste arquivo. As urgentes continuam passando.
+    readonly property string stateHome: Quickshell.env("XDG_STATE_HOME") || (Quickshell.env("HOME") + "/.local/state")
+    property bool dnd: false
+
+    FileView {
+        path: stateHome + "/clios/dnd"
+        watchChanges: true
+        printErrors: false
+        onFileChanged: reload()
+        onLoaded: dnd = text().trim() === "1"
+        onLoadFailed: dnd = false
+    }
+
     NotificationServer {
         id: server
         keepOnReload: true
         actionsSupported: true
         bodySupported: true
         imageSupported: false
-        onNotification: n => { n.tracked = true }
+        onNotification: n => {
+            if (dnd && n.urgency !== NotificationUrgency.Critical) return
+            n.tracked = true
+        }
     }
 
     PanelWindow {
@@ -24,7 +41,7 @@ Scope {
         screen: Quickshell.screens[0]
         visible: server.trackedNotifications.values.length > 0
         anchors { top: true; right: true }
-        margins { top: Tokens.barHeight + Tokens.gapOut; right: Tokens.gapOut }
+        margins { top: Tokens.barHeight + Tokens.gapIn + Tokens.gapOut; right: Tokens.gapOut }
         implicitWidth: 360
         implicitHeight: stack.implicitHeight
         exclusionMode: ExclusionMode.Ignore

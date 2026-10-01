@@ -24,6 +24,8 @@ Scope {
             screen: modelData
 
             anchors { top: true; left: true; right: true }
+            // a barra flutua: margem em volta, para o canto arredondado aparecer
+            margins { top: Tokens.gapIn; left: Tokens.gapOut; right: Tokens.gapOut }
             implicitHeight: Tokens.barHeight
             exclusionMode: ExclusionMode.Auto
             WlrLayershell.namespace: "clios-bar"
@@ -65,8 +67,12 @@ Scope {
                 audioKnown: win.sink !== null
                 volume: win.sink && win.sink.audio ? win.sink.audio.volume : 0
                 muted: win.sink && win.sink.audio ? win.sink.audio.muted : false
-                netKind: Net.kind
-                netLabel: Net.label
+                netKind: Status.kind
+                netLabel: Status.label
+                rec: Status.rec
+                caffeine: Status.caffeine
+                night: Status.night
+                dnd: Status.dnd
                 battery: win.battery && win.battery.isPresent && win.battery.isLaptopBattery ? win.fraction(win.battery.percentage) : -1
                 charging: win.battery ? win.battery.state === UPowerDeviceState.Charging : false
                 clock: Qt.formatDateTime(clock.date, "ddd d  HH:mm")
@@ -76,6 +82,8 @@ Scope {
                 onNetClicked: open("network")
                 onBatteryClicked: open("monitor")
                 onClockClicked: open("monitor")
+                // clicar num indicador desliga o que ele mostra
+                onIndicatorClicked: name => Quickshell.execDetached(name === "rec" ? ["clios", "rec", "stop"] : ["clios", name, "off"])
             }
         }
     }

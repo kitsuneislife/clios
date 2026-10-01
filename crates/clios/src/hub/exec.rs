@@ -5,6 +5,7 @@ use std::process::{Command, Stdio};
 use anyhow::{Context, Result, bail};
 
 use super::items::Action;
+use crate::sys::sh_quote;
 
 pub struct Env {
     /// Caminho deste executável, para as ações que reexecutam o clios.
@@ -25,14 +26,6 @@ fn foot_server_running() -> bool {
     let display = std::env::var("WAYLAND_DISPLAY").unwrap_or_default();
     let name = if display.is_empty() { "foot.sock".to_string() } else { format!("foot-{display}.sock") };
     std::path::Path::new(&rt).join(name).exists()
-}
-
-/// Aspas simples POSIX.
-pub fn sh_quote(s: &str) -> String {
-    if !s.is_empty() && s.chars().all(|c| c.is_ascii_alphanumeric() || "-_./=:,@%+".contains(c)) {
-        return s.to_string();
-    }
-    format!("'{}'", s.replace('\'', "'\\''"))
 }
 
 /// Tamanho inicial (em células) das janelas flutuantes.
@@ -116,15 +109,6 @@ mod tests {
 
     fn env(server: bool) -> Env {
         Env { exe: "/usr/bin/clios".into(), foot_server: server }
-    }
-
-    #[test]
-    fn quoting() {
-        assert_eq!(sh_quote("abc-1.2"), "abc-1.2");
-        assert_eq!(sh_quote("a b"), "'a b'");
-        assert_eq!(sh_quote("it's"), "'it'\\''s'");
-        assert_eq!(sh_quote(""), "''");
-        assert_eq!(sh_quote("$(rm -rf)"), "'$(rm -rf)'");
     }
 
     #[test]

@@ -10,6 +10,7 @@ Rectangle {
     color: Tokens.bg
 
     property string themeJson: "{}"
+    property url wallpaper
     property int active: 2
     Component.onCompleted: Tokens.apply(JSON.parse(themeJson))
 
@@ -22,7 +23,7 @@ Rectangle {
     ]
 
     Column {
-        anchors { left: parent.left; right: parent.right; top: parent.top }
+        anchors { left: parent.left; right: parent.right; top: parent.top; leftMargin: Tokens.gapOut; rightMargin: Tokens.gapOut; topMargin: Tokens.gapIn }
         spacing: 0
 
         BarView {
@@ -36,6 +37,8 @@ Rectangle {
             battery: 0.87
             charging: false
             clock: "qua 1  14:32"
+            caffeine: true
+            night: true
         }
     }
 
@@ -49,6 +52,7 @@ Rectangle {
             OsdView { id: osd; shown: true; label: "vol"; value: 0.7 }
             OsdView { id: osdMuted; shown: true; label: "vol"; value: 0.7; muted: true }
             Mark { size: 96; blink: false }
+            WallpaperView { id: wp; objectName: "wallpaper"; width: 256; height: 144; source: root.wallpaper }
         }
 
         Column {

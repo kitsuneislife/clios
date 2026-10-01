@@ -1,0 +1,124 @@
+# O baralho de dicas do guia de boas-vindas (aba "dicas"). Uma ideia por cartão, curta, útil de verdade.
+#   title   a ideia, em poucas palavras
+#   body    uma ou duas frases
+#   keys    (opcional) o atalho ou comando que a põe em prática
+
+[[tip]]
+title = "o hub faz tudo"
+body = "Comece a digitar e ele acha apps, janelas abertas, ações e atalhos. Tab troca o escopo; esc fecha."
+keys = "super + espaço"
+
+[[tip]]
+title = "escopos do hub"
+body = "Um prefixo restringe a busca: @ janelas, ? atalhos, > ações, \" clipboard, + instalar apps que faltam."
+keys = "@  ?  >  \""
+
+[[tip]]
+title = "instale sem sair do hub"
+body = "Digite + e o nome de um app: o hub mostra os apps curados que ainda não estão instalados e instala com Enter."
+keys = "super + espaço, depois +"
+
+[[tip]]
+title = "o catálogo está no terminal"
+body = "Mais de cinquenta apps de terminal escolhidos a dedo. Veja por categoria, com a descrição, ou instale todos os recomendados de uma vez."
+keys = "clios apps list"
+
+[[tip]]
+title = "o acento é seu"
+body = "Seis cores prontas e qualquer hex que você quiser. A barra, os terminais, o helix, o btop e o resto mudam juntos, ao vivo."
+keys = "clios theme set --accent '#7CFF00'"
+
+[[tip]]
+title = "claro ou escuro, sem reiniciar nada"
+body = "O tema troca em todos os apps abertos, inclusive nos terminais que já estavam rodando."
+keys = "super + F1"
+
+[[tip]]
+title = "movimento sob controle"
+body = "Completo, reduzido (só fades curtos) ou desligado. Vale para o Hyprland, a barra e o hub."
+keys = "super + F3"
+
+[[tip]]
+title = "papel de parede que acompanha o tema"
+body = "Oito estilos desenhados em tempo real com as cores do seu acento. Dá para usar uma imagem sua também."
+keys = "super + F4"
+
+[[tip]]
+title = "scratchpad"
+body = "Um terminal escondido que desce na hora. Bom para consultar algo sem perder o lugar na workspace."
+keys = "super + s"
+
+[[tip]]
+title = "redimensionar com o teclado"
+body = "O modo redimensionar mantém h j k l para ajustar a janela, quantas vezes precisar. Esc ou Enter sai."
+keys = "super + r"
+
+[[tip]]
+title = "histórico de clipboard"
+body = "Tudo que você copiou, com busca. Imagens também. Enter cola de volta."
+keys = "super + v"
+
+[[tip]]
+title = "um atalho esqueceu?"
+body = "Todos os atalhos têm descrição e ficam no hub. Digite parte do que quer fazer e a tecla aparece."
+keys = "super + /"
+
+[[tip]]
+title = "capturas vão direto para o clipboard"
+body = "Selecione uma região e cole em qualquer lugar. O arquivo também fica salvo em ~/Pictures/Screenshots."
+keys = "print"
+
+[[tip]]
+title = "histórico do shell que entende contexto"
+body = "O Ctrl+R do fish usa o atuin: busca difusa, filtrada por pasta, sem mandar nada para fora do seu computador."
+keys = "ctrl + r"
+
+[[tip]]
+title = "esqueceu um comando?"
+body = "tldr mostra exemplos práticos em vez da man page inteira. O atalho '?' do fish já aponta para ele."
+keys = "tldr tar"
+
+[[tip]]
+title = "a calculadora entende unidades"
+body = "fend resolve contas com unidades e conversões: 5 km em milhas, 2 GiB / 4 min em MB/s."
+keys = "clios open calc"
+
+[[tip]]
+title = "atualize com segurança"
+body = "O clios update lê as notícias do Arch antes e avisa se algo pede intervenção manual."
+keys = "clios update"
+
+[[tip]]
+title = "diagnóstico em um comando"
+body = "O doctor confere dependências, serviços e arquivos do desktop, e diz o que fazer quando algo falta."
+keys = "clios doctor"
+
+[[tip]]
+title = "tudo é um arquivo de texto"
+body = "Seus dotfiles estão em ~/.local/share/clios e viram links em ~/.config. Edite, salve, e o Hyprland recarrega."
+keys = "clios sync"
+
+[[tip]]
+title = "o seu catálogo"
+body = "Copie config/clios/hub.toml para ~/.config/clios/hub.toml e acrescente os seus apps: eles entram no hub, no guia e no clios apps."
+keys = "~/.config/clios/hub.toml"
+
+[[tip]]
+title = "modo café"
+body = "Vai assistir ou apresentar algo? Um atalho segura a tela acesa e o sistema acordado, e a barra lembra que está ligado."
+keys = "super + c"
+
+[[tip]]
+title = "tela mais quente à noite"
+body = "O modo noturno avermelha a tela para cansar menos a vista. Clicar em noturno, na barra, desliga."
+keys = "super + n"
+
+[[tip]]
+title = "grave a tela"
+body = "Escolha uma região e grave. Quando parar, o arquivo vai para ~/Videos e uma notificação diz onde ficou."
+keys = "super + shift + r"
+
+[[tip]]
+title = "conta-gotas"
+body = "Pegue qualquer cor da tela: o hex vai direto para o clipboard."
+keys = "super + p"
