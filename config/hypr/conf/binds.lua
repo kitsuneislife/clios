@@ -92,6 +92,8 @@ return function(_)
   bind(M .. " + F3", run("clios motion"), "movimento: completo, reduzido, desligado")
   bind(M .. " + F4", open("wallpaper"), "papel de parede: escolher")
   bind(M .. " + SHIFT + F4", run("clios wallpaper next"), "papel de parede: próximo")
+  bind(M .. " + F9", open("central"), "central do sistema")
+  bind(M .. " + F10", open("welcome"), "guia de boas-vindas")
 
   -- ── capturas ─────────────────────────────────────────────────────────────
   bind("Print", run("clios shot region"), "captura: região")

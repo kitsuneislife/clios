@@ -1,5 +1,6 @@
 pub mod apps;
 pub mod doctor;
+pub mod fetch;
 pub mod motion;
 pub mod shot;
 pub mod status;

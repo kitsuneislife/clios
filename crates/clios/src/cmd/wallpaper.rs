@@ -278,12 +278,17 @@ pub fn set(ctx: &mut Ctx, what: &str) -> Result<()> {
     Ok(())
 }
 
-pub fn step_cmd(ctx: &mut Ctx, delta: isize) -> Result<()> {
+/// Passa para o vizinho na lista, sem imprimir.
+pub fn step_quiet(ctx: &mut Ctx, delta: isize) -> Result<Choice> {
     let all = all_choices(&ctx.paths);
     let cur = Choice::parse(&ctx.state.wallpaper).unwrap_or(Choice::Style(Style::Grade));
     let next = step(&all, &cur, delta);
     set_choice(ctx, &next)?;
-    println!("papel de parede: {}", next.label());
+    Ok(next)
+}
+
+pub fn step_cmd(ctx: &mut Ctx, delta: isize) -> Result<()> {
+    println!("papel de parede: {}", step_quiet(ctx, delta)?.label());
     Ok(())
 }
 

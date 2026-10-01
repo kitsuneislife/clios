@@ -456,6 +456,45 @@ tip = "/ busca; enter instala"
 keywords = "pacseek pacman aur instalar procurar apps loja"
 
 [[tui]]
+id = "welcome"
+name = "boas-vindas"
+cmd = ["clios", "welcome"]
+bin = "clios"
+pkg = "clios"
+category = "sistema"
+tier = "core"
+float = true
+desc = "o guia do CLIOS: primeiros passos, atalhos, apps e dicas"
+tip = "tab troca de página; 1 a 6 vão direto"
+keywords = "welcome guia ajuda help tutorial comecar inicio"
+
+[[tui]]
+id = "central"
+name = "central do sistema"
+cmd = ["clios", "welcome", "--page", "sistema"]
+bin = "clios"
+pkg = "clios"
+category = "sistema"
+tier = "core"
+float = true
+desc = "modo, acento, movimento, papel de parede e energia num só lugar"
+tip = "← e → mudam o valor na hora, em todos os apps"
+keywords = "settings configuracoes config tema ajustes controle"
+
+[[tui]]
+id = "fetch"
+name = "resumo do sistema"
+cmd = ["clios", "fetch"]
+bin = "clios"
+pkg = "clios"
+category = "sistema"
+tier = "core"
+float = true
+hold = true
+desc = "o neofetch do CLIOS: sistema, tema e a marca"
+keywords = "neofetch fastfetch info sistema sobre"
+
+[[tui]]
 id = "wallpaper"
 name = "papel de parede"
 cmd = ["clios", "wallpaper"]

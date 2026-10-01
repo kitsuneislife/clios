@@ -465,6 +465,24 @@ fn scene(style: Style, c: &Colors, w: f32, h: f32, lw: f32) -> Shader {
     }
 }
 
+/// A marca como máscara de cobertura (`[corpo, cursor]`, 0..1) em `w` x `h` pixels, com a caixa de 64 inteira.
+/// `cursor_on = false` apaga o cursor (a piscada). Usada para desenhar a marca em meio-bloco no terminal.
+pub fn mark_coverage(w: u32, h: u32, cursor_on: bool) -> Vec<[f32; 2]> {
+    let mark: &'static Mark = MARK.get_or_init(Mark::build);
+    let (sx, sy) = (64.0 / w as f32, 64.0 / h as f32);
+    let px = (sx + sy) / 2.0; // unidades da marca por pixel
+    let mut out = Vec::with_capacity((w * h) as usize);
+    for j in 0..h {
+        for i in 0..w {
+            let (ux, uy) = ((i as f32 + 0.5) * sx, (j as f32 + 0.5) * sy);
+            let body = cov(mark.dist(ux, uy) / px);
+            let cursor = if cursor_on { cov(cursor_sdf(ux, uy) / px) } else { 0.0 };
+            out.push([body, cursor]);
+        }
+    }
+    out
+}
+
 /// Renderiza em RGB8 (`w * h * 3` bytes), em paralelo por faixas de linhas.
 pub fn render(style: Style, c: &Colors, w: u32, h: u32) -> Vec<u8> {
     render_with(style, c, w, h, 1.0)
@@ -633,6 +651,16 @@ mod tests {
         assert!(m.dist(-8.0, 32.0) > 6.0, "fora");
         // canto externo arredondado: o ponto da quina do quadrado está fora do corpo
         assert!(m.dist(0.3, 0.3) > 0.0, "quina arredondada");
+    }
+
+    #[test]
+    fn mark_coverage_has_the_c_and_its_cursor() {
+        let m = mark_coverage(32, 32, true);
+        let at = |x: usize, y: usize| m[y * 32 + x];
+        assert!(at(2, 16)[0] > 0.9, "a coluna do c está cheia");
+        assert!(at(24, 16)[0] < 0.1 && at(24, 16)[1] < 0.1, "a abertura está vazia");
+        assert!(at(20, 16)[1] > 0.9, "o cursor está na abertura");
+        assert!(mark_coverage(32, 32, false).iter().all(|c| c[1] == 0.0), "sem cursor quando apagado");
     }
 
     #[test]

@@ -16,6 +16,7 @@ import re
 import subprocess
 import sys
 import tempfile
+import tomllib
 
 from lupa import LuaRuntime
 
@@ -456,6 +457,13 @@ def main():
             for keys, desc, submap in binds:
                 if not desc:
                     errors.append(f"atalho {keys!r} sem description (o hub usa isso como documentação)")
+            # O guia de boas-vindas mostra config/clios/keys.toml: cada atalho citado tem que existir de verdade.
+            real = {keys for keys, _, submap in binds if not submap}
+            for g in tomllib.loads((repo / "config/clios/keys.toml").read_text())["group"]:
+                for k in g["key"]:
+                    for b in k["bind"]:
+                        if b not in real:
+                            errors.append(f"keys.toml ({g['id']}): {b!r} não existe em binds.lua")
             for where, rx in regexes:
                 try:
                     re.compile(rx)

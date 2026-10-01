@@ -1,0 +1,237 @@
+# Os atalhos que o guia de boas-vindas mostra, na ordem em que fazem sentido para quem chega.
+#
+#   keys   o que aparece (cada palavra vira uma tecla desenhada)
+#   bind   os atalhos reais de config/hypr/conf/binds.lua que isto descreve (o teste do Hyprland confere)
+#   what   a ação, numa frase
+#
+# A lista completa e sempre atual é `SUPER + /` no desktop, ou docs/KEYS.md.
+
+[[group]]
+id = "comecar"
+name = "comece por aqui"
+blurb = "Cinco atalhos que resolvem quase tudo."
+
+[[group.key]]
+keys = "super + espaço"
+bind = ["SUPER + space"]
+what = "abre o hub: apps, janelas, ações e atalhos"
+
+[[group.key]]
+keys = "super + /"
+bind = ["SUPER + slash"]
+what = "mostra todos os atalhos, com busca"
+
+[[group.key]]
+keys = "super + enter"
+bind = ["SUPER + Return"]
+what = "abre um terminal"
+
+[[group.key]]
+keys = "super + esc"
+bind = ["SUPER + Escape"]
+what = "bloquear, suspender, reiniciar ou sair"
+
+[[group.key]]
+keys = "super + v"
+bind = ["SUPER + V"]
+what = "histórico da área de transferência"
+
+[[group]]
+id = "apps"
+name = "apps"
+blurb = "Cada letra abre um app de terminal numa janela própria."
+
+[[group.key]]
+keys = "super + e"
+bind = ["SUPER + E"]
+what = "arquivos (yazi)"
+
+[[group.key]]
+keys = "super + g"
+bind = ["SUPER + G"]
+what = "git (lazygit)"
+
+[[group.key]]
+keys = "super + b"
+bind = ["SUPER + B"]
+what = "monitor do sistema (btop)"
+
+[[group.key]]
+keys = "super + a"
+bind = ["SUPER + A"]
+what = "áudio (wiremix)"
+
+[[group.key]]
+keys = "super + i"
+bind = ["SUPER + I"]
+what = "rede e wi-fi (impala)"
+
+[[group.key]]
+keys = "super + shift + b"
+bind = ["SUPER + SHIFT + B"]
+what = "bluetooth (bluetui)"
+
+[[group.key]]
+keys = "super + m"
+bind = ["SUPER + M"]
+what = "música (spotify-player)"
+
+[[group.key]]
+keys = "super + w"
+bind = ["SUPER + W"]
+what = "navegador, a única exceção gráfica"
+
+[[group]]
+id = "janelas"
+name = "janelas"
+blurb = "As mãos ficam no h j k l, como no helix."
+
+[[group.key]]
+keys = "super + h j k l"
+bind = ["SUPER + h", "SUPER + j", "SUPER + k", "SUPER + l"]
+what = "mover o foco (as setas também funcionam)"
+
+[[group.key]]
+keys = "super + shift + h j k l"
+bind = ["SUPER + SHIFT + h", "SUPER + SHIFT + j", "SUPER + SHIFT + k", "SUPER + SHIFT + l"]
+what = "mover a janela de lugar"
+
+[[group.key]]
+keys = "super + q"
+bind = ["SUPER + Q"]
+what = "fechar a janela"
+
+[[group.key]]
+keys = "super + f"
+bind = ["SUPER + F"]
+what = "tela cheia"
+
+[[group.key]]
+keys = "super + shift + f"
+bind = ["SUPER + SHIFT + F"]
+what = "maximizar, mantendo a barra"
+
+[[group.key]]
+keys = "super + t"
+bind = ["SUPER + T"]
+what = "alternar entre mosaico e flutuante"
+
+[[group.key]]
+keys = "super + r"
+bind = ["SUPER + R"]
+what = "modo redimensionar (h j k l, esc sai)"
+
+[[group.key]]
+keys = "super + ,"
+bind = ["SUPER + comma"]
+what = "trocar a direção da divisão"
+
+[[group.key]]
+keys = "super + ."
+bind = ["SUPER + period"]
+what = "fixar a janela em todas as workspaces"
+
+[[group.key]]
+keys = "super + arrastar"
+bind = ["SUPER + mouse:272", "SUPER + mouse:273"]
+what = "mover (esquerdo) ou redimensionar (direito)"
+
+[[group]]
+id = "workspaces"
+name = "workspaces"
+blurb = "Dez áreas de trabalho, e um scratchpad para o que você só consulta."
+
+[[group.key]]
+keys = "super + 1 … 0"
+bind = ["SUPER + 1", "SUPER + 2", "SUPER + 3", "SUPER + 4", "SUPER + 5", "SUPER + 6", "SUPER + 7", "SUPER + 8", "SUPER + 9", "SUPER + 0"]
+what = "ir para a workspace (0 é a décima)"
+
+[[group.key]]
+keys = "super + shift + 1 … 0"
+bind = ["SUPER + SHIFT + 1", "SUPER + SHIFT + 2", "SUPER + SHIFT + 3", "SUPER + SHIFT + 4", "SUPER + SHIFT + 5", "SUPER + SHIFT + 6", "SUPER + SHIFT + 7", "SUPER + SHIFT + 8", "SUPER + SHIFT + 9", "SUPER + SHIFT + 0"]
+what = "mandar a janela para a workspace"
+
+[[group.key]]
+keys = "super + [ ]"
+bind = ["SUPER + bracketleft", "SUPER + bracketright"]
+what = "workspace anterior e próxima"
+
+[[group.key]]
+keys = "super + tab"
+bind = ["SUPER + Tab"]
+what = "voltar para a workspace de antes"
+
+[[group.key]]
+keys = "super + s"
+bind = ["SUPER + S"]
+what = "mostrar ou esconder o scratchpad"
+
+[[group.key]]
+keys = "super + shift + s"
+bind = ["SUPER + SHIFT + S"]
+what = "mandar a janela para o scratchpad"
+
+[[group]]
+id = "visual"
+name = "visual"
+blurb = "Troque o clima do desktop sem abrir nenhuma configuração."
+
+[[group.key]]
+keys = "super + F1"
+bind = ["SUPER + F1"]
+what = "claro ou escuro"
+
+[[group.key]]
+keys = "super + F2"
+bind = ["SUPER + F2"]
+what = "próximo acento"
+
+[[group.key]]
+keys = "super + F3"
+bind = ["SUPER + F3"]
+what = "movimento: completo, reduzido ou desligado"
+
+[[group.key]]
+keys = "super + F4"
+bind = ["SUPER + F4"]
+what = "escolher o papel de parede, com prévia"
+
+[[group.key]]
+keys = "super + shift + F4"
+bind = ["SUPER + SHIFT + F4"]
+what = "próximo papel de parede"
+
+[[group.key]]
+keys = "super + F9"
+bind = ["SUPER + F9"]
+what = "central do sistema: tudo isso e mais"
+
+[[group.key]]
+keys = "super + F10"
+bind = ["SUPER + F10"]
+what = "este guia, de volta"
+
+[[group]]
+id = "capturas"
+name = "capturas e sessão"
+blurb = "As capturas vão para o clipboard e para ~/Imagens."
+
+[[group.key]]
+keys = "print"
+bind = ["Print"]
+what = "captura de uma região"
+
+[[group.key]]
+keys = "shift + print"
+bind = ["SHIFT + Print"]
+what = "captura da tela inteira"
+
+[[group.key]]
+keys = "ctrl + print"
+bind = ["CTRL + Print"]
+what = "captura da janela em foco"
+
+[[group.key]]
+keys = "super + ctrl + q"
+bind = ["SUPER + CTRL + Q"]
+what = "bloquear a tela"

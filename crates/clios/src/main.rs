@@ -1,11 +1,14 @@
 //! clios: tema, hub e utilitários do desktop feito para o terminal.
 
+mod art;
 mod catalog;
 mod cmd;
 mod ctx;
 mod hub;
 mod sys;
+mod sysinfo;
 mod ui;
+mod welcome;
 
 use std::path::PathBuf;
 use std::process::ExitCode;
@@ -91,6 +94,22 @@ enum Command {
         #[command(subcommand)]
         command: AppsCommand,
     },
+    /// O guia de boas-vindas e a central do sistema.
+    Welcome {
+        /// Página inicial: início, atalhos, apps, sistema, dicas ou sobre.
+        #[arg(long, short)]
+        page: Option<String>,
+        /// Para o autostart: abre uma janela só se o guia nunca foi visto.
+        #[arg(long)]
+        first_run: bool,
+        #[arg(long, value_name = "LARGURAxALTURA", hide = true)]
+        snapshot: Option<String>,
+        /// Com --snapshot: o item selecionado da página (grupo, categoria, linha ou dica).
+        #[arg(long, hide = true)]
+        select: Option<usize>,
+    },
+    /// O resumo do sistema, com a marca ao lado.
+    Fetch,
     /// Confere o que falta para o desktop funcionar.
     Doctor,
     /// Estado do sistema em JSON, para a barra.
@@ -267,6 +286,10 @@ fn run() -> Result<bool> {
                 return cmd::apps::install(&ctx, &ids, extras, dry_run);
             }
         },
+        Command::Welcome { page, first_run, snapshot, select } => {
+            welcome::run(ctx, welcome::Options { page, first_run, snapshot, select })?
+        }
+        Command::Fetch => cmd::fetch::run(&ctx)?,
         Command::Doctor => return cmd::doctor::run(&ctx),
         Command::Shot { target } => {
             let t = match target {

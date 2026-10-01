@@ -18,5 +18,10 @@ return function(_)
     hl.timer(function()
       hl.exec_cmd("footclient -a clios.scratch")
     end, { timeout = 800, type = "oneshot" })
+
+    -- No primeiro login, o guia de boas-vindas abre sozinho (depois disso, só com SUPER + F10).
+    hl.timer(function()
+      hl.exec_cmd("clios welcome --first-run")
+    end, { timeout = 1800, type = "oneshot" })
   end)
 end
