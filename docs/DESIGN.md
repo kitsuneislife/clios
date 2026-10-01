@@ -31,6 +31,8 @@ Dois modos, um acento. Os neutros são os mesmos nos dois modos, espelhados.
 | `dim` | `#A8A8A8` (8.8:1) | `#4D4D4D` (8.5:1) | texto secundário |
 | `fg` | `#F5F5F5` (19.3:1) | `#0A0A0A` (19.8:1) | texto |
 
+No modo escuro, o preto ANSI (a cor 0 do terminal) é o próprio fundo, `#000000`. Programas que pintam um fundo preto explícito, como o asciiquarium e o cmatrix, não deixam retângulos mais claros na tela.
+
 As razões de contraste são contra `bg`. `surface`, `raised` e `line` ficam de propósito quase invisíveis: a hierarquia vem de linhas e de peso de fonte, sem sombras nem gradientes.
 
 ### Acentos

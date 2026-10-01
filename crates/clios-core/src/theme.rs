@@ -23,6 +23,8 @@ pub struct Theme {
     pub accents: Vec<Swatch>,
     /// Onde mora o estado do usuário (para templates que apontam para arquivos gerados, como o papel de parede).
     pub state_dir: String,
+    /// O estilo de prompt escolhido (`minimal`, `dev`, `zen`): o template do starship decide o formato por ele.
+    pub prompt: String,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -184,6 +186,7 @@ impl Theme {
             c,
             accents,
             state_dir: "~/.local/state/clios".into(),
+            prompt: "minimal".into(),
         })
     }
 }

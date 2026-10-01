@@ -13,11 +13,13 @@ Preto no branco e branco no preto, mais um acento que você escolhe. Uma fonte s
 
 ## O que tem aqui
 
-- **`clios`**, um binário em Rust, com os comandos do sistema: `theme`, `hub`, `open`, `sync`, `shot`, `status`, `motion`, `doctor`, e, desde a V0.2, `welcome`, `wallpaper`, `apps`, `update`, `fetch`, `caffeine`, `night`, `dnd`, `rec`, `pick`, `power` e `saver`.
+- **`clios`**, um binário em Rust, com os comandos do sistema: `theme`, `hub`, `open`, `sync`, `shot`, `status`, `motion`, `doctor`, e, desde a V0.2, `welcome`, `wallpaper`, `apps`, `update`, `fetch`, `caffeine`, `night`, `dnd`, `rec`, `pick`, `power` e `saver`, e, na V0.3, `prompt`, `greet`, `play`, `focus`, `ocr`, `notifs`, `keys` e `self-update`.
 - **Tokens de design** (`tokens/tokens.toml`) que controlam cor, movimento e tipografia. Hyprland, Quickshell, foot, helix, fish, btop, yazi, lazygit, mpv e a tela de bloqueio leem os mesmos valores. Trocar o acento ou o modo muda tudo junto, e os terminais abertos mudam na hora.
 - **O hub**, um lançador que roda dentro de um terminal (`SUPER + espaço`): apps, TUIs, ações, janelas abertas, atalhos e histórico da área de transferência numa busca só. Com `+`, ele mostra os apps curados que faltam e instala com Enter.
 - **O guia de boas-vindas** (`clios welcome`, `SUPER + F10`): primeiros passos ao vivo, atalhos desenhados como teclas, o catálogo de apps, a central do sistema, dicas e o sobre. Abre sozinho no primeiro login.
-- **Mais de cinquenta apps de terminal** curados, em dez categorias, com descrição e dica de uso; os essenciais já vêm, o resto instala sob demanda.
+- **44 apps de terminal** curados, em dez categorias, com descrição e dica de uso; os essenciais já vêm, o resto instala sob demanda. A regra é um app por trabalho, e um teste a faz valer.
+- **Um terminal que se apresenta, mas só às vezes**: o resumo do sistema (fastfetch, com a marca) no primeiro terminal depois de ligar, duas linhas discretas na primeira vez que uma workspace vazia recebe um, e silêncio no resto do tempo. O prompt tem três estilos (`clios prompt`).
+- **Brinquedos que entram no sistema**: cbonsai, aquário, tubulações, lava, sakura, chuva digital, relógio e mais. Revezam na proteção de tela, na cor mais perto do seu acento, e `SUPER + Z` abre um ao acaso.
 - **Papel de parede que segue o tema**: oito estilos gerados em Rust com as cores do acento, mais as suas imagens (`SUPER + F4`).
 - **Configuração do Hyprland em Lua**, com todos os atalhos documentados (`SUPER + /` lista todos), e **uma shell em Quickshell** (barra, OSD, notificações, papel de parede).
 - **Instalação**: `scripts/bootstrap.sh` sobre um Arch mínimo, e um perfil de ISO ao vivo.
@@ -32,7 +34,7 @@ Preto no branco e branco no preto, mais um acento que você escolhe. Uma fonte s
 
 Leia isto antes de instalar.
 
-**Testado** (234 testes de Rust, mais os validadores abaixo, tudo rodando no CI):
+**Testado** (277 testes de Rust, mais os validadores abaixo, tudo rodando no CI):
 
 - Os tokens e o contraste: todo acento e toda cor de texto passa de 4.5:1 nos dois modos, e o build quebra se isso piorar.
 - Os templates de cada app renderizam em 48 combinações (modo × acento × nível de movimento), e JSON e TOML saem válidos.
@@ -44,6 +46,7 @@ Leia isto antes de instalar.
 - Os papéis de parede: cada estilo, os dois modos, a escala por resolução, o recorte do contorno da marca, o PNG de ida e volta e a escolha de monitor.
 - O leitor de notícias do Arch (feed de exemplo, datas RFC 2822, `.pacnew`) e os pequenos liga-desliga (pid, estado, argumentos).
 - O catálogo: ids únicos, descrições completas, pacotes do bootstrap e dos extras separados, instalação com aspas.
+- Os configs gerados valem para os programas de verdade: o `starship` aceita os três estilos de prompt, o `fastfetch` lê a config e o `nft` valida o firewall (o runner roda isso onde os programas estão instalados).
 - Os scripts passam no `shellcheck`, e o `bootstrap.sh` tem `--dry-run`.
 
 **Nunca rodou de verdade**:
@@ -79,11 +82,13 @@ Para experimentar numa VM sem instalar, veja [`iso/`](iso/README.md).
 | `SUPER + F1` / `F2` / `F3` / `F4` | claro ou escuro / próximo acento / movimento / papel de parede |
 | `SUPER + F9` / `F10` | central do sistema / guia de boas-vindas |
 | `SUPER + C / N / D` | modo café / noturno / não perturbe |
-| `SUPER + shift + R`, `SUPER + P`, `SUPER + U` | gravar a tela / conta-gotas / atualizar o sistema |
+| `SUPER + shift + R`, `SUPER + P`, `SUPER + shift + T`, `SUPER + U` | gravar a tela / conta-gotas / copiar texto da tela (OCR) / atualizar o sistema |
+| `SUPER + X` / `SUPER + shift + N` / `SUPER + Z` | foco de 25 minutos / histórico de notificações / um brinquedo |
 | `SUPER + h j k l` | foco; com `shift`, move a janela |
-| `SUPER + 1…0` | workspaces |
+| `SUPER + 1…0` / `SUPER + shift + 1…0` | ir para a workspace / mandar a janela para ela |
+| `SUPER + Q` | fechar a janela |
 | `SUPER + E / G / A / I` | arquivos / git / áudio / rede |
-| `Print` | captura de região (salva, copia e avisa) |
+| `Print` ou `SUPER + shift + S` | captura de região (salva, copia e avisa) |
 
 A lista completa, gerada do próprio config, está em [`docs/KEYS.md`](docs/KEYS.md).
 
@@ -97,6 +102,14 @@ clios apps list --missing                 # os apps curados que ainda não estã
 clios apps install --extras               # instala todos os recomendados
 clios update                              # lê as notícias do Arch e atualiza
 clios fetch                               # o resumo do sistema, com a marca
+clios prompt dev                          # prompt de duas linhas (minimal, dev, zen)
+clios greet --mode boot                   # o terminal só se apresenta ao ligar
+clios play                                # um brinquedo ao acaso, na cor do seu acento
+clios saver set bonsai                    # a proteção de tela (auto, marca, off ou um brinquedo)
+clios focus 50                            # 50 minutos em silêncio, com contagem na barra
+clios ocr                                 # copia o texto de uma região da tela
+clios keys captura                        # os atalhos, no terminal
+clios self-update                         # atualiza o próprio CLIOS
 ```
 
 Para mudar o catálogo do hub (as TUIs que aparecem), copie `config/clios/hub.toml` para `~/.config/clios/hub.toml`. Monitores e teclado ficam em `~/.config/hypr/user.lua` (há um `user.lua.example`).
@@ -124,9 +137,10 @@ tokens/        a fonte única de design
 templates/     um template (minijinja) por app, e o manifesto que os liga
 config/        dotfiles estáticos, ligados por symlink em ~/.config
 seed/          arquivos que o app reescreve (btop): copiados uma vez
-system/        arquivos de /etc (greetd, iwd, zram, sysctl)
+system/        arquivos de /etc (greetd, iwd, zram, sysctl, nftables)
 crates/        clios-core (tokens, tema, sync) e clios (a CLI e o hub)
 brand/         marca e wordmark em SVG, e o script que os gera
+site/          a página do projeto (GitHub Pages), gerada do catálogo, dos atalhos e do changelog
 iso/           perfil da ISO ao vivo
 scripts/       bootstrap.sh
 tests/         validadores de Hyprland (Lua) e de Quickshell (QML), e o runner
@@ -148,6 +162,7 @@ O runner executa `rustfmt`, `clippy`, os testes de Rust, os validadores de Lua e
 - [`docs/DESIGN.md`](docs/DESIGN.md): a identidade: marca, cor, tipografia, forma e movimento.
 - [`docs/KEYS.md`](docs/KEYS.md): atalhos.
 - [`CHANGELOG.md`](CHANGELOG.md): o que mudou em cada versão.
+- [`site/`](site/): a página do projeto, publicada no GitHub Pages.
 - [`docs/identidade.html`](docs/identidade.html): a identidade ao vivo. Abra no navegador, troque modo, acento e movimento, e use o hub dentro do desktop ilustrado.
 
 ## Roteiro
@@ -156,6 +171,7 @@ O runner executa `rustfmt`, `clippy`, os testes de Rust, os validadores de Lua e
 - Um instalador, para não depender do `archinstall`.
 - Papel de parede animado (o cursor da marca já pisca na proteção de tela; falta o fundo).
 - Tema para o Firefox (`userChrome.css` gerado dos tokens).
+- Atalhos para mover foco e janelas entre monitores (a API de monitor do Hyprland em Lua ainda não foi conferida).
 
 ## Licença
 

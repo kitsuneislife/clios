@@ -1,0 +1,48 @@
+name: pages
+
+# Publica site/ no GitHub Pages. Uma vez só, em Settings > Pages, escolha "Source: GitHub Actions".
+# O index.html é gerado do catálogo, dos atalhos, dos tokens e do CHANGELOG: o job confere que o commitado está em dia
+# e publica o que o build gera, então a página nunca fica atrás do repositório.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "site/**"
+      - "CHANGELOG.md"
+      - "config/clios/**"
+      - "tokens/**"
+      - "docs/KEYS.md"
+      - "docs/img/**"
+      - "brand/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-24.04
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: gerar a página
+        run: python3 site/build.py
+      - name: o index.html commitado estava em dia?
+        run: git diff --exit-code -- site/index.html || echo "::warning::site/index.html estava desatualizado; publicando a versão gerada agora"
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deploy
+        uses: actions/deploy-pages@v4

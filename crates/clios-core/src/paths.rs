@@ -44,6 +44,11 @@ impl Paths {
         Ok(Self { root, home, config, state, data })
     }
 
+    /// ~/.local/share (o pai de `data`): onde o xdg procura os .desktop do usuário.
+    pub fn xdg_data_home(&self) -> PathBuf {
+        self.data.parent().map_or_else(|| self.home.join(".local/share"), Path::to_path_buf)
+    }
+
     pub fn tokens_file(&self) -> PathBuf {
         self.root.join("tokens/tokens.toml")
     }

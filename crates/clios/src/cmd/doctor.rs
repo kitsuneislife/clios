@@ -54,8 +54,11 @@ const RECOMMENDED: &[Check] = &[
     Check { bin: "paru", why: "instalar apps do AUR (o hub e o clios apps usam)" },
     Check { bin: "hyprpicker", why: "conta-gotas (super + p)" },
     Check { bin: "hyprsunset", why: "modo noturno (super + n)" },
+    Check { bin: "tesseract", why: "copiar o texto de uma região da tela (super + shift + t)" },
     Check { bin: "wf-recorder", why: "gravar a tela (super + shift + r)" },
     Check { bin: "atuin", why: "histórico do shell com busca (ctrl + r)" },
+    Check { bin: "fastfetch", why: "o resumo do sistema que o terminal mostra ao ligar" },
+    Check { bin: "udiskie", why: "montar pendrives e discos externos sozinho" },
     Check { bin: "powerprofilesctl", why: "perfil de energia na central do sistema" },
 ];
 
@@ -66,6 +69,7 @@ const OPTIONAL: &[Check] = &[
     Check { bin: "firefox", why: "a única exceção gráfica: o navegador" },
     Check { bin: "zathura", why: "PDF" },
     Check { bin: "imv", why: "imagens" },
+    Check { bin: "cbonsai", why: "um brinquedo para a proteção de tela e o super + z" },
 ];
 
 fn has_font(family: &str) -> Option<bool> {

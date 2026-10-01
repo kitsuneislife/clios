@@ -79,6 +79,7 @@ pub fn steps(state: &State, p: &Probes) -> Vec<Step> {
             done: Some(p.aur_helper && p.extras_missing == 0),
         },
         Step { title: "veja todos os atalhos", keys: "super + /", done: None },
+        Step { title: "espaireça com um brinquedo", keys: "super + z", done: None },
     ]
 }
 

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Arquivos (yazi)
+Comment=Abre a pasta no yazi, numa janela de terminal
+Exec=footclient -a clios.tui.files yazi %f
+Terminal=false
+NoDisplay=true
+Categories=System;FileManager;
+MimeType=inode/directory;

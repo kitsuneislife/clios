@@ -1,0 +1,43 @@
+// Gerado por `clios theme apply`. Não edite.
+// O fastfetch do CLIOS: poucas linhas, o acento só nos rótulos, a marca ao lado.
+// Quem chama é o `clios fetch`; ele também desenha a marca em {{ state_dir }}/fetch-logo.ansi.
+{
+  "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+  "logo": {
+    "type": "file-raw",
+    "source": "{{ state_dir }}/fetch-logo.ansi",
+    "padding": { "top": 1, "left": 2, "right": 4 }
+  },
+  "display": {
+    "separator": "  ",
+    "key": { "width": 10 },
+    "color": {
+      "keys": "38;2;{{ c.accent | semi }}",
+      "title": "1;38;2;{{ c.fg | semi }}",
+      "separator": "38;2;{{ c.mute | semi }}",
+      "output": "38;2;{{ c.dim | semi }}"
+    },
+    "bar": { "char": { "elapsed": "▰", "total": "▱" }, "width": 10 },
+    "percent": { "type": 9 }
+  },
+  "modules": [
+    "break",
+    "title",
+    { "type": "custom", "format": "─────────────────────", "outputColor": "38;2;{{ c.mute | semi }}" },
+    { "type": "os", "key": "os", "format": "{name}" },
+    { "type": "kernel", "key": "kernel", "format": "{release}" },
+    { "type": "uptime", "key": "uptime" },
+    { "type": "packages", "key": "pacotes", "format": "{pacman}" },
+    { "type": "command", "key": "shell", "text": "basename \"${SHELL:-fish}\"" },
+    { "type": "wm", "key": "wm", "format": "{pretty-name}" },
+    { "type": "terminal", "key": "terminal", "format": "{pretty-name}" },
+    { "type": "cpu", "key": "cpu", "format": "{name}" },
+    { "type": "gpu", "key": "gpu", "format": "{name}" },
+    { "type": "memory", "key": "memória", "format": "{used} / {total}" },
+    { "type": "disk", "key": "disco", "folders": "/", "format": "{size-used} / {size-total}" },
+    { "type": "battery", "key": "bateria", "format": "{capacity}% {status}" },
+    { "type": "custom", "key": "tema", "format": "{{ accent_name }} · {{ mode }} · movimento {{ motion.level }}" },
+    "break",
+    { "type": "colors", "symbol": "block", "paddingLeft": 0 }
+  ]
+}

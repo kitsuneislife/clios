@@ -1,0 +1,46 @@
+# CLIOS · o que abre cada tipo de arquivo (xdg-open, o `open` do fish, links no terminal, o yazi).
+# Texto e pastas abrem nos apps de terminal (config/applications/*.desktop); o resto, no app mais leve que serve.
+# Para trocar um, edite aqui: a linha é `tipo=app.desktop`.
+
+[Default Applications]
+inode/directory=clios-files.desktop
+text/plain=clios-edit.desktop
+text/markdown=clios-edit.desktop
+text/x-shellscript=clios-edit.desktop
+text/x-python=clios-edit.desktop
+text/x-rust=clios-edit.desktop
+text/x-csrc=clios-edit.desktop
+text/x-chdr=clios-edit.desktop
+text/x-c++src=clios-edit.desktop
+text/x-log=clios-edit.desktop
+text/csv=clios-edit.desktop
+text/x-toml=clios-edit.desktop
+application/json=clios-edit.desktop
+application/x-yaml=clios-edit.desktop
+application/toml=clios-edit.desktop
+application/x-shellscript=clios-edit.desktop
+application/xml=clios-edit.desktop
+text/xml=clios-edit.desktop
+application/pdf=org.pwmt.zathura.desktop
+application/epub+zip=org.pwmt.zathura.desktop
+image/png=imv.desktop
+image/jpeg=imv.desktop
+image/gif=imv.desktop
+image/webp=imv.desktop
+image/avif=imv.desktop
+image/bmp=imv.desktop
+image/svg+xml=imv.desktop
+video/mp4=mpv.desktop
+video/x-matroska=mpv.desktop
+video/webm=mpv.desktop
+video/quicktime=mpv.desktop
+video/x-msvideo=mpv.desktop
+audio/mpeg=mpv.desktop
+audio/flac=mpv.desktop
+audio/ogg=mpv.desktop
+audio/x-wav=mpv.desktop
+audio/mp4=mpv.desktop
+text/html=firefox.desktop
+x-scheme-handler/http=firefox.desktop
+x-scheme-handler/https=firefox.desktop
+x-scheme-handler/mailto=clios-mail.desktop

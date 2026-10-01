@@ -31,6 +31,7 @@ impl Ctx {
     pub fn theme_for(&self, state: &State) -> Result<Theme> {
         let mut theme = Theme::resolve(&self.tokens, state.mode, &state.accent, state.motion)?;
         theme.state_dir = self.paths.state.display().to_string();
+        theme.prompt = state.prompt.id().to_string();
         Ok(theme)
     }
 

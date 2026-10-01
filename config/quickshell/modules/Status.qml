@@ -4,7 +4,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-// O estado do sistema que a barra mostra: rede e os liga-desliga (café, noturno, não perturbe, gravação).
+// O estado do sistema que a barra mostra: rede e os liga-desliga (café, noturno, não perturbe, gravação, foco).
 // `clios status all` (Rust) lê /sys, /proc e os arquivos de estado; a barra só pergunta a cada 2 s.
 // Não usa o módulo de rede do Quickshell porque ele exige NetworkManager, e aqui o wi-fi é do iwd.
 Singleton {
@@ -14,6 +14,7 @@ Singleton {
     property bool night: false
     property bool dnd: false
     property bool rec: false
+    property int focusLeft: 0           // segundos que faltam do bloco de foco; 0 sem bloco
 
     Process {
         id: poll
@@ -28,6 +29,7 @@ Singleton {
                     night = j.night
                     dnd = j.dnd
                     rec = j.rec
+                    focusLeft = j.focus || 0
                 } catch (e) {
                     // mantém o último estado conhecido
                 }

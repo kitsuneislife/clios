@@ -5,6 +5,8 @@
 # Para ter o seu: copie para ~/.config/clios/hub.toml e edite.
 #
 #   id        nome curto, usado em `clios open <id>` e nos atalhos do Hyprland
+#   job       o trabalho que o app faz, em uma palavra-chave. Dois apps não podem ter o mesmo `job`:
+#             se um segundo faz a mesma coisa, ou ele é melhor e substitui o primeiro, ou não entra
 #   name      como aparece (minúsculas, em português)
 #   cmd       o comando
 #   pkg       pacote(s) do Arch ou do AUR (o `paru` resolve os dois), separados por espaço
@@ -15,12 +17,16 @@
 #   tier      core (vem instalado) | extra (instala sob demanda)
 #   float     abre numa janela flutuante e centralizada
 #   hold      espera um Enter antes de fechar (para comandos que só imprimem)
+#   saver     (diversão) como rodar de proteção de tela e no `clios play`. Marcadores de cor, trocados pelo tema:
+#             {color} nome ANSI mais perto do acento, {n} o número dele, {hex} e {hexdim} o acento em RRGGBB
+#             (inteiro e recuado), {palette} a paleta do csakura que combina com ele
 #
 # Apps gráficos (.desktop) aparecem sozinhos; não precisa listar.
 
 # ── arquivos ────────────────────────────────────────────────────────────────
 [[tui]]
 id = "files"
+job = "arquivos"
 name = "arquivos"
 cmd = ["yazi"]
 pkg = "yazi"
@@ -32,6 +38,7 @@ keywords = "yazi files fm pastas gerenciador explorer"
 
 [[tui]]
 id = "disk"
+job = "espaço-em-disco"
 name = "disco"
 cmd = ["gdu"]
 pkg = "gdu"
@@ -42,21 +49,10 @@ desc = "mostra o que está ocupando espaço, das maiores pastas para as menores"
 tip = "d apaga o item selecionado; ? mostra todas as teclas"
 keywords = "gdu ncdu espaco armazenamento du tamanho"
 
-[[tui]]
-id = "find"
-name = "busca"
-cmd = ["tv"]
-pkg = "television"
-bin = "tv"
-category = "arquivos"
-float = true
-desc = "busca difusa em arquivos, repositórios git, variáveis, o que você quiser"
-tip = "ctrl + t troca de canal"
-keywords = "television tv fuzzy finder procurar fzf"
-
 # ── código ──────────────────────────────────────────────────────────────────
 [[tui]]
 id = "editor"
+job = "editor"
 name = "editor"
 cmd = ["hx"]
 pkg = "helix"
@@ -68,6 +64,7 @@ keywords = "helix hx edit code texto programar"
 
 [[tui]]
 id = "git"
+job = "git"
 name = "git"
 cmd = ["lazygit"]
 pkg = "lazygit"
@@ -79,6 +76,7 @@ keywords = "lazygit commit repo repositorio versionamento"
 
 [[tui]]
 id = "docker"
+job = "contêineres"
 name = "docker"
 cmd = ["lazydocker"]
 pkg = "lazydocker"
@@ -89,6 +87,7 @@ keywords = "lazydocker containers conteineres compose"
 
 [[tui]]
 id = "api"
+job = "api-http"
 name = "api"
 cmd = ["atac"]
 pkg = "atac"
@@ -99,6 +98,7 @@ keywords = "atac http rest postman insomnia requisicoes"
 
 [[tui]]
 id = "db"
+job = "banco-de-dados"
 name = "banco"
 cmd = ["rainfrog"]
 pkg = "rainfrog"
@@ -110,6 +110,7 @@ keywords = "rainfrog sql postgres mysql sqlite database dados"
 # ── sistema ─────────────────────────────────────────────────────────────────
 [[tui]]
 id = "monitor"
+job = "monitor-do-sistema"
 name = "monitor"
 cmd = ["btop"]
 pkg = "btop"
@@ -122,6 +123,7 @@ keywords = "btop cpu memoria ram processos top htop sistema"
 
 [[tui]]
 id = "audio"
+job = "mixer-de-áudio"
 name = "áudio"
 cmd = ["wiremix"]
 pkg = "wiremix"
@@ -134,6 +136,7 @@ keywords = "wiremix volume som pipewire mixer audio saida entrada"
 
 [[tui]]
 id = "logs"
+job = "logs"
 name = "logs"
 cmd = ["sh", "-c", "journalctl --no-pager -b -n 20000 -o short-iso | lnav"]
 pkg = "lnav"
@@ -146,6 +149,7 @@ keywords = "lnav journal journalctl log erro depurar"
 
 [[tui]]
 id = "calc"
+job = "calculadora"
 name = "calculadora"
 cmd = ["fend"]
 pkg = "fend"
@@ -159,6 +163,7 @@ keywords = "fend calculadora conta unidades converter"
 # ── rede ────────────────────────────────────────────────────────────────────
 [[tui]]
 id = "network"
+job = "wifi"
 name = "rede"
 cmd = ["impala"]
 pkg = "impala"
@@ -171,6 +176,7 @@ keywords = "impala wifi wi-fi wireless internet network conectar"
 
 [[tui]]
 id = "bluetooth"
+job = "bluetooth"
 name = "bluetooth"
 cmd = ["bluetui"]
 pkg = "bluetui"
@@ -182,18 +188,8 @@ tip = "s procura dispositivos"
 keywords = "bluetui bt fone headset pareamento"
 
 [[tui]]
-id = "signal"
-name = "sinal wi-fi"
-cmd = ["wavemon"]
-pkg = "wavemon"
-category = "rede"
-float = true
-desc = "mede a força do sinal em tempo real, bom para achar o melhor lugar da casa"
-tip = "F2 mostra as redes ao redor"
-keywords = "wavemon wifi sinal potencia antena"
-
-[[tui]]
 id = "traffic"
+job = "tráfego-por-app"
 name = "tráfego"
 cmd = ["sudo", "bandwhich"]
 bin = "bandwhich"
@@ -206,6 +202,7 @@ keywords = "bandwhich banda rede consumo conexoes"
 
 [[tui]]
 id = "route"
+job = "rota-de-rede"
 name = "rota"
 cmd = ["sh", "-c", "printf 'host: '; read -r h; trip \"$h\""]
 bin = "trip"
@@ -218,6 +215,7 @@ keywords = "trippy trip traceroute ping mtr latencia"
 
 [[tui]]
 id = "ssh"
+job = "ssh"
 name = "ssh"
 cmd = ["sshs"]
 pkg = "sshs"
@@ -228,6 +226,7 @@ keywords = "sshs servidor remoto conectar"
 
 [[tui]]
 id = "transfer"
+job = "transferência-de-arquivos"
 name = "transferir"
 cmd = ["termscp"]
 pkg = "termscp"
@@ -239,6 +238,7 @@ keywords = "termscp scp sftp ftp copiar enviar"
 # ── mídia ───────────────────────────────────────────────────────────────────
 [[tui]]
 id = "music"
+job = "música-streaming"
 name = "música"
 cmd = ["spotify_player"]
 pkg = "spotify-player"
@@ -252,6 +252,7 @@ keywords = "spotify player musica tocar playlist"
 
 [[tui]]
 id = "local-music"
+job = "música-local"
 name = "música local"
 cmd = ["kew"]
 pkg = "kew"
@@ -263,10 +264,11 @@ keywords = "kew mp3 flac biblioteca album local"
 
 [[tui]]
 id = "visualizer"
+job = "visual-do-áudio"
 name = "visualizador"
 cmd = ["cava"]
 pkg = "cava"
-category = "midia"
+category = "diversao"
 float = true
 desc = "barras que dançam com o som que está tocando"
 tip = "q sai; as cores seguem o acento do tema"
@@ -274,6 +276,7 @@ keywords = "cava audio espectro visualizer barras"
 
 [[tui]]
 id = "anime"
+job = "anime"
 name = "anime"
 cmd = ["ani-cli"]
 pkg = "ani-cli"
@@ -284,17 +287,8 @@ tip = "escolha o título, depois o episódio; q volta"
 keywords = "ani-cli assistir episodio mpv animes"
 
 [[tui]]
-id = "movies"
-name = "filmes"
-cmd = ["lobster"]
-pkg = "lobster"
-category = "midia"
-desc = "procura filmes e séries e toca no mpv, no mesmo estilo do ani-cli"
-tip = "digite o título e escolha na lista"
-keywords = "lobster filmes series cinema assistir"
-
-[[tui]]
 id = "manga"
+job = "mangá"
 name = "mangá"
 cmd = ["manga-tui"]
 pkg = "manga-tui"
@@ -305,6 +299,7 @@ keywords = "manga-tui mangadex ler quadrinhos hq"
 
 [[tui]]
 id = "youtube"
+job = "youtube"
 name = "youtube"
 cmd = ["ytfzf"]
 pkg = "ytfzf"
@@ -316,6 +311,7 @@ keywords = "ytfzf youtube videos yt-dlp assistir"
 # ── ler ─────────────────────────────────────────────────────────────────────
 [[tui]]
 id = "feeds"
+job = "rss"
 name = "feeds"
 cmd = ["newsboat"]
 pkg = "newsboat"
@@ -327,6 +323,7 @@ keywords = "newsboat rss noticias atom leitor blogs"
 
 [[tui]]
 id = "markdown"
+job = "markdown"
 name = "markdown"
 cmd = ["glow"]
 pkg = "glow"
@@ -339,6 +336,7 @@ keywords = "glow md readme documentacao"
 
 [[tui]]
 id = "slides"
+job = "slides"
 name = "apresentação"
 cmd = ["sh", "-c", "printf 'arquivo .md: '; read -r f; presenterm \"$f\""]
 bin = "presenterm"
@@ -348,20 +346,10 @@ desc = "slides a partir de um arquivo markdown, com código, imagens e temas"
 tip = "setas ou espaço avançam; ctrl + c sai"
 keywords = "presenterm slides apresentacao palestra powerpoint"
 
-[[tui]]
-id = "cheats"
-name = "colas"
-cmd = ["navi"]
-pkg = "navi"
-category = "ler"
-float = true
-desc = "cheatsheets interativos: acha o comando certo e já preenche os argumentos"
-tip = "ctrl + g abre o navi a partir do shell"
-keywords = "navi cheatsheet colas comandos lembrar"
-
 # ── conversar ───────────────────────────────────────────────────────────────
 [[tui]]
 id = "mail"
+job = "email"
 name = "e-mail"
 cmd = ["aerc"]
 pkg = "aerc"
@@ -373,6 +361,7 @@ keywords = "aerc email correio mensagens gmail"
 
 [[tui]]
 id = "irc"
+job = "chat-irc"
 name = "irc"
 cmd = ["weechat"]
 pkg = "weechat"
@@ -383,6 +372,7 @@ keywords = "weechat irc chat canais libera"
 
 [[tui]]
 id = "matrix"
+job = "chat-matrix"
 name = "matrix"
 cmd = ["iamb"]
 pkg = "iamb"
@@ -393,6 +383,7 @@ keywords = "iamb matrix element chat salas"
 
 [[tui]]
 id = "chat"
+job = "chat-telegram-whatsapp"
 name = "telegram"
 cmd = ["nchat"]
 pkg = "nchat"
@@ -403,6 +394,7 @@ keywords = "nchat telegram whatsapp mensagens conversas"
 
 [[tui]]
 id = "mastodon"
+job = "fediverso"
 name = "mastodon"
 cmd = ["toot", "tui"]
 pkg = "toot"
@@ -415,6 +407,7 @@ keywords = "toot mastodon fediverso timeline"
 # ── produtividade ───────────────────────────────────────────────────────────
 [[tui]]
 id = "agenda"
+job = "agenda"
 name = "agenda"
 cmd = ["calcurse"]
 pkg = "calcurse"
@@ -425,6 +418,7 @@ keywords = "calcurse calendario compromissos agenda eventos"
 
 [[tui]]
 id = "tasks"
+job = "tarefas"
 name = "tarefas"
 cmd = ["taskwarrior-tui"]
 pkg = "taskwarrior-tui task"
@@ -435,6 +429,7 @@ keywords = "taskwarrior todo tarefas projetos prazos"
 
 [[tui]]
 id = "habits"
+job = "hábitos"
 name = "hábitos"
 cmd = ["dijo"]
 pkg = "dijo"
@@ -446,6 +441,7 @@ keywords = "dijo habitos rotina streak"
 # ── pacotes ─────────────────────────────────────────────────────────────────
 [[tui]]
 id = "packages"
+job = "busca-de-pacotes"
 name = "pacotes"
 cmd = ["pacseek"]
 pkg = "pacseek"
@@ -457,6 +453,7 @@ keywords = "pacseek pacman aur instalar procurar apps loja"
 
 [[tui]]
 id = "welcome"
+job = "guia"
 name = "boas-vindas"
 cmd = ["clios", "welcome"]
 bin = "clios"
@@ -470,6 +467,7 @@ keywords = "welcome guia ajuda help tutorial comecar inicio"
 
 [[tui]]
 id = "central"
+job = "ajustes"
 name = "central do sistema"
 cmd = ["clios", "welcome", "--page", "sistema"]
 bin = "clios"
@@ -482,7 +480,23 @@ tip = "← e → mudam o valor na hora, em todos os apps"
 keywords = "settings configuracoes config tema ajustes controle"
 
 [[tui]]
+id = "notifs"
+job = "histórico-de-notificações"
+name = "notificações"
+cmd = ["clios", "notifs"]
+bin = "clios"
+pkg = "clios"
+category = "sistema"
+tier = "core"
+float = true
+hold = true
+desc = "o histórico de notificações, inclusive as que o não perturbe silenciou"
+tip = "clios notifs clear apaga tudo"
+keywords = "notifs notificacoes historico avisos perdi dnd"
+
+[[tui]]
 id = "fetch"
+job = "resumo-do-sistema"
 name = "resumo do sistema"
 cmd = ["clios", "fetch"]
 bin = "clios"
@@ -496,6 +510,7 @@ keywords = "neofetch fastfetch info sistema sobre"
 
 [[tui]]
 id = "wallpaper"
+job = "papel-de-parede"
 name = "papel de parede"
 cmd = ["clios", "wallpaper"]
 bin = "clios"
@@ -509,6 +524,7 @@ keywords = "wallpaper fundo background tela imagem"
 
 [[tui]]
 id = "update"
+job = "atualizar"
 name = "atualizar"
 cmd = ["clios", "update"]
 bin = "clios"
@@ -521,11 +537,42 @@ desc = "lê as notícias do Arch antes e atualiza o sistema, avisando dos .pacne
 tip = "se uma notícia pedir intervenção manual, leia antes de continuar"
 keywords = "update upgrade paru pacman atualizar sistema"
 
+[[tui]]
+id = "self-update"
+job = "atualizar-o-clios"
+name = "atualizar o clios"
+cmd = ["clios", "self-update"]
+bin = "clios"
+pkg = "clios"
+category = "pacotes"
+tier = "core"
+float = true
+hold = true
+desc = "puxa as novidades do CLIOS, recompila e sincroniza os arquivos"
+tip = "clios self-update --check só diz se há novidades"
+keywords = "self update clios atualizar versao novidades git pull"
+
 # ── diversão ────────────────────────────────────────────────────────────────
 [[tui]]
+id = "play"
+job = "brinquedo-ao-acaso"
+name = "brincar"
+cmd = ["sh", "-c", "clios play || { printf '\\n\\033[2m↵ fechar\\033[0m'; read _; }"]
+bin = "clios"
+pkg = "clios"
+category = "diversao"
+tier = "core"
+float = true
+desc = "sorteia um dos brinquedos instalados, na cor do seu acento"
+tip = "q sai; clios play --list mostra todos, e clios play bonsai abre um específico"
+keywords = "play brincar relaxar espairecer aleatorio sorte"
+
+[[tui]]
 id = "bonsai"
+job = "decoração-árvore"
 name = "bonsai"
 cmd = ["cbonsai", "-li"]
+saver = ["cbonsai", "-li", "-t", "0.04", "-w", "8"]
 pkg = "cbonsai"
 bin = "cbonsai"
 category = "diversao"
@@ -536,8 +583,10 @@ keywords = "cbonsai arvore relaxar zen"
 
 [[tui]]
 id = "aquarium"
+job = "decoração-aquário"
 name = "aquário"
 cmd = ["asciiquarium"]
+saver = ["asciiquarium"]
 pkg = "asciiquarium"
 category = "diversao"
 float = true
@@ -547,20 +596,24 @@ keywords = "asciiquarium peixes aquario"
 
 [[tui]]
 id = "matrix-rain"
+job = "decoração-chuva"
 name = "chuva digital"
-cmd = ["cmatrix", "-ab"]
+cmd = ["cmatrix", "-ab", "-C", "{color}"]
+saver = ["cmatrix", "-ab", "-C", "{color}"]
 pkg = "cmatrix"
 bin = "cmatrix"
 category = "diversao"
 float = true
-desc = "a chuva de caracteres verdes do filme, sem precisar de pílula"
+desc = "a chuva de caracteres do filme, na cor do seu acento, sem precisar de pílula"
 tip = "q sai"
 keywords = "cmatrix matrix chuva hacker"
 
 [[tui]]
 id = "genact"
+job = "decoração-atividade"
 name = "hacker"
 cmd = ["genact"]
+saver = ["genact"]
 pkg = "genact"
 category = "diversao"
 float = true
@@ -569,7 +622,61 @@ tip = "ctrl + c sai"
 keywords = "genact fake hacker simular atividade"
 
 [[tui]]
+id = "lava"
+job = "decoração-lava"
+name = "lâmpada de lava"
+cmd = ["lavat", "-g", "-c", "{hex}", "-k", "{hexdim}"]
+saver = ["lavat", "-g", "-c", "{hex}", "-k", "{hexdim}"]
+pkg = "lavat-git"
+bin = "lavat"
+category = "diversao"
+float = true
+desc = "uma lâmpada de lava feita de metabolas, num gradiente do seu acento"
+tip = "ctrl + c sai"
+keywords = "lavat lava lamp lampada metabolas relaxar"
+
+[[tui]]
+id = "sakura"
+job = "decoração-pétalas"
+name = "sakura"
+cmd = ["csakura", "-c", "{palette}", "-H", "none"]
+saver = ["csakura", "-c", "{palette}", "-H", "none"]
+pkg = "csakura"
+category = "diversao"
+float = true
+desc = "uma cerejeira que cresce sozinha e solta pétalas, na paleta do seu acento"
+tip = "r planta outra árvore; c troca a paleta; q sai"
+keywords = "csakura cerejeira petalas flor arvore japao"
+
+[[tui]]
+id = "pipes"
+job = "decoração-tubos"
+name = "tubulações"
+cmd = ["pipes.sh", "-p", "3", "-c", "{n}"]
+saver = ["pipes.sh", "-p", "3", "-c", "{n}"]
+pkg = "pipes.sh"
+category = "diversao"
+float = true
+desc = "canos que crescem pela tela e se cruzam, como o clássico protetor do Windows"
+tip = "q sai"
+keywords = "pipes tubos canos screensaver classico"
+
+[[tui]]
+id = "clock"
+job = "relógio"
+name = "relógio"
+cmd = ["tty-clock", "-s", "-c", "-B", "-C", "{n}"]
+saver = ["tty-clock", "-s", "-c", "-B", "-C", "{n}"]
+pkg = "tty-clock"
+category = "diversao"
+float = true
+desc = "um relógio grande no centro da tela, com segundos"
+tip = "q sai; s mostra ou esconde os segundos"
+keywords = "tty-clock relogio hora tempo"
+
+[[tui]]
 id = "terminal"
+job = "terminal"
 name = "terminal"
 cmd = ["fish"]
 pkg = "fish"

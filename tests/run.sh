@@ -39,7 +39,7 @@ else
 fi
 
 if command -v shellcheck >/dev/null; then
-  step "shellcheck" shellcheck scripts/bootstrap.sh iso/build.sh iso/airootfs/usr/local/bin/clios-live-setup tests/run.sh
+  step "shellcheck" shellcheck scripts/bootstrap.sh iso/build.sh iso/airootfs/usr/local/bin/clios-live-setup tests/run.sh tests/tools/toyshots.sh
 else
   skip "shellcheck" "pip install shellcheck-py"
 fi
@@ -55,6 +55,45 @@ if command -v fish >/dev/null; then
   rm -rf "$render_dir"
 else
   skip "fish" "instale o fish"
+fi
+
+step "site: index.html em dia com o catálogo, os atalhos e o changelog" "$PY" site/build.py --check
+
+# Os configs gerados valem para os programas de verdade? Só roda onde eles estão instalados.
+if command -v starship >/dev/null; then
+  cfg_dir="$(mktemp -d)"
+  # shellcheck disable=SC2016
+  step "starship: os três estilos de prompt são aceitos" bash -c '
+    set -e
+    for style in minimal dev zen; do
+      ./target/debug/clios --root . --home "$1" prompt "$style" >/dev/null
+      STARSHIP_CONFIG="$1/.config/starship.toml" starship prompt >/dev/null
+      STARSHIP_CONFIG="$1/.config/starship.toml" starship prompt --right >/dev/null
+    done' _ "$cfg_dir"
+  rm -rf "$cfg_dir"
+else
+  skip "starship" "instale o starship"
+fi
+
+if command -v fastfetch >/dev/null; then
+  cfg_dir="$(mktemp -d)"
+  # shellcheck disable=SC2016
+  step "fastfetch: a config gerada é aceita" bash -c '
+    set -e
+    ./target/debug/clios --root . --home "$1" theme apply >/dev/null
+    fastfetch -c "$1/.config/fastfetch/config.jsonc" --pipe >/dev/null' _ "$cfg_dir"
+  rm -rf "$cfg_dir"
+else
+  skip "fastfetch" "instale o fastfetch"
+fi
+
+if ! command -v nft >/dev/null; then
+  skip "nftables" "instale o nftables"
+elif nft -c -f system/etc/nftables.conf 2>&1 | grep -q "Operation not permitted" && ! sudo -n true 2>/dev/null; then
+  skip "nftables" "o nft precisa de privilégio (netlink) neste ambiente"
+else
+  # shellcheck disable=SC2016
+  step "nftables: o firewall é válido" bash -c 'nft -c -f system/etc/nftables.conf 2>/dev/null || sudo -n nft -c -f system/etc/nftables.conf'
 fi
 
 printf '\n\033[1m────────────────────────────────\033[0m\n'

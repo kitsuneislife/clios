@@ -11,6 +11,7 @@ rust-version.workspace = true
 clios-core = { path = "../clios-core" }
 anyhow.workspace = true
 clap.workspace = true
+clap_complete.workspace = true
 nucleo-matcher.workspace = true
 ratatui.workspace = true
 serde.workspace = true

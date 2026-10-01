@@ -167,8 +167,8 @@ bind = ["SUPER + S"]
 what = "mostrar ou esconder o scratchpad"
 
 [[group.key]]
-keys = "super + shift + s"
-bind = ["SUPER + SHIFT + S"]
+keys = "super + ctrl + s"
+bind = ["SUPER + CTRL + S"]
 what = "mandar a janela para o scratchpad"
 
 [[group]]
@@ -232,6 +232,16 @@ bind = ["SUPER + D"]
 what = "não perturbe: silencia as notificações"
 
 [[group.key]]
+keys = "super + x"
+bind = ["SUPER + X"]
+what = "foco de 25 minutos, com contagem na barra"
+
+[[group.key]]
+keys = "super + shift + n"
+bind = ["SUPER + SHIFT + N"]
+what = "histórico de notificações"
+
+[[group.key]]
 keys = "super + shift + r"
 bind = ["SUPER + SHIFT + R"]
 what = "gravar a tela, ou parar a gravação"
@@ -242,14 +252,29 @@ bind = ["SUPER + P"]
 what = "conta-gotas: copia uma cor da tela"
 
 [[group.key]]
+keys = "super + shift + t"
+bind = ["SUPER + SHIFT + T"]
+what = "copia o texto de uma região da tela (OCR)"
+
+[[group.key]]
 keys = "super + u"
 bind = ["SUPER + U"]
 what = "atualizar o sistema, lendo as notícias antes"
+
+[[group.key]]
+keys = "super + z"
+bind = ["SUPER + Z"]
+what = "um brinquedo para espairecer"
 
 [[group]]
 id = "capturas"
 name = "capturas e sessão"
 blurb = "As capturas vão para o clipboard e para ~/Pictures/Screenshots."
+
+[[group.key]]
+keys = "super + shift + s"
+bind = ["SUPER + SHIFT + S"]
+what = "captura de uma região (o mesmo que print)"
 
 [[group.key]]
 keys = "print"

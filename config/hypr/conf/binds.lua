@@ -27,7 +27,7 @@ return function(_)
   bind(M .. " + Return", run("footclient"), "terminal")
   bind(M .. " + SHIFT + Return", run("footclient -a clios.float.term -W 100x30"), "terminal flutuante")
   bind(M .. " + S", hl.dsp.workspace.toggle_special("scratch"), "scratchpad: mostrar ou esconder")
-  bind(M .. " + SHIFT + S", hl.dsp.window.move({ workspace = "special:scratch" }), "enviar janela ao scratchpad")
+  bind(M .. " + CTRL + S", hl.dsp.window.move({ workspace = "special:scratch" }), "enviar janela ao scratchpad")
 
   -- ── apps de terminal (ids em config/clios/hub.toml) ──────────────────────
   bind(M .. " + E", open("files"), "arquivos")
@@ -99,12 +99,17 @@ return function(_)
   bind(M .. " + C", run("clios caffeine"), "modo café: a tela não apaga")
   bind(M .. " + N", run("clios night"), "modo noturno: tela mais quente")
   bind(M .. " + D", run("clios dnd"), "não perturbe: silenciar notificações")
+  bind(M .. " + SHIFT + N", open("notifs"), "histórico de notificações")
+  bind(M .. " + X", run("clios focus"), "foco: 25 minutos em silêncio (de novo, para)")
   bind(M .. " + SHIFT + R", run("clios rec"), "gravar a tela: começar ou parar")
   bind(M .. " + P", run("clios pick"), "conta-gotas: copiar uma cor da tela")
+  bind(M .. " + SHIFT + T", run("clios ocr"), "texto da tela: selecionar e copiar (OCR)")
   bind(M .. " + U", open("update"), "atualizar o sistema")
+  bind(M .. " + Z", open("play"), "brincar: um brinquedo para espairecer")
 
   -- ── capturas ─────────────────────────────────────────────────────────────
   bind("Print", run("clios shot region"), "captura: região")
+  bind(M .. " + SHIFT + S", run("clios shot region"), "captura: região (o mesmo que Print)")
   bind("SHIFT + Print", run("clios shot screen"), "captura: tela inteira")
   bind("CTRL + Print", run("clios shot window"), "captura: janela")
 

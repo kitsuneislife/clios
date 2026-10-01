@@ -271,6 +271,8 @@ pub struct All {
     pub night: bool,
     pub dnd: bool,
     pub rec: bool,
+    /// Segundos que faltam do bloco de foco (`clios focus`); 0 sem bloco.
+    pub focus: u64,
 }
 
 pub fn all(ctx: &Ctx) -> All {
@@ -280,6 +282,7 @@ pub fn all(ctx: &Ctx) -> All {
         night: NIGHT.running(ctx),
         dnd: dnd_on(ctx),
         rec: REC.running(ctx),
+        focus: super::focus::remaining(ctx).unwrap_or(0),
     }
 }
 
@@ -350,7 +353,7 @@ mod tests {
         let c = ctx("all");
         dnd(&c, Switch::On).unwrap();
         let a = all(&c);
-        assert!(a.dnd && !a.caffeine && !a.night && !a.rec);
+        assert!(a.dnd && !a.caffeine && !a.night && !a.rec && a.focus == 0);
         let j = serde_json::to_value(&a).unwrap();
         assert_eq!(j["dnd"], true);
         assert!(j["net"]["kind"].is_string());

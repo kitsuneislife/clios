@@ -32,6 +32,10 @@ echo "▌ clios"
 cargo build --release --locked --manifest-path "$REPO/Cargo.toml"
 install -Dm755 "$REPO/target/release/clios" "$PROFILE/airootfs/usr/local/bin/clios"
 
+mkdir -p "$PROFILE/airootfs/usr/share/fish/vendor_completions.d" "$PROFILE/airootfs/usr/share/bash-completion/completions"
+"$REPO/target/release/clios" completions fish > "$PROFILE/airootfs/usr/share/fish/vendor_completions.d/clios.fish"
+"$REPO/target/release/clios" completions bash > "$PROFILE/airootfs/usr/share/bash-completion/completions/clios"
+
 # O checkout dentro da ISO: o clios procura em /usr/share/clios.
 mkdir -p "$PROFILE/airootfs/usr/share/clios"
 cp -r "$REPO"/{tokens,templates,config,seed,brand} "$PROFILE/airootfs/usr/share/clios/"
@@ -45,6 +49,7 @@ cp -r "$HERE/airootfs/." "$PROFILE/airootfs/"
 install -Dm644 "$REPO/system/etc/sysctl.d/99-clios.conf" "$PROFILE/airootfs/etc/sysctl.d/99-clios.conf"
 install -Dm644 "$REPO/system/etc/systemd/zram-generator.conf" "$PROFILE/airootfs/etc/systemd/zram-generator.conf"
 install -Dm644 "$REPO/system/etc/iwd/main.conf" "$PROFILE/airootfs/etc/iwd/main.conf"
+install -Dm644 "$REPO/system/etc/nftables.conf" "$PROFILE/airootfs/etc/nftables.conf"
 
 # Identidade da ISO e usuário `live`.
 # O $(date) fica entre aspas simples de propósito: quem o avalia é o profiledef.sh, ao ser lido.

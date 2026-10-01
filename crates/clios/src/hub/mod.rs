@@ -50,7 +50,8 @@ pub fn open(ctx: &Ctx, id: &str, args: &[String]) -> Result<()> {
             let ids: Vec<&str> = std::iter::once("hub").chain(catalog.tui.iter().map(|t| t.id.as_str())).collect();
             anyhow::bail!("não há entrada {id:?} no catálogo. Disponíveis: {}", ids.join(", "));
         };
-        let action = items::Action::Tui { id: t.id.clone(), argv: t.cmd.clone(), float: t.float, hold: t.hold };
+        let action =
+            items::Action::Tui { id: t.id.clone(), argv: t.launch_argv(&ctx.theme()?), float: t.float, hold: t.hold };
         exec::plan(&action, &env).expect("Tui sempre tem plano")
     };
     exec::spawn(&argv)

@@ -1,13 +1,30 @@
-# Gerado por `clios theme apply`. Não edite.
-# Uma linha. Diretório, git, e o cursor. Nada mais pede atenção até pedir.
+# Gerado por `clios theme apply`. Não edite. Para trocar de estilo: `clios prompt` (minimal, dev ou zen).
+{% if prompt == "dev" %}
+# dev: duas linhas. Em cima onde você está e o que o projeto usa; embaixo, só a seta.
+{% elif prompt == "zen" %}
+# zen: a seta sozinha. O resto vai para o canto direito e some quando o comando roda.
+{% else %}
+# minimal: uma linha. Diretório, git, e o cursor. Nada mais pede atenção até pedir.
+{% endif %}
 
 "$schema" = "https://starship.rs/config-schema.json"
 
 add_newline = false
 palette = "clios"
 
-format = "$directory$git_branch$git_status$character"
-right_format = "$cmd_duration$status"
+{% if prompt == "dev" %}
+format = """
+$hostname$directory$git_branch$git_status$git_state\
+$nodejs$python$rust$golang$lua$zig$c$java$docker_context$nix_shell
+$character"""
+right_format = "$jobs$cmd_duration$status"
+{% elif prompt == "zen" %}
+format = "$character"
+right_format = "$hostname$directory$git_branch$git_status$jobs$cmd_duration$status"
+{% else %}
+format = "$hostname$directory$git_branch$git_status$character"
+right_format = "$jobs$cmd_duration$status"
+{% endif %}
 
 [palettes.clios]
 fg = "{{ c.fg | hex }}"
@@ -26,7 +43,15 @@ style = "dim"
 truncation_length = 3
 truncate_to_repo = true
 truncation_symbol = "…/"
-format = "[$path]($style) "
+read_only = " ro"
+read_only_style = "red"
+format = "[$path]($style)[$read_only]($read_only_style) "
+
+[hostname]
+ssh_only = true
+ssh_symbol = ""
+format = "[$ssh_symbol$hostname]($style) "
+style = "accent"
 
 [git_branch]
 style = "mute"
@@ -37,6 +62,17 @@ format = "[$symbol$branch]($style) "
 style = "accent"
 format = "[$all_status$ahead_behind]($style) "
 
+[git_state]
+style = "red"
+format = "[$state( $progress_current/$progress_total)]($style) "
+
+[jobs]
+symbol = "& "
+number_threshold = 1
+symbol_threshold = 1
+style = "mute"
+format = "[$symbol$number]($style) "
+
 [cmd_duration]
 min_time = 2000
 style = "mute"
@@ -46,3 +82,35 @@ format = "[$duration]($style) "
 disabled = false
 style = "red"
 format = "[$status]($style) "
+
+# As linguagens só aparecem no estilo dev, e só quando o projeto usa. Texto, não ícone: lê igual em qualquer fonte.
+[nodejs]
+format = "[node $version]($style) "
+style = "mute"
+[python]
+format = "[py $version]($style)[( $virtualenv)]($style) "
+style = "mute"
+[rust]
+format = "[rust $version]($style) "
+style = "mute"
+[golang]
+format = "[go $version]($style) "
+style = "mute"
+[lua]
+format = "[lua $version]($style) "
+style = "mute"
+[zig]
+format = "[zig $version]($style) "
+style = "mute"
+[c]
+format = "[c $version]($style) "
+style = "mute"
+[java]
+format = "[java $version]($style) "
+style = "mute"
+[docker_context]
+format = "[docker $context]($style) "
+style = "mute"
+[nix_shell]
+format = "[nix]($style) "
+style = "mute"

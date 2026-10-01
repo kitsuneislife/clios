@@ -3,7 +3,7 @@
 //! Vem de `config/clios/hub.toml` (embutido no binário). O usuário pode sobrescrever copiando o
 //! arquivo para `~/.config/clios/hub.toml`. O hub, o `clios apps` e o welcome leem o mesmo catálogo.
 
-use clios_core::Paths;
+use clios_core::{Paths, Theme};
 use serde::Deserialize;
 
 use crate::sys::{is_installed, sh_quote};
@@ -49,6 +49,9 @@ pub struct Catalog {
 #[derive(Debug, Clone, Deserialize)]
 pub struct TuiDef {
     pub id: String,
+    /// O trabalho que o app faz. Único em todo o catálogo: dois apps para o mesmo trabalho não passam no teste.
+    #[serde(default)]
+    pub job: String,
     pub name: String,
     pub cmd: Vec<String>,
     #[serde(default)]
@@ -73,6 +76,9 @@ pub struct TuiDef {
     pub tip: String,
     #[serde(default)]
     pub tier: Tier,
+    /// Como rodar de proteção de tela e no `clios play` (só os brinquedos). Aceita marcadores de cor (veja toys.rs).
+    #[serde(default)]
+    pub saver: Vec<String>,
 }
 
 fn default_category() -> String {
@@ -95,6 +101,16 @@ impl TuiDef {
 
     pub fn installed(&self) -> bool {
         !self.bin().is_empty() && is_installed(self.bin())
+    }
+
+    /// O comando, com os marcadores de cor (`{color}`, `{n}`, `{hex}`...) trocados pelos do tema.
+    pub fn launch_argv(&self, theme: &Theme) -> Vec<String> {
+        crate::toys::expand(&self.cmd, theme)
+    }
+
+    /// Como rodar como cena (proteção de tela, `clios play`); `None` se o app não é um brinquedo.
+    pub fn scene_argv(&self, theme: &Theme) -> Option<Vec<String>> {
+        (!self.saver.is_empty()).then(|| crate::toys::expand(&self.saver, theme))
     }
 
     /// O comando que instala o app: `paru` resolve repositórios e AUR com o mesmo comando;
@@ -166,6 +182,24 @@ mod tests {
             assert!(!t.name.is_empty() && t.name == t.name.to_lowercase(), "{}: o nome é em minúsculas", t.id);
             assert!(!t.pkg.is_empty(), "{}: sem pacote", t.id);
             assert!(!t.desc.ends_with('.'), "{}: descrição sem ponto final, como o resto da interface", t.id);
+        }
+    }
+
+    #[test]
+    fn one_job_one_app() {
+        // A regra do CLIOS: se dois apps fazem o mesmo trabalho, fica o melhor. O `job` torna isso testável.
+        let mut seen: std::collections::HashMap<&str, &str> = std::collections::HashMap::new();
+        for t in &builtin().tui {
+            assert!(!t.job.is_empty(), "{}: sem job", t.id);
+            assert!(
+                t.job.chars().all(|c| c.is_lowercase() || c.is_ascii_digit() || c == '-'),
+                "{}: job {:?} em minúsculas e sem espaço (use hífen)",
+                t.id,
+                t.job
+            );
+            if let Some(other) = seen.insert(&t.job, &t.id) {
+                panic!("{} e {} fazem o mesmo trabalho ({}): escolha um", t.id, other, t.job);
+            }
         }
     }
 

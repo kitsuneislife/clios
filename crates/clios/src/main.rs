@@ -7,6 +7,7 @@ mod ctx;
 mod hub;
 mod sys;
 mod sysinfo;
+mod toys;
 mod ui;
 mod welcome;
 
@@ -116,6 +117,18 @@ enum Command {
     },
     /// O resumo do sistema, com a marca ao lado.
     Fetch,
+    /// A apresentação do terminal: o resumo ao ligar, duas linhas em workspace vazia (o fish chama ao abrir).
+    Greet {
+        /// Mostra agora, sem decidir nem gravar: fetch ou line.
+        #[arg(long, value_enum)]
+        show: Option<cmd::greet::Greeting>,
+        /// Esquece o que já foi mostrado nesta sessão.
+        #[arg(long, conflicts_with = "show")]
+        reset: bool,
+        /// Quando se apresentar: all (ao ligar e em workspace vazia), boot (só ao ligar) ou off.
+        #[arg(long, conflicts_with_all = ["show", "reset"])]
+        mode: Option<clios_core::GreetMode>,
+    },
     /// Lê as notícias do Arch, atualiza o sistema e avisa dos .pacnew.
     Update {
         /// Só mostra as notícias, sem atualizar.
@@ -125,10 +138,33 @@ enum Command {
         #[arg(long, short)]
         yes: bool,
     },
+    /// Atualiza o próprio CLIOS: puxa o repositório, recompila, reinstala e sincroniza.
+    SelfUpdate {
+        /// Só diz se há novidades, sem atualizar.
+        #[arg(long)]
+        check: bool,
+    },
     /// Modo café: a tela não apaga e o sistema não suspende.
     Caffeine {
         #[arg(value_enum, default_value = "toggle")]
         switch: cmd::toggles::Switch,
+    },
+    /// Os atalhos do desktop, no terminal (com um filtro, mostra só o que combina: `clios keys captura`).
+    Keys {
+        /// Parte do nome do grupo, da tecla ou da descrição.
+        query: Vec<String>,
+    },
+    /// Um bloco de foco: liga o não perturbe, a barra mostra quanto falta e, no fim, avisa (sem argumento: 25 minutos, ou para).
+    Focus {
+        /// Minutos (1 a 240) ou `stop`.
+        #[arg(value_name = "MINUTOS|stop")]
+        what: Option<String>,
+        /// Mostra só o que falta, em texto (para scripts).
+        #[arg(long, conflicts_with_all = ["what", "wait"])]
+        status: bool,
+        /// O processo que espera o fim; quem chama é o próprio `clios focus`.
+        #[arg(long, hide = true)]
+        wait: bool,
     },
     /// Modo noturno: tela mais quente (hyprsunset).
     Night {
@@ -153,16 +189,46 @@ enum Command {
     },
     /// Conta-gotas: escolhe uma cor da tela e copia o hex.
     Pick,
+    /// Seleciona uma região da tela e copia o texto que está nela (OCR).
+    Ocr,
     /// Perfil de energia (sem argumento, passa para o próximo).
     Power {
         #[arg(value_name = "power-saver|balanced|performance")]
         profile: Option<String>,
     },
-    /// Proteção de tela: a marca desliza e o cursor troca de acento a cada batida.
+    /// Proteção de tela: a marca ou um brinquedo, o que você escolheu (sem argumento, abre agora).
     Saver {
+        #[command(subcommand)]
+        command: Option<SaverCommand>,
         /// Roda aqui, no terminal atual (é o que a janela em tela cheia executa).
         #[arg(long)]
         run: bool,
+        /// Força uma cena nesta vez: marca ou o id de um brinquedo (veja `clios saver list`).
+        #[arg(long, value_name = "CENA")]
+        scene: Option<String>,
+    },
+    /// Roda um brinquedo aqui no terminal, na cor do seu acento (sem argumento, sorteia um dos instalados).
+    Play {
+        /// O id do brinquedo (veja `clios play --list`).
+        id: Option<String>,
+        /// Lista os brinquedos e o que falta instalar.
+        #[arg(long, short)]
+        list: bool,
+    },
+    /// O histórico de notificações, inclusive as que o "não perturbe" silenciou.
+    Notifs {
+        #[command(subcommand)]
+        command: Option<NotifsCommand>,
+        /// Quantas mostrar (as mais novas).
+        #[arg(long, short, default_value_t = 30)]
+        count: usize,
+    },
+    /// Estilo do prompt do shell: minimal, dev ou zen (sem argumento, lista).
+    Prompt { style: Option<clios_core::PromptStyle> },
+    /// Imprime o autocompletar para o seu shell (fish, bash, zsh): `clios completions fish > ~/.config/fish/completions/clios.fish`.
+    Completions {
+        #[arg(value_enum)]
+        shell: clap_complete::Shell,
     },
     /// Confere o que falta para o desktop funcionar.
     Doctor,
@@ -267,6 +333,36 @@ enum AppsCommand {
 }
 
 #[derive(Subcommand)]
+enum SaverCommand {
+    /// Lista as cenas e mostra a escolhida.
+    List,
+    /// Escolhe: auto (rodízio), marca, off ou o id de um brinquedo.
+    Set { scene: String },
+    /// Fecha a proteção de tela aberta.
+    Stop,
+}
+
+#[derive(Subcommand)]
+enum NotifsCommand {
+    /// Apaga o histórico.
+    Clear,
+    /// Registra uma notificação (a shell chama isto sozinha a cada uma que chega).
+    #[command(hide = true)]
+    Add {
+        #[arg(long = "app", default_value = "")]
+        app: String,
+        #[arg(long = "summary", default_value = "")]
+        summary: String,
+        #[arg(long = "body", default_value = "")]
+        body: String,
+        #[arg(long = "urgency", default_value = "normal")]
+        urgency: String,
+        #[arg(long)]
+        silenced: bool,
+    },
+}
+
+#[derive(Subcommand)]
 enum StatusWhat {
     /// Conexão de rede: {"kind":"wifi|eth|none","label":"SSID"}.
     Net,
@@ -347,9 +443,29 @@ fn run() -> Result<bool> {
             welcome::run(ctx, welcome::Options { page, first_run, snapshot, select, demo })?
         }
         Command::Fetch => cmd::fetch::run(&ctx)?,
+        Command::Greet { show, reset, mode } => {
+            if let Some(m) = mode {
+                ctx.state.greet = m;
+                ctx.save_state()?;
+                println!("saudação do terminal: {}", cmd::greet::describe(m));
+            } else {
+                cmd::greet::run(&ctx, show, reset)?
+            }
+        }
         Command::Update { news, yes } => return cmd::update::run(&ctx, news, yes),
+        Command::SelfUpdate { check } => return cmd::selfupdate::run(&ctx, check),
         Command::Caffeine { switch } => {
             println!("café {}", cmd::toggles::state_word(cmd::toggles::caffeine(&ctx, switch)?))
+        }
+        Command::Keys { query } => cmd::keys::run(&query.join(" "))?,
+        Command::Focus { what, status, wait } => {
+            if wait {
+                cmd::focus::wait(&ctx)?
+            } else if status {
+                println!("{}", cmd::focus::status_text(&ctx))
+            } else {
+                cmd::focus::run(&ctx, what.as_deref())?
+            }
         }
         Command::Night { switch, temp } => {
             println!("noturno {}", cmd::toggles::state_word(cmd::toggles::night(&ctx, switch, temp)?))
@@ -358,14 +474,41 @@ fn run() -> Result<bool> {
             println!("não perturbe {}", cmd::toggles::state_word(cmd::toggles::dnd(&ctx, switch)?))
         }
         Command::Rec { what, audio } => cmd::toggles::rec(&ctx, what, audio)?,
+        Command::Ocr => cmd::ocr::run(&ctx)?,
         Command::Pick => cmd::toggles::pick()?,
         Command::Power { profile } => cmd::toggles::power(profile.as_deref())?,
-        Command::Saver { run } => {
+        Command::Saver { command: Some(c), .. } => match c {
+            SaverCommand::List => cmd::saver::list(&ctx)?,
+            SaverCommand::Set { scene } => cmd::saver::set(&mut ctx, &scene)?,
+            SaverCommand::Stop => cmd::saver::stop(),
+        },
+        Command::Saver { command: None, run, scene } => {
             if run {
-                cmd::saver::run(&ctx)?
+                cmd::saver::run(&ctx, scene.as_deref())?
             } else {
-                cmd::saver::launch()?
+                cmd::saver::launch(&ctx, scene.as_deref())?
             }
+        }
+        Command::Play { id, list } => return cmd::play::run(&ctx, id.as_deref(), list),
+        Command::Notifs { command, count } => match command {
+            None => cmd::notifs::list(&ctx, count)?,
+            Some(NotifsCommand::Clear) => cmd::notifs::clear(&ctx)?,
+            Some(NotifsCommand::Add { app, summary, body, urgency, silenced }) => {
+                let t = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map_or(0, |d| d.as_secs());
+                cmd::notifs::add(&ctx, cmd::notifs::Entry { t, app, summary, body, urgency, silenced })?
+            }
+        },
+        Command::Prompt { style } => cmd::prompt::run(&mut ctx, style)?,
+        Command::Completions { shell } => {
+            use clap::CommandFactory;
+            use std::io::Write;
+            let mut buf = Vec::new();
+            clap_complete::generate(shell, &mut Cli::command(), "clios", &mut buf);
+            if shell == clap_complete::Shell::Fish {
+                buf.extend_from_slice(cmd::completions::fish_ids(&catalog::builtin()).as_bytes());
+            }
+            // `clios completions fish | head` fecha o cano antes do fim: não é erro.
+            let _ = std::io::stdout().write_all(&buf);
         }
         Command::Doctor => return cmd::doctor::run(&ctx),
         Command::Shot { target } => {

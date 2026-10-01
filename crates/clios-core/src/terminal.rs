@@ -32,8 +32,9 @@ pub fn recolor_sequence(theme: &Theme) -> String {
 /// Parâmetros `vt.default_*` do kernel, para o console de texto (boot, TTY) usar a mesma paleta.
 /// Devolve algo como `vt.default_red=0,255,... vt.default_grn=... vt.default_blu=...`.
 ///
-/// O console usa a cor 0 como fundo, então ela vira o fundo do tema (preto puro) em vez do
-/// "preto ANSI" (#151515). Passe um tema escuro: o console não tem como inverter para claro.
+/// O console usa a cor 0 como fundo, então ela vira o fundo do tema (preto puro). No tema escuro o preto
+/// ANSI já é o próprio fundo; o ajuste vale para quem trocar essa cor. Passe um tema escuro: o console não
+/// tem como inverter para claro.
 pub fn kernel_vt_params(theme: &Theme) -> String {
     let mut palette = theme.c.ansi.clone();
     palette[0] = theme.c.bg;
@@ -65,7 +66,7 @@ mod tests {
     #[test]
     fn kernel_console_background_is_pure_theme_bg_not_ansi_black() {
         let p = kernel_vt_params(&theme());
-        // índice 0 de cada canal = 0 (preto puro), não 0x15 (#151515)
+        // índice 0 de cada canal = 0 (preto puro)
         assert!(p.starts_with("vt.default_red=0,"), "{p}");
         assert!(p.contains(" vt.default_grn=0,") && p.contains(" vt.default_blu=0,"), "{p}");
     }

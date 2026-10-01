@@ -1,22 +1,64 @@
-//! `clios saver`: a proteção de tela do CLIOS. A marca desliza pela tela, e cada vez que bate numa borda
-//! o cursor dela troca para o próximo acento. Qualquer tecla ou movimento do mouse fecha.
+//! `clios saver`: a proteção de tela do CLIOS. A cena padrão é a marca deslizando pela tela: cada vez que
+//! bate numa borda, o cursor dela troca para o próximo acento. As outras cenas são os brinquedos do
+//! catálogo (bonsai, aquário, tubulações...) que estiverem instalados, na cor mais perto do seu acento.
 //!
 //! `clios saver` abre uma janela de terminal em tela cheia (é o que o hypridle chama);
-//! `clios saver --run` é o que roda dentro dela.
+//! `clios saver --run` é o que roda dentro dela. O hypridle fecha a janela ao primeiro sinal de vida
+//! (`on-resume`); aberta à mão, `q` sai dos brinquedos e qualquer tecla sai da marca.
 
 use std::io;
 use std::time::{Duration, Instant};
 
-use anyhow::Result;
+use anyhow::{Result, bail};
 use clios_core::{Rgb, Theme};
 use ratatui::buffer::Buffer;
 use ratatui::crossterm::event::{self, DisableMouseCapture, EnableMouseCapture, Event};
 use ratatui::crossterm::execute;
 
 use crate::art;
+use crate::catalog;
 use crate::ctx::Ctx;
 use crate::hub::exec;
 use crate::hub::items::Action;
+use crate::toys;
+
+/// O que o estado `saver` pede, já resolvido contra o que está instalado.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Pick {
+    /// A proteção de tela está desligada.
+    Off,
+    /// A marca deslizando.
+    Mark,
+    /// Um brinquedo do catálogo, pelo id.
+    Toy(String),
+}
+
+/// Escolhe a cena. `setting` é `auto`, `off`, `marca` ou o id de um brinquedo; `installed` são os ids que
+/// dá para rodar agora; `seed` desempata o rodízio (o relógio, na prática, e um número fixo nos testes).
+/// Um brinquedo pedido e não instalado cai para a marca: a tela nunca fica sem proteção por causa disso.
+pub fn pick(setting: &str, installed: &[&str], seed: usize) -> Pick {
+    match setting {
+        "off" => Pick::Off,
+        "marca" | "mark" => Pick::Mark,
+        "auto" | "" => {
+            // A marca entra no rodízio como uma cena igual às outras.
+            let n = installed.len() + 1;
+            match seed % n {
+                0 => Pick::Mark,
+                i => Pick::Toy(installed[i - 1].to_string()),
+            }
+        }
+        id if installed.contains(&id) => Pick::Toy(id.to_string()),
+        _ => Pick::Mark,
+    }
+}
+
+/// Valores aceitos em `clios saver set`: os fixos e os ids dos brinquedos do catálogo.
+pub fn valid_settings(cat: &catalog::Catalog) -> Vec<String> {
+    let mut v: Vec<String> = ["auto", "marca", "off"].map(String::from).to_vec();
+    v.extend(cat.tui.iter().filter(|t| !t.saver.is_empty()).map(|t| t.id.clone()));
+    v
+}
 
 /// Altura da marca, em linhas de terminal (a largura é o dobro).
 const ROWS: u16 = 8;
@@ -82,8 +124,11 @@ pub fn render(buf: &mut Buffer, theme: &Theme, d: &Drift, accent: Rgb, cursor_on
     }
 }
 
-/// Abre a proteção de tela numa janela em tela cheia.
-pub fn launch() -> Result<()> {
+/// Abre a proteção de tela numa janela em tela cheia. `scene` força uma cena (e ignora o `off`).
+pub fn launch(ctx: &Ctx, scene: Option<&str>) -> Result<()> {
+    if scene.is_none() && ctx.state.saver == "off" {
+        return Ok(());
+    }
     // já tem uma rodando? não empilha outra
     let running = std::process::Command::new("pgrep")
         .args(["-f", "clios saver --run"])
@@ -95,7 +140,13 @@ pub fn launch() -> Result<()> {
     let env = exec::Env::detect();
     let action = Action::Tui {
         id: "saver".into(),
-        argv: vec![env.exe.clone(), "saver".into(), "--run".into()],
+        argv: {
+            let mut a = vec![env.exe.clone(), "saver".into(), "--run".into()];
+            if let Some(sc) = scene {
+                a.extend(["--scene".into(), sc.into()]);
+            }
+            a
+        },
         float: false,
         hold: false,
     };
@@ -110,8 +161,81 @@ pub fn launch() -> Result<()> {
     exec::spawn(&argv)
 }
 
-pub fn run(ctx: &Ctx) -> Result<()> {
+/// `clios saver set`: escolhe a cena (ou o rodízio, ou nada).
+pub fn set(ctx: &mut Ctx, value: &str) -> Result<()> {
+    let (cat, _) = catalog::load(&ctx.paths);
+    let valid = valid_settings(&cat);
+    let value = if value == "mark" { "marca" } else { value };
+    if !valid.iter().any(|v| v == value) {
+        bail!("{value:?} não é uma cena. Use: {}", valid.join(", "));
+    }
+    ctx.state.saver = value.to_string();
+    ctx.save_state()?;
+    println!("proteção de tela: {}", describe(value));
+    Ok(())
+}
+
+pub fn describe(setting: &str) -> &'static str {
+    match setting {
+        "auto" => "rodízio (a marca e os brinquedos instalados)",
+        "marca" => "a marca deslizando",
+        "off" => "desligada",
+        _ => "um brinquedo só",
+    }
+}
+
+/// `clios saver list`: as cenas, marcando a escolhida e o que está instalado.
+pub fn list(ctx: &Ctx) -> Result<()> {
+    let (cat, _) = catalog::load(&ctx.paths);
+    let cur = ctx.state.saver.as_str();
+    let mark = |id: &str| if id == cur { "  ←" } else { "" };
+    println!("{:<12} {}{}", "auto", describe("auto"), mark("auto"));
+    println!("{:<12} {}{}", "marca", describe("marca"), mark("marca"));
+    for t in cat.tui.iter().filter(|t| !t.saver.is_empty()) {
+        let state = if t.installed() { String::new() } else { format!("  (falta: clios apps install {})", t.id) };
+        println!("{:<12} {}{}{state}", t.id, t.desc, mark(&t.id));
+    }
+    println!("{:<12} {}{}", "off", describe("off"), mark("off"));
+    Ok(())
+}
+
+/// Fecha a proteção de tela aberta (é o que o hypridle faz ao primeiro sinal de vida).
+pub fn stop() {
+    let _ = std::process::Command::new("pkill").args(["-f", "clios saver --run"]).status();
+}
+
+/// Roda aqui, no terminal atual. Sem `scene`, vale o que o usuário escolheu.
+pub fn run(ctx: &Ctx, scene: Option<&str>) -> Result<()> {
     let theme = ctx.theme()?;
+    let (cat, _) = catalog::load(&ctx.paths);
+    let installed = toys::installed_scenes(&cat.tui);
+    let ids: Vec<&str> = installed.iter().map(|t| t.id.as_str()).collect();
+    let seed =
+        std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map_or(0, |d| d.subsec_nanos() as usize);
+    let setting = scene.unwrap_or(&ctx.state.saver);
+    match pick(setting, &ids, seed) {
+        Pick::Off => return Ok(()),
+        Pick::Toy(id) => {
+            if let Some(argv) = installed.iter().find(|t| t.id == id).and_then(|t| t.scene_argv(&theme)) {
+                // Se o brinquedo não abrir, a marca assume: tela preta seria pior.
+                if run_toy(&argv) {
+                    return Ok(());
+                }
+            }
+        }
+        Pick::Mark => {}
+    }
+    run_mark(&theme)
+}
+
+/// Roda o brinquedo no terminal atual e espera. `false` se não conseguiu nem começar.
+fn run_toy(argv: &[String]) -> bool {
+    let Some((prog, args)) = argv.split_first() else { return false };
+    std::process::Command::new(prog).args(args).status().is_ok()
+}
+
+fn run_mark(theme: &Theme) -> Result<()> {
+    let theme = theme.clone();
     let mut terminal = ratatui::init();
     let _ = execute!(io::stdout(), EnableMouseCapture);
     let result = (|| -> Result<()> {
@@ -191,6 +315,34 @@ mod tests {
             d = d.step(5, 3).0;
         }
         assert_eq!((d.x, d.y), (0, 0));
+    }
+
+    #[test]
+    fn pick_follows_the_setting_and_falls_back_to_the_mark() {
+        let have = ["bonsai", "pipes"];
+        assert_eq!(pick("off", &have, 0), Pick::Off);
+        assert_eq!(pick("marca", &have, 1), Pick::Mark);
+        assert_eq!(pick("pipes", &have, 0), Pick::Toy("pipes".into()));
+        assert_eq!(pick("aquarium", &have, 0), Pick::Mark, "pedido e não instalado: a marca assume");
+        assert_eq!(pick("lixo", &[], 0), Pick::Mark);
+    }
+
+    #[test]
+    fn auto_rotates_through_the_mark_and_every_installed_toy() {
+        let have = ["bonsai", "pipes"];
+        let seen: Vec<Pick> = (0..3).map(|s| pick("auto", &have, s)).collect();
+        assert_eq!(seen, [Pick::Mark, Pick::Toy("bonsai".into()), Pick::Toy("pipes".into())]);
+        assert_eq!(pick("auto", &have, 3), Pick::Mark, "dá a volta");
+        assert_eq!(pick("auto", &[], 7), Pick::Mark, "sem brinquedos, só a marca");
+    }
+
+    #[test]
+    fn every_toy_of_the_catalog_is_a_valid_setting() {
+        let v = valid_settings(&catalog::builtin());
+        for want in ["auto", "marca", "off", "bonsai", "aquarium", "pipes", "sakura", "lava", "clock", "matrix-rain"] {
+            assert!(v.iter().any(|x| x == want), "{want} deveria valer: {v:?}");
+        }
+        assert!(!v.iter().any(|x| x == "visualizer"), "o cava não faz sentido sem música: fica de fora");
     }
 
     #[test]

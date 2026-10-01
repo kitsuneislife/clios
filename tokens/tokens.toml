@@ -74,7 +74,7 @@ dim     = "#A8A8A8"
 fg      = "#F5F5F5"
 
 [mode.dark.ansi]
-black   = "#151515"
+black   = "#000000"
 red     = "#FF6166"
 green   = "#4FCB8B"
 yellow  = "#E8BE4F"

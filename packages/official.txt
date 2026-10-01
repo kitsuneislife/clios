@@ -25,6 +25,7 @@ adwaita-icon-theme
 foot
 fish
 starship
+fastfetch
 zoxide
 fzf
 ripgrep
@@ -80,10 +81,17 @@ satty
 hyprpicker
 hyprsunset
 wf-recorder
+tesseract
+tesseract-data-eng
+tesseract-data-por
 wl-clipboard
 cliphist
 libnotify
 brightnessctl
+
+# ── discos externos: pendrive e HD aparecem montados, sem abrir nada ──
+udisks2
+udiskie
 
 # ── login e sistema ───────────────────────────────────────────────────
 greetd
@@ -94,10 +102,12 @@ upower
 polkit
 pacman-contrib
 reflector
+nftables
 
 # ── tipografia ────────────────────────────────────────────────────────
 otf-geist-mono-nerd
 noto-fonts-emoji
+noto-fonts-cjk
 
 # ── a única exceção gráfica ───────────────────────────────────────────
 firefox
