@@ -87,10 +87,13 @@ else
   skip "fastfetch" "instale o fastfetch"
 fi
 
-if command -v nft >/dev/null; then
-  step "nftables: o firewall é válido" nft -c -f system/etc/nftables.conf
-else
+if ! command -v nft >/dev/null; then
   skip "nftables" "instale o nftables"
+elif nft -c -f system/etc/nftables.conf 2>&1 | grep -q "Operation not permitted" && ! sudo -n true 2>/dev/null; then
+  skip "nftables" "o nft precisa de privilégio (netlink) neste ambiente"
+else
+  # shellcheck disable=SC2016
+  step "nftables: o firewall é válido" bash -c 'nft -c -f system/etc/nftables.conf 2>/dev/null || sudo -n nft -c -f system/etc/nftables.conf'
 fi
 
 printf '\n\033[1m────────────────────────────────\033[0m\n'

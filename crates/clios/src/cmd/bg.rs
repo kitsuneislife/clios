@@ -59,6 +59,14 @@ impl Bg {
             fs::create_dir_all(dir)?;
         }
         fs::write(&file, format!("{pid}\n"))?;
+        // Logo depois do fork, a linha de comando ainda é a do `clios`; espera o exec do programa
+        // (até ~1 s) para quem chama poder perguntar `running` em seguida.
+        for _ in 0..50 {
+            if alive(Path::new("/proc"), pid, self.needle) {
+                break;
+            }
+            std::thread::sleep(std::time::Duration::from_millis(20));
+        }
         Ok(pid)
     }
 
