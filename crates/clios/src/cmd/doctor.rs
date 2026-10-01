@@ -51,6 +51,12 @@ const RECOMMENDED: &[Check] = &[
     Check { bin: "zoxide", why: "cd inteligente" },
     Check { bin: "delta", why: "diffs legíveis no git" },
     Check { bin: "jq", why: "JSON" },
+    Check { bin: "paru", why: "instalar apps do AUR (o hub e o clios apps usam)" },
+    Check { bin: "hyprpicker", why: "conta-gotas (super + p)" },
+    Check { bin: "hyprsunset", why: "modo noturno (super + n)" },
+    Check { bin: "wf-recorder", why: "gravar a tela (super + shift + r)" },
+    Check { bin: "atuin", why: "histórico do shell com busca (ctrl + r)" },
+    Check { bin: "powerprofilesctl", why: "perfil de energia na central do sistema" },
 ];
 
 const OPTIONAL: &[Check] = &[

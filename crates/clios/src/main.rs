@@ -110,6 +110,54 @@ enum Command {
     },
     /// O resumo do sistema, com a marca ao lado.
     Fetch,
+    /// Lê as notícias do Arch, atualiza o sistema e avisa dos .pacnew.
+    Update {
+        /// Só mostra as notícias, sem atualizar.
+        #[arg(long)]
+        news: bool,
+        /// Não pergunta antes de atualizar (as notícias continuam aparecendo).
+        #[arg(long, short)]
+        yes: bool,
+    },
+    /// Modo café: a tela não apaga e o sistema não suspende.
+    Caffeine {
+        #[arg(value_enum, default_value = "toggle")]
+        switch: cmd::toggles::Switch,
+    },
+    /// Modo noturno: tela mais quente (hyprsunset).
+    Night {
+        #[arg(value_enum, default_value = "toggle")]
+        switch: cmd::toggles::Switch,
+        /// Temperatura em kelvin (1000 a 10000).
+        #[arg(long, short)]
+        temp: Option<u32>,
+    },
+    /// Não perturbe: silencia as notificações (as urgentes passam).
+    Dnd {
+        #[arg(value_enum, default_value = "toggle")]
+        switch: cmd::toggles::Switch,
+    },
+    /// Grava a tela (sem argumento: começa por uma região, ou para se já está gravando).
+    Rec {
+        #[arg(value_enum, default_value = "toggle")]
+        what: cmd::toggles::RecWhat,
+        /// Grava também o áudio.
+        #[arg(long)]
+        audio: bool,
+    },
+    /// Conta-gotas: escolhe uma cor da tela e copia o hex.
+    Pick,
+    /// Perfil de energia (sem argumento, passa para o próximo).
+    Power {
+        #[arg(value_name = "power-saver|balanced|performance")]
+        profile: Option<String>,
+    },
+    /// Proteção de tela: a marca desliza e o cursor troca de acento a cada batida.
+    Saver {
+        /// Roda aqui, no terminal atual (é o que a janela em tela cheia executa).
+        #[arg(long)]
+        run: bool,
+    },
     /// Confere o que falta para o desktop funcionar.
     Doctor,
     /// Estado do sistema em JSON, para a barra.
@@ -216,6 +264,8 @@ enum AppsCommand {
 enum StatusWhat {
     /// Conexão de rede: {"kind":"wifi|eth|none","label":"SSID"}.
     Net,
+    /// Rede e os liga-desliga (café, noturno, não perturbe, gravação), para a barra.
+    All,
 }
 
 #[derive(Clone, Copy, clap::ValueEnum)]
@@ -252,6 +302,7 @@ fn run() -> Result<bool> {
         }
         Command::Open { id, args } => hub::open(&ctx, &id, &args)?,
         Command::Status { what: StatusWhat::Net } => cmd::status::run_net()?,
+        Command::Status { what: StatusWhat::All } => println!("{}", serde_json::to_string(&cmd::toggles::all(&ctx))?),
         Command::Wallpaper { command, snapshot: Some(size), select } => {
             anyhow::ensure!(command.is_none(), "--snapshot não combina com subcomando");
             cmd::wallpaper_tui::snapshot(&ctx, &size, select.as_deref())?
@@ -290,6 +341,26 @@ fn run() -> Result<bool> {
             welcome::run(ctx, welcome::Options { page, first_run, snapshot, select })?
         }
         Command::Fetch => cmd::fetch::run(&ctx)?,
+        Command::Update { news, yes } => return cmd::update::run(&ctx, news, yes),
+        Command::Caffeine { switch } => {
+            println!("café {}", cmd::toggles::state_word(cmd::toggles::caffeine(&ctx, switch)?))
+        }
+        Command::Night { switch, temp } => {
+            println!("noturno {}", cmd::toggles::state_word(cmd::toggles::night(&ctx, switch, temp)?))
+        }
+        Command::Dnd { switch } => {
+            println!("não perturbe {}", cmd::toggles::state_word(cmd::toggles::dnd(&ctx, switch)?))
+        }
+        Command::Rec { what, audio } => cmd::toggles::rec(&ctx, what, audio)?,
+        Command::Pick => cmd::toggles::pick()?,
+        Command::Power { profile } => cmd::toggles::power(profile.as_deref())?,
+        Command::Saver { run } => {
+            if run {
+                cmd::saver::run(&ctx)?
+            } else {
+                cmd::saver::launch()?
+            }
+        }
         Command::Doctor => return cmd::doctor::run(&ctx),
         Command::Shot { target } => {
             let t = match target {

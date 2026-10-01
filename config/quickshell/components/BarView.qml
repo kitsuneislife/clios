@@ -17,12 +17,18 @@ Rectangle {
     property real battery: -1          // 0..1, -1 sem bateria
     property bool charging: false
     property string clock: ""
+    // liga-desliga ativos: só aparecem enquanto estão ligados
+    property bool rec: false
+    property bool caffeine: false
+    property bool night: false
+    property bool dnd: false
 
     signal workspaceActivated(int id)
     signal audioClicked
     signal netClicked
     signal batteryClicked
     signal clockClicked
+    signal indicatorClicked(string name)
 
     implicitHeight: Tokens.barHeight
     // A barra flutua: superfície própria, canto arredondado e um filete de 1px. Sem sombra.
@@ -56,6 +62,30 @@ Rectangle {
         height: parent.height
         spacing: 0
 
+        Segment {
+            visible: root.rec
+            text: "● gravando"
+            color: Tokens.red
+            onClicked: root.indicatorClicked("rec")
+        }
+        Segment {
+            visible: root.dnd
+            text: "silêncio"
+            color: Tokens.accent
+            onClicked: root.indicatorClicked("dnd")
+        }
+        Segment {
+            visible: root.night
+            text: "noturno"
+            color: Tokens.accent
+            onClicked: root.indicatorClicked("night")
+        }
+        Segment {
+            visible: root.caffeine
+            text: "café"
+            color: Tokens.accent
+            onClicked: root.indicatorClicked("caffeine")
+        }
         Segment {
             visible: root.audioKnown
             text: root.muted ? "mudo" : "vol " + Math.round(root.volume * 100)

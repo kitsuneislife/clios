@@ -37,6 +37,8 @@ Rectangle {
             battery: 0.87
             charging: false
             clock: "qua 1  14:32"
+            caffeine: true
+            night: true
         }
     }
 

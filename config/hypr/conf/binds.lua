@@ -95,6 +95,14 @@ return function(_)
   bind(M .. " + F9", open("central"), "central do sistema")
   bind(M .. " + F10", open("welcome"), "guia de boas-vindas")
 
+  -- ── ferramentas do dia a dia ─────────────────────────────────────────────
+  bind(M .. " + C", run("clios caffeine"), "modo café: a tela não apaga")
+  bind(M .. " + N", run("clios night"), "modo noturno: tela mais quente")
+  bind(M .. " + D", run("clios dnd"), "não perturbe: silenciar notificações")
+  bind(M .. " + SHIFT + R", run("clios rec"), "gravar a tela: começar ou parar")
+  bind(M .. " + P", run("clios pick"), "conta-gotas: copiar uma cor da tela")
+  bind(M .. " + U", open("update"), "atualizar o sistema")
+
   -- ── capturas ─────────────────────────────────────────────────────────────
   bind("Print", run("clios shot region"), "captura: região")
   bind("SHIFT + Print", run("clios shot screen"), "captura: tela inteira")

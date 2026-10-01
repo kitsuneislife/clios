@@ -22,6 +22,7 @@ use ratatui::crossterm::execute;
 use ratatui::layout::Rect;
 
 use crate::catalog::{CATEGORIES, Catalog, TuiDef};
+use crate::cmd::toggles::{self, Switch, state_word};
 use crate::cmd::{theme as theme_cmd, wallpaper as wp};
 use crate::ctx::Ctx;
 use crate::hub::anim::Motion;
@@ -75,6 +76,9 @@ pub enum Setting {
     Motion,
     Wallpaper,
     Power,
+    Caffeine,
+    Night,
+    Dnd,
     Lock,
     Suspend,
     Reboot,
@@ -89,6 +93,9 @@ impl Setting {
             Setting::Motion => "movimento",
             Setting::Wallpaper => "papel de parede",
             Setting::Power => "energia",
+            Setting::Caffeine => "modo café",
+            Setting::Night => "modo noturno",
+            Setting::Dnd => "não perturbe",
             Setting::Lock => "bloquear a tela",
             Setting::Suspend => "suspender",
             Setting::Reboot => "reiniciar",
@@ -124,6 +131,10 @@ pub struct App {
     pub sys_sel: usize,
     pub confirm: Option<Setting>,
     pub power: Option<String>,
+    /// Café, noturno e não perturbe (no sandbox os dois primeiros são simulados, sem subir processo).
+    pub caffeine: bool,
+    pub night: bool,
+    pub dnd: bool,
     pub notice: Option<(String, Instant)>,
     pub hour: u32,
     pub motion: Motion,
@@ -157,6 +168,7 @@ impl App {
         if power.is_some() {
             settings.push(Setting::Power);
         }
+        settings.extend([Setting::Caffeine, Setting::Night, Setting::Dnd]);
         settings.extend([Setting::Lock, Setting::Suspend, Setting::Reboot, Setting::Poweroff]);
         let tips = data::tips();
         // Um cartão por dia: quem abre o guia amanhã vê outra dica.
@@ -180,6 +192,9 @@ impl App {
             sys_sel: 0,
             confirm: None,
             power,
+            caffeine: false,
+            night: false,
+            dnd: false,
             notice: warn.map(|w| (w, now)),
             hour: sysinfo::local_hour().unwrap_or(20),
             motion,
@@ -213,6 +228,11 @@ impl App {
             }
         };
         self.steps = data::steps(&self.ctx.state, &probes);
+        self.dnd = toggles::dnd_on(&self.ctx);
+        if !self.ctx.sandboxed {
+            self.caffeine = toggles::CAFFEINE.running(&self.ctx);
+            self.night = toggles::NIGHT.running(&self.ctx);
+        }
     }
 
     pub fn say(&mut self, msg: impl Into<String>, now: Instant) {
@@ -293,6 +313,9 @@ impl App {
                 wp::Choice::parse(&self.ctx.state.wallpaper).map_or_else(|_| "?".into(), |c| c.label())
             }
             Setting::Power => self.power.as_deref().map_or("indisponível", power_label).into(),
+            Setting::Caffeine => state_word(self.caffeine).into(),
+            Setting::Night => state_word(self.night).into(),
+            Setting::Dnd => state_word(self.dnd).into(),
             _ => "↵".into(),
         }
     }
@@ -339,6 +362,26 @@ impl App {
                 }
                 self.power = Some(next.to_string());
                 Ok(format!("energia: {}", power_label(next)))
+            }
+            Setting::Caffeine => {
+                if !self.ctx.sandboxed {
+                    self.caffeine = toggles::caffeine(&self.ctx, Switch::Toggle)?;
+                } else {
+                    self.caffeine = !self.caffeine;
+                }
+                Ok(format!("café {}", state_word(self.caffeine)))
+            }
+            Setting::Night => {
+                if !self.ctx.sandboxed {
+                    self.night = toggles::night(&self.ctx, Switch::Toggle, None)?;
+                } else {
+                    self.night = !self.night;
+                }
+                Ok(format!("noturno {}", state_word(self.night)))
+            }
+            Setting::Dnd => {
+                self.dnd = toggles::dnd(&self.ctx, Switch::Toggle)?;
+                Ok(format!("não perturbe {}", state_word(self.dnd)))
             }
             _ => Ok(String::new()),
         })();

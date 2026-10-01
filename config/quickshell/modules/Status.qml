@@ -4,21 +4,30 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-// Conexão de rede. `clios status net` (Rust) lê /sys e /proc; a barra só pergunta a cada 5 s.
+// O estado do sistema que a barra mostra: rede e os liga-desliga (café, noturno, não perturbe, gravação).
+// `clios status all` (Rust) lê /sys, /proc e os arquivos de estado; a barra só pergunta a cada 2 s.
 // Não usa o módulo de rede do Quickshell porque ele exige NetworkManager, e aqui o wi-fi é do iwd.
 Singleton {
     property string kind: "none"
     property string label: ""
+    property bool caffeine: false
+    property bool night: false
+    property bool dnd: false
+    property bool rec: false
 
     Process {
         id: poll
-        command: ["clios", "status", "net"]
+        command: ["clios", "status", "all"]
         stdout: StdioCollector {
             onStreamFinished: {
                 try {
                     const j = JSON.parse(text)
-                    kind = j.kind
-                    label = j.label
+                    kind = j.net.kind
+                    label = j.net.label
+                    caffeine = j.caffeine
+                    night = j.night
+                    dnd = j.dnd
+                    rec = j.rec
                 } catch (e) {
                     // mantém o último estado conhecido
                 }
@@ -27,7 +36,7 @@ Singleton {
     }
 
     Timer {
-        interval: 5000
+        interval: 2000
         running: true
         repeat: true
         triggeredOnStart: true

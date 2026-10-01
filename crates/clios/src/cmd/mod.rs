@@ -1,10 +1,14 @@
 pub mod apps;
+pub mod bg;
 pub mod doctor;
 pub mod fetch;
 pub mod motion;
+pub mod saver;
 pub mod shot;
 pub mod status;
 pub mod sync;
 pub mod theme;
+pub mod toggles;
+pub mod update;
 pub mod wallpaper;
 pub mod wallpaper_tui;

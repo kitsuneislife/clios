@@ -212,9 +212,44 @@ bind = ["SUPER + F10"]
 what = "este guia, de volta"
 
 [[group]]
+id = "ferramentas"
+name = "ferramentas"
+blurb = "Pequenos liga-desliga, e os avisos aparecem na barra."
+
+[[group.key]]
+keys = "super + c"
+bind = ["SUPER + C"]
+what = "modo café: a tela não apaga nem suspende"
+
+[[group.key]]
+keys = "super + n"
+bind = ["SUPER + N"]
+what = "modo noturno: tela mais quente"
+
+[[group.key]]
+keys = "super + d"
+bind = ["SUPER + D"]
+what = "não perturbe: silencia as notificações"
+
+[[group.key]]
+keys = "super + shift + r"
+bind = ["SUPER + SHIFT + R"]
+what = "gravar a tela, ou parar a gravação"
+
+[[group.key]]
+keys = "super + p"
+bind = ["SUPER + P"]
+what = "conta-gotas: copia uma cor da tela"
+
+[[group.key]]
+keys = "super + u"
+bind = ["SUPER + U"]
+what = "atualizar o sistema, lendo as notícias antes"
+
+[[group]]
 id = "capturas"
 name = "capturas e sessão"
-blurb = "As capturas vão para o clipboard e para ~/Imagens."
+blurb = "As capturas vão para o clipboard e para ~/Pictures/Screenshots."
 
 [[group.key]]
 keys = "print"

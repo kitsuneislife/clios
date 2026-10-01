@@ -382,10 +382,18 @@ fn sistema(buf: &mut Buffer, app: &App, pen: &Pen, body: Rect) {
             value
         };
         let vx = body.x + w.saturating_sub(text_w(&shown) + 2);
+        let toggle_on = match s {
+            Setting::Caffeine => Some(app.caffeine),
+            Setting::Night => Some(app.night),
+            Setting::Dnd => Some(app.dnd),
+            _ => None,
+        };
         let fg = if confirming {
             pen.red
         } else if s.is_action() {
             pen.mute
+        } else if let Some(on) = toggle_on {
+            if on { pen.accent } else { pen.mute }
         } else if selected {
             pen.accent
         } else {
@@ -639,6 +647,26 @@ mod tests {
         a.sys_sel = 3;
         a.adjust(1, now);
         assert_ne!(a.ctx.state.wallpaper, "grade");
+    }
+
+    #[test]
+    fn toggles_flip_and_show_their_state() {
+        let mut a = app("toggles", Page::Sistema);
+        let now = Instant::now();
+        let t = draw(&a, 104, 32);
+        assert!(t.contains("modo café") && t.contains("modo noturno") && t.contains("não perturbe"), "{t}");
+        for (setting, read) in [
+            (Setting::Caffeine, (|a: &App| a.caffeine) as fn(&App) -> bool),
+            (Setting::Night, |a: &App| a.night),
+            (Setting::Dnd, |a: &App| a.dnd),
+        ] {
+            a.sys_sel = a.settings.iter().position(|s| *s == setting).unwrap();
+            assert!(!read(&a));
+            a.activate(now);
+            assert!(read(&a), "{setting:?} ligou");
+            a.activate(now);
+            assert!(!read(&a), "{setting:?} desligou");
+        }
     }
 
     #[test]

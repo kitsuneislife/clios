@@ -29,22 +29,22 @@ Gerado de `config/hypr/conf/binds.lua` por `tests/hypr/dump_keys.py`. No sistema
 | `super + T` | alternar flutuante |
 | `super + comma` | trocar direção da divisão |
 | `super + period` | fixar em todas as workspaces |
+| `super + k` | foco: up |
+| `super + shift + k` | mover janela: up |
 | `super + j` | foco: down |
 | `super + shift + j` | mover janela: down |
 | `super + l` | foco: right |
 | `super + shift + l` | mover janela: right |
 | `super + h` | foco: left |
 | `super + shift + h` | mover janela: left |
-| `super + k` | foco: up |
-| `super + shift + k` | mover janela: up |
 | `super + left` | foco: left |
 | `super + shift + left` | mover janela: left |
+| `super + down` | foco: down |
+| `super + shift + down` | mover janela: down |
 | `super + up` | foco: up |
 | `super + shift + up` | mover janela: up |
 | `super + right` | foco: right |
 | `super + shift + right` | mover janela: right |
-| `super + down` | foco: down |
-| `super + shift + down` | mover janela: down |
 | `super + R` | modo redimensionar (h j k l, esc sai) |
 | `super + 1` | ir para a workspace 1 |
 | `super + shift + 1` | enviar janela para a workspace 1 |
@@ -75,6 +75,16 @@ Gerado de `config/hypr/conf/binds.lua` por `tests/hypr/dump_keys.py`. No sistema
 | `super + F1` | tema: claro ou escuro |
 | `super + F2` | tema: próximo acento |
 | `super + F3` | movimento: completo, reduzido, desligado |
+| `super + F4` | papel de parede: escolher |
+| `super + shift + F4` | papel de parede: próximo |
+| `super + F9` | central do sistema |
+| `super + F10` | guia de boas-vindas |
+| `super + C` | modo café: a tela não apaga |
+| `super + N` | modo noturno: tela mais quente |
+| `super + D` | não perturbe: silenciar notificações |
+| `super + shift + R` | gravar a tela: começar ou parar |
+| `super + P` | conta-gotas: copiar uma cor da tela |
+| `super + U` | atualizar o sistema |
 | `Print` | captura: região |
 | `shift + Print` | captura: tela inteira |
 | `ctrl + Print` | captura: janela |

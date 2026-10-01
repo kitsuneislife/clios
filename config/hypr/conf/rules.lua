@@ -47,6 +47,15 @@ return function(T)
     stay_focused = true,
   })
 
+  -- A proteção de tela (`clios saver`) cobre a tela inteira, sem animação de entrada.
+  hl.window_rule({
+    name = "saver",
+    match = { class = "^clios\\.saver$" },
+    fullscreen = true,
+    no_anim = true,
+    stay_focused = true,
+  })
+
   -- Vídeo: a tela não apaga enquanto o mpv está em foco.
   hl.window_rule({
     name = "mpv",

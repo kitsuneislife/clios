@@ -11,7 +11,7 @@ keys = "super + espaço"
 [[tip]]
 title = "escopos do hub"
 body = "Um prefixo restringe a busca: @ janelas, ? atalhos, > ações, \" clipboard, + instalar apps que faltam."
-keys = "@  ?  >  \"  +"
+keys = "@  ?  >  \""
 
 [[tip]]
 title = "instale sem sair do hub"
@@ -65,7 +65,7 @@ keys = "super + /"
 
 [[tip]]
 title = "capturas vão direto para o clipboard"
-body = "Selecione uma região e cole em qualquer lugar. O arquivo também fica salvo em ~/Imagens."
+body = "Selecione uma região e cole em qualquer lugar. O arquivo também fica salvo em ~/Pictures/Screenshots."
 keys = "print"
 
 [[tip]]
@@ -102,3 +102,23 @@ keys = "clios sync"
 title = "o seu catálogo"
 body = "Copie config/clios/hub.toml para ~/.config/clios/hub.toml e acrescente os seus apps: eles entram no hub, no guia e no clios apps."
 keys = "~/.config/clios/hub.toml"
+
+[[tip]]
+title = "modo café"
+body = "Vai assistir ou apresentar algo? Um atalho segura a tela acesa e o sistema acordado, e a barra lembra que está ligado."
+keys = "super + c"
+
+[[tip]]
+title = "tela mais quente à noite"
+body = "O modo noturno avermelha a tela para cansar menos a vista. Clicar em noturno, na barra, desliga."
+keys = "super + n"
+
+[[tip]]
+title = "grave a tela"
+body = "Escolha uma região e grave. Quando parar, o arquivo vai para ~/Videos e uma notificação diz onde ficou."
+keys = "super + shift + r"
+
+[[tip]]
+title = "conta-gotas"
+body = "Pegue qualquer cor da tela: o hex vai direto para o clipboard."
+keys = "super + p"
