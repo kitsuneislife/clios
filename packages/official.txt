@@ -1,0 +1,90 @@
+# Pacotes dos repositórios oficiais do Arch (core + extra). Um por linha; # comenta.
+# Os nomes foram conferidos por pesquisa, não por instalação: o bootstrap pula e avisa os que não existirem.
+
+# ── base ──────────────────────────────────────────────────────────────
+base-devel
+git
+rust
+man-db
+less
+openssh
+xdg-utils
+
+# ── desktop ───────────────────────────────────────────────────────────
+hyprland
+hyprlock
+hypridle
+hyprpolkitagent
+xdg-desktop-portal-hyprland
+xdg-desktop-portal-gtk
+quickshell
+qt6-wayland
+adwaita-icon-theme
+
+# ── terminal e shell ──────────────────────────────────────────────────
+foot
+fish
+starship
+zoxide
+fzf
+ripgrep
+fd
+bat
+eza
+git-delta
+jq
+
+# ── ferramentas (as TUIs que substituem apps gráficos) ───────────────
+helix
+yazi
+lazygit
+btop
+aerc
+newsboat
+ffmpeg
+7zip
+poppler
+imagemagick
+
+# ── rede, bluetooth, áudio ────────────────────────────────────────────
+iwd
+iw
+impala
+bluez
+bluez-utils
+bluetui
+pipewire
+pipewire-pulse
+wireplumber
+wiremix
+playerctl
+
+# ── mídia ─────────────────────────────────────────────────────────────
+mpv
+spotify-player
+imv
+zathura
+zathura-pdf-mupdf
+
+# ── capturas, clipboard, notificações ────────────────────────────────
+grim
+slurp
+wl-clipboard
+cliphist
+libnotify
+brightnessctl
+
+# ── login e sistema ───────────────────────────────────────────────────
+greetd
+greetd-tuigreet
+zram-generator
+power-profiles-daemon
+upower
+polkit
+
+# ── tipografia ────────────────────────────────────────────────────────
+otf-geist-mono-nerd
+noto-fonts-emoji
+
+# ── a única exceção gráfica ───────────────────────────────────────────
+firefox

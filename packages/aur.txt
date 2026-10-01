@@ -1,0 +1,2 @@
+# Pacotes do AUR. Precisam de um helper (paru ou yay). Opcionais: o desktop funciona sem eles.
+ani-cli

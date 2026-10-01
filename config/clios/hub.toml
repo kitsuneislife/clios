@@ -1,0 +1,90 @@
+# Catálogo do hub. Copie para ~/.config/clios/hub.toml e edite para mudar o seu.
+#
+# [[tui]]  programa de terminal. `float = true` abre numa janela flutuante e centralizada.
+#          `hold = true` espera um Enter antes de fechar (para comandos que só imprimem).
+# [[cmd]]  qualquer comando de shell, sem janela.
+#
+# Apps gráficos (.desktop) aparecem sozinhos; não precisa listar.
+
+[[tui]]
+id = "files"
+name = "arquivos"
+cmd = ["yazi"]
+keywords = "yazi files manager fm pastas gerenciador"
+
+[[tui]]
+id = "editor"
+name = "editor"
+cmd = ["hx"]
+keywords = "helix hx edit code texto"
+
+[[tui]]
+id = "git"
+name = "git"
+cmd = ["lazygit"]
+keywords = "lazygit commit repo repositorio versionamento"
+
+[[tui]]
+id = "monitor"
+name = "monitor"
+cmd = ["btop"]
+float = true
+keywords = "btop cpu memoria ram processos top sistema"
+
+[[tui]]
+id = "audio"
+name = "áudio"
+cmd = ["wiremix"]
+float = true
+keywords = "wiremix volume som pipewire mixer audio saida entrada"
+
+[[tui]]
+id = "network"
+name = "rede"
+cmd = ["impala"]
+float = true
+keywords = "impala wifi wi-fi wireless internet network conectar"
+
+[[tui]]
+id = "bluetooth"
+name = "bluetooth"
+cmd = ["bluetui"]
+float = true
+keywords = "bluetui bt fone headset pareamento"
+
+[[tui]]
+id = "music"
+name = "música"
+cmd = ["spotify_player"]
+float = true
+keywords = "spotify player musica tocar playlist"
+
+[[tui]]
+id = "anime"
+name = "anime"
+cmd = ["ani-cli"]
+keywords = "ani-cli assistir episodio mpv"
+
+[[tui]]
+id = "mail"
+name = "e-mail"
+cmd = ["aerc"]
+keywords = "aerc email correio mensagens"
+
+[[tui]]
+id = "feeds"
+name = "feeds"
+cmd = ["newsboat"]
+keywords = "newsboat rss noticias atom leitor"
+
+[[tui]]
+id = "terminal"
+name = "terminal"
+cmd = ["fish"]
+keywords = "shell fish console"
+
+[[cmd]]
+id = "clip"
+name = "histórico da área de transferência"
+shell = "true"
+keywords = "clipboard cliphist copiar colar"

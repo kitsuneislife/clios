@@ -1,0 +1,549 @@
+<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Identidade CLIOS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;700&display=swap">
+<style>
+/* Plano: uma família só (Geist Mono), como o próprio sistema. Neutros puros, um acento trocável.
+   Layout: coluna única estreita para texto, e uma "tela" larga com o desktop; seções separadas por régua de 1px. */
+:root{
+  color-scheme:dark;
+  --bg:#000000; --surface:#0A0A0A; --raised:#151515; --line:#2A2A2A; --mute:#6B6B6B; --dim:#A8A8A8; --fg:#F5F5F5;
+  --accent:#FF5A1F; --accent-ink:#000000; --accent-soft:#2E1006; --red:#FF6166;
+  --font:"Geist Mono",ui-monospace,"JetBrains Mono",Menlo,Consolas,monospace;
+  --t-instant:90ms; --t-fast:160ms; --t-base:240ms; --t-slow:360ms; --t-exit:144ms;
+  --out:cubic-bezier(.16,1,.3,1); --in:cubic-bezier(.7,0,.84,0); --inout:cubic-bezier(.65,0,.35,1);
+  --travel:16px;
+}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){
+  color-scheme:light;
+  --bg:#FFFFFF; --surface:#F6F6F6; --raised:#ECECEC; --line:#D2D2D2; --mute:#767676; --dim:#4D4D4D; --fg:#0A0A0A;
+  --accent:#CC3E00; --accent-ink:#FFFFFF; --accent-soft:#F6DCD1; --red:#C42B2B;}}
+:root[data-theme="light"]{
+  color-scheme:light;
+  --bg:#FFFFFF; --surface:#F6F6F6; --raised:#ECECEC; --line:#D2D2D2; --mute:#767676; --dim:#4D4D4D; --fg:#0A0A0A;
+  --accent:#CC3E00; --accent-ink:#FFFFFF; --accent-soft:#F6DCD1; --red:#C42B2B;}
+:root[data-motion="reduced"]{--t-instant:45ms;--t-fast:80ms;--t-base:120ms;--t-slow:180ms;--t-exit:72ms;--travel:0px}
+:root[data-motion="off"]{--t-instant:0ms;--t-fast:0ms;--t-base:0ms;--t-slow:0ms;--t-exit:0ms;--travel:0px}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:400 14px/1.65 var(--font);padding-inline:clamp(16px,4vw,48px);padding-block:0 96px;
+  transition:background var(--t-slow) var(--out),color var(--t-slow) var(--out);-webkit-font-smoothing:antialiased}
+a{color:var(--fg);text-decoration-color:var(--line);text-underline-offset:3px}
+a:hover{text-decoration-color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button{font:inherit;color:inherit;background:none;border:1px solid var(--line);padding:6px 12px;cursor:pointer;border-radius:0;
+  transition:background var(--t-fast) var(--out),border-color var(--t-fast) var(--out),color var(--t-fast) var(--out)}
+button:hover{border-color:var(--mute)}
+button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.wrap{max-width:1120px;margin-inline:auto}
+section{padding-block:56px 8px;border-top:1px solid var(--line);margin-top:56px}
+h1,h2,h3{margin:0;font-weight:700;text-wrap:balance;letter-spacing:-.01em}
+h2{font-size:clamp(22px,3vw,30px);line-height:1.2;display:flex;gap:.55ch;align-items:baseline}
+h2::before{content:"";display:inline-block;width:.42em;height:.9em;background:var(--accent);transform:translateY(.08em);flex:none;transition:background var(--t-slow) var(--out)}
+h3{font-size:15px;color:var(--fg)}
+p{margin:0;max-width:68ch;color:var(--dim)}
+.lead{font-size:16px;color:var(--fg);max-width:60ch}
+.mute{color:var(--mute)}
+.num{font-variant-numeric:tabular-nums}
+.stack{display:flex;flex-direction:column;gap:20px}
+.grid{display:grid;gap:24px;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr))}
+.row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+
+/* ── controle fixo ─────────────────────────────────── */
+.ctl{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);border-bottom:1px solid var(--line);
+  margin-inline:calc(-1*clamp(16px,4vw,48px));padding:10px clamp(16px,4vw,48px);transition:background var(--t-slow) var(--out)}
+.ctl .wrap{display:flex;flex-wrap:wrap;gap:10px 24px;align-items:center}
+.ctl .brand{display:flex;gap:10px;align-items:center;font-weight:700}
+.seg{display:flex}
+.seg button+button{margin-left:-1px}
+.sw{display:flex;gap:6px}
+.sw button{width:26px;height:26px;padding:0;border:2px solid transparent;background:var(--c);position:relative}
+.sw button[aria-pressed="true"]{border-color:var(--fg);background:var(--c);color:inherit}
+.lbl{color:var(--mute);font-size:12px}
+
+/* ── hero ──────────────────────────────────────────── */
+.hero{padding-block:64px 24px;display:grid;gap:40px;grid-template-columns:minmax(0,1fr)}
+@media(min-width:860px){.hero{grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);align-items:center}}
+.wm{display:block;width:min(100%,460px);height:auto;color:var(--fg);margin-bottom:28px}
+.wm path{fill:currentColor;transition:fill var(--t-slow) var(--out)}
+.wm rect{fill:var(--accent);transition:fill var(--t-slow) var(--out)}
+.blink{animation:blink 1.06s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+:root[data-motion="off"] .blink{animation:none}
+.bigmark{width:min(100%,320px);height:auto;justify-self:center}
+.bigmark path{fill:var(--fg);transition:fill var(--t-slow) var(--out)}
+.bigmark rect{fill:var(--accent);transition:fill var(--t-slow) var(--out)}
+
+/* ── desktop ───────────────────────────────────────── */
+.desk{container-type:inline-size;position:relative;width:100%;aspect-ratio:16/10;min-height:300px;background:var(--bg);border:1px solid var(--line);overflow:hidden;
+  font-size:clamp(7.5px,1.08cqw,13px);line-height:1.5;transition:background var(--t-slow) var(--out)}
+.bar{position:absolute;inset:0 0 auto 0;height:2.15em;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding-inline:1em;background:var(--bg);transition:background var(--t-slow) var(--out)}
+.ws{position:relative;display:flex;height:100%;align-items:center}
+.ws b{position:absolute;left:0;top:.35em;height:calc(100% - .7em);width:2.6em;background:var(--accent);transition:transform var(--t-fast) var(--out),background var(--t-slow) var(--out)}
+.ws button{position:relative;width:2.6em;height:100%;border:0;padding:0;font-size:.92em;color:var(--dim);font-weight:400;transition:color var(--t-fast) var(--out)}
+.ws button[aria-current="true"]{color:var(--accent-ink);font-weight:700}
+.bar .ttl{color:var(--mute);margin-inline:1.5em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0;font-size:.92em}
+.bar .st{display:flex;gap:0;white-space:nowrap;flex:none}
+.bar .st button{border:0;padding:0 .55em;color:var(--dim);height:2em;font-size:inherit}
+.bar .st button:hover{color:var(--fg)}
+.bar .st .ck{color:var(--fg)}
+.tiles{position:absolute;inset:2.15em 0 0 0;display:grid;grid-template-columns:1.15fr 1fr;gap:.46em;padding:.92em}
+.win{border:.15em solid var(--line);background:var(--bg);padding:.8em 1em;overflow:hidden;min-width:0;position:relative;transition:border-color var(--t-fast) var(--out),background var(--t-slow) var(--out)}
+.win.on{border-color:var(--accent)}
+.win .h{color:var(--mute);margin-bottom:.5em;white-space:nowrap}
+.code{white-space:pre;color:var(--fg);font-size:.95em}
+.code .ln{color:var(--mute);display:inline-block;width:2.4em}
+.code .k{color:var(--accent)} .code .s{color:var(--dim)} .code .c{color:var(--mute);font-style:italic} .code .cur{background:var(--accent);color:var(--accent-ink)}
+.hx{position:absolute;left:0;right:0;bottom:0;display:flex;gap:1em;padding:.2em 1em;background:var(--surface);color:var(--dim);white-space:nowrap;overflow:hidden}
+.hx b{background:var(--accent);color:var(--accent-ink);padding:0 .7em;margin-left:-1em;margin-right:0}
+.yz{display:grid;grid-template-columns:1fr 1fr;gap:1em;height:100%}
+.yz ul{list-style:none;margin:0;padding:0;color:var(--dim)}
+.yz li{display:flex;justify-content:space-between;padding-inline:.5em;white-space:nowrap}
+.yz li.d{color:var(--accent)} .yz li.hov{background:var(--accent);color:var(--accent-ink)}
+.yz .pv{border-left:1px solid var(--line);padding-left:1em}
+.corner{position:absolute;right:1.6em;bottom:1.4em;width:3.2em;opacity:.9}
+.corner path{fill:var(--line)} .corner rect{fill:var(--accent);opacity:.55}
+
+.hub{position:absolute;left:50%;top:52%;width:min(66%,60em);transform:translate(-50%,-50%);background:var(--bg);border:.2em solid var(--accent);padding:1.1em 0 .9em;z-index:5;
+  box-shadow:0 0 0 1px var(--bg);transition:opacity var(--t-base) var(--out),transform var(--t-base) var(--out),border-color var(--t-slow) var(--out),background var(--t-slow) var(--out)}
+.hub[hidden]{display:none!important}
+.hub.in{animation:pop var(--t-base) var(--out)}
+@keyframes pop{from{opacity:0;transform:translate(-50%,-50%) scale(calc(1 - var(--pop,.06)))}}
+:root[data-motion="reduced"]{--pop:0}
+.hub .hd{display:flex;justify-content:space-between;padding-inline:1.6em;color:var(--mute)}
+.hub .hd b{color:var(--fg)} .hub .hd i{font-style:normal;color:var(--accent)}
+.hub .pr{display:flex;gap:.9em;padding:.7em 1em .5em 1.6em;align-items:center}
+.hub .pr span{color:var(--accent)}
+.hub input{flex:1;min-width:0;background:none;border:0;outline:0;color:var(--fg);font:inherit;caret-color:var(--accent);caret-shape:block;padding:0}
+.hub input::placeholder{color:var(--mute)}
+.hub .rule{height:1px;background:var(--line);margin:.2em 1.6em .4em}
+.hub ol{list-style:none;margin:0;padding:0;min-height:11.5em}
+.hub li{display:flex;justify-content:space-between;gap:1em;padding:.1em 1.6em .1em 1.6em;position:relative;color:var(--dim);cursor:pointer;white-space:nowrap;
+  background:linear-gradient(var(--bg),var(--bg));transition:background var(--t-instant) var(--out),color var(--t-instant) var(--out)}
+.hub li[aria-selected="true"]{background:var(--raised);color:var(--fg);font-weight:700}
+.hub li[aria-selected="true"]::before{content:"";position:absolute;left:.5em;top:0;bottom:0;width:.5em;background:var(--accent)}
+.hub li .t{overflow:hidden;text-overflow:ellipsis;min-width:0} .hub li mark{background:none;color:var(--accent);font-weight:700}
+.hub li .k{color:var(--mute);font-weight:400;flex:none} .hub li.arm .k{color:var(--red)}
+.hub li .dot{display:inline-block;width:.7em;height:.7em;background:var(--c);border-radius:50%;margin-right:.7em}
+.hub .ft{display:flex;justify-content:space-between;gap:1em;padding:.7em 1.6em 0;color:var(--mute);white-space:nowrap;overflow:hidden}
+.hub .ft b{color:var(--dim);font-weight:400}
+.toast{position:absolute;right:1em;top:3.1em;width:24em;max-width:60%;background:var(--surface);border:1px solid var(--line);border-left:.2em solid var(--accent);padding:.7em 1em;z-index:6;
+  transition:opacity var(--t-fast) var(--out),transform var(--t-base) var(--out);opacity:1;transform:none}
+.toast[hidden]{display:none!important}
+.toast.out{opacity:0;transform:translateX(var(--travel));transition-duration:var(--t-exit);transition-timing-function:var(--in)}
+.toast small{display:block;color:var(--mute)} .toast b{display:block}
+.toast span{color:var(--dim)}
+.cap{margin-top:12px;color:var(--mute);font-size:12px}
+
+/* ── tabelas ───────────────────────────────────────── */
+.tbl{width:100%;border-collapse:collapse}
+.tbl th,.tbl td{text-align:left;padding:9px 14px 9px 0;border-bottom:1px solid var(--line);vertical-align:top;font-weight:400}
+.tbl th{color:var(--mute);font-size:12px}
+.tbl td:first-child{color:var(--fg);white-space:nowrap}
+.scroll{overflow-x:auto}
+.chip{display:inline-block;width:1.1em;height:1.1em;vertical-align:-.15em;margin-right:.8ch;background:var(--c);border:1px solid var(--line)}
+.ok{color:var(--fg)} .low{color:var(--red)}
+
+/* ── movimento ─────────────────────────────────────── */
+.curve{border:1px solid var(--line);padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.curve svg{width:100%;height:auto;display:block}
+.curve .ax{stroke:var(--line);fill:none} .curve .cv{stroke:var(--accent);fill:none;stroke-width:2;transition:stroke var(--t-slow) var(--out)}
+.curve .gl{stroke:var(--mute);stroke-dasharray:3 4;fill:none}
+.curve .pt{fill:var(--accent)} .curve .tx{fill:var(--mute);font:11px var(--font)}
+.track{position:relative;height:22px;border-bottom:1px solid var(--line)}
+.track i{position:absolute;left:0;bottom:-1px;width:22px;height:22px;background:var(--accent);transition:background var(--t-slow) var(--out)}
+.bars{display:grid;gap:10px}
+.bars div{display:grid;grid-template-columns:7.5em 1fr 5em;gap:12px;align-items:center}
+.bars .bg{height:10px;background:var(--raised);position:relative}
+.bars .fg{position:absolute;inset:0 auto 0 0;width:0;background:var(--accent)}
+.demo{border:1px solid var(--line);padding:16px;min-height:150px;position:relative;overflow:hidden}
+.demo>p{position:absolute;left:16px;bottom:12px;margin:0}
+.demo .card{position:absolute;right:16px;top:16px;width:min(260px,70%);border:1px solid var(--line);border-left:3px solid var(--accent);background:var(--surface);padding:10px 12px;opacity:0;transform:translateX(var(--travel))}
+.demo .card.show{opacity:1;transform:none;transition:opacity var(--t-fast) var(--out),transform var(--t-base) var(--out)}
+.demo .card.hide{transition:opacity var(--t-exit) var(--in),transform var(--t-exit) var(--in)}
+
+/* ── marca ─────────────────────────────────────────── */
+.vars{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:16px}
+.var{border:1px solid var(--line);padding:14px;display:flex;flex-direction:column;gap:10px}
+.var.pick{border-color:var(--accent)}
+.var .sizes{display:flex;gap:10px;align-items:flex-end}
+.var svg{display:block}
+.var svg path{fill:var(--fg)} .var svg rect{fill:var(--accent)}
+
+.two{display:grid;gap:32px;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr))}
+ul.plain{margin:0;padding:0;list-style:none;display:grid;gap:8px;color:var(--dim)}
+ul.plain li{padding-left:1.6em;position:relative}
+ul.plain li::before{content:"✓";position:absolute;left:0;color:var(--fg)}
+ul.plain.no li::before{content:"·";color:var(--accent);font-weight:700}
+footer{margin-top:96px;padding-top:24px;border-top:1px solid var(--line);color:var(--mute);font-size:12px;display:flex;flex-wrap:wrap;gap:8px 32px;justify-content:space-between}
+code{color:var(--fg)}
+@media (prefers-reduced-motion:reduce){.blink{animation:none}}
+</style>
+
+<div class="ctl"><div class="wrap">
+  <span class="brand"><svg width="18" height="18" viewBox="0 0 64 64" aria-hidden="true"><path d="M0 0H64V20H20V44H64V64H0Z" fill="currentColor"/><rect x="34" y="20" width="12" height="24" style="fill:var(--accent)"/></svg>clios</span>
+  <div class="row"><span class="lbl">modo</span><div class="seg" id="mode"><button id="m-dark" data-v="dark">escuro</button><button id="m-light" data-v="light">claro</button></div></div>
+  <div class="row"><span class="lbl">acento</span><div class="sw" id="accents"></div></div>
+  <div class="row"><span class="lbl">movimento</span><div class="seg" id="motion"><button id="mo-full" data-v="full">completo</button><button id="mo-reduced" data-v="reduced">reduzido</button><button id="mo-off" data-v="off">desligado</button></div></div>
+</div></div>
+
+<main class="wrap">
+  <div class="hero">
+    <div>
+      <svg class="wm" viewBox="0 0 291.6 64" role="img" aria-label="clios"><path d="M26.983783783783785 65.03783783783784Q20.583783783783787 65.03783783783784 15.740540540540543 62.054054054054056Q10.897297297297298 59.07027027027027 8.216216216216218 53.66486486486487Q5.535135135135135 48.25945945945946 5.535135135135135 40.994594594594595Q5.535135135135135 33.729729729729726 8.216216216216218 28.324324324324323Q10.897297297297298 22.91891891891892 15.740540540540543 19.935135135135134Q20.583783783783787 16.95135135135135 26.983783783783785 16.95135135135135Q34.85405405405405 16.95135135135135 40.17297297297297 21.318918918918918Q45.491891891891896 25.686486486486487 46.789189189189194 33.47027027027027L37.881081081081085 34.075675675675676Q36.84324324324324 29.751351351351346 33.98918918918919 27.37297297297297Q31.135135135135137 24.994594594594595 27.07027027027027 24.994594594594595Q21.18918918918919 24.994594594594595 17.902702702702705 29.275675675675675Q14.616216216216216 33.556756756756755 14.616216216216216 40.994594594594595Q14.616216216216216 48.432432432432435 17.902702702702705 52.71351351351352Q21.18918918918919 56.994594594594595 27.07027027027027 56.994594594594595Q31.221621621621622 56.994594594594595 34.20540540540541 54.52972972972973Q37.18918918918919 52.064864864864866 38.14054054054054 47.22162162162162L47.04864864864865 47.740540540540536Q45.75135135135135 55.61081081081081 40.3027027027027 60.32432432432432Q34.85405405405405 65.03783783783784 26.983783783783785 65.03783783783784Z M56.73513513513514 64.0V56.648648648648646H74.72432432432433V15.65405405405405Q74.72432432432433 12.972972972972968 73.25405405405405 11.459459459459456Q71.78378378378379 9.945945945945944 69.01621621621622 9.945945945945944H58.464864864864865V2.5945945945945894H69.96756756756757Q83.45945945945947 2.5945945945945894 83.45945945945947 16.086486486486486V56.648648648648646H98.94054054054055V64.0Z M110.35675675675677 64.0V56.648648648648646H128.34594594594594V25.340540540540538H111.22162162162162V17.98918918918919H137.16756756756757V56.648648648648646H152.56216216216217V64.0ZM127.82702702702704 11.329729729729728V2.248648648648647H136.82162162162163V11.329729729729728Z M181.6216216216216 65.03783783783784Q175.22162162162164 65.03783783783784 170.42162162162163 62.0972972972973Q165.6216216216216 59.15675675675676 162.9837837837838 53.751351351351346Q160.34594594594594 48.34594594594594 160.34594594594594 40.994594594594595Q160.34594594594594 33.64324324324324 162.9837837837838 28.237837837837834Q165.6216216216216 22.832432432432427 170.42162162162163 19.891891891891888Q175.22162162162164 16.95135135135135 181.6216216216216 16.95135135135135Q188.02162162162162 16.95135135135135 192.8216216216216 19.891891891891888Q197.6216216216216 22.832432432432427 200.25945945945946 28.237837837837834Q202.8972972972973 33.64324324324324 202.8972972972973 40.994594594594595Q202.8972972972973 48.34594594594594 200.25945945945946 53.751351351351346Q197.6216216216216 59.15675675675676 192.8216216216216 62.0972972972973Q188.02162162162162 65.03783783783784 181.6216216216216 65.03783783783784ZM181.6216216216216 56.994594594594595Q187.4162162162162 56.994594594594595 190.572972972973 52.75675675675676Q193.72972972972974 48.518918918918914 193.72972972972974 40.994594594594595Q193.72972972972974 33.47027027027027 190.572972972973 29.232432432432432Q187.4162162162162 24.994594594594595 181.6216216216216 24.994594594594595Q175.82702702702704 24.994594594594595 172.6702702702703 29.232432432432432Q169.51351351351352 33.47027027027027 169.51351351351352 40.994594594594595Q169.51351351351352 48.518918918918914 172.6702702702703 52.75675675675676Q175.82702702702704 56.994594594594595 181.6216216216216 56.994594594594595Z M234.20540540540543 65.03783783783784Q228.0648648648649 65.03783783783784 223.6540540540541 62.962162162162166Q219.24324324324326 60.88648648648649 216.82162162162163 57.383783783783784Q214.4 53.88108108108108 214.05405405405406 49.556756756756755L222.96216216216217 49.03783783783784Q223.65405405405406 52.84324324324324 226.42162162162163 55.005405405405405Q229.1891891891892 57.167567567567566 234.2918918918919 57.167567567567566Q238.96216216216217 57.167567567567566 241.51351351351354 55.87027027027027Q244.0648648648649 54.57297297297298 244.0648648648649 51.80540540540541Q244.0648648648649 50.075675675675676 243.20000000000002 48.90810810810811Q242.33513513513515 47.740540540540536 239.95675675675676 46.91891891891892Q237.5783783783784 46.097297297297295 232.99459459459462 45.23243243243243Q226.1621621621622 44.02162162162162 222.2702702702703 42.16216216216216Q218.3783783783784 40.3027027027027 216.7783783783784 37.62162162162162Q215.1783783783784 34.94054054054054 215.1783783783784 31.048648648648644Q215.1783783783784 24.994594594594595 219.71891891891892 20.972972972972972Q224.25945945945946 16.95135135135135 233.0810810810811 16.95135135135135Q239.22162162162164 16.95135135135135 243.24324324324326 19.027027027027025Q247.26486486486488 21.1027027027027 249.47027027027028 24.518918918918917Q251.67567567567568 27.935135135135134 252.28108108108108 31.913513513513514L243.372972972973 32.432432432432435Q242.6810810810811 29.05945945945946 240.04324324324324 26.94054054054054Q237.40540540540542 24.821621621621617 233.0810810810811 24.821621621621617Q228.41081081081083 24.821621621621617 226.2918918918919 26.637837837837836Q224.17297297297299 28.454054054054055 224.17297297297299 31.048648648648644Q224.17297297297299 34.16216216216216 226.5945945945946 35.545945945945945Q229.01621621621624 36.92972972972973 235.24324324324326 38.05405405405405Q242.24864864864867 39.26486486486486 246.0972972972973 40.99459459459459Q249.94594594594597 42.72432432432432 251.45945945945948 45.31891891891892Q252.972972972973 47.913513513513514 252.972972972973 51.71891891891892Q252.972972972973 57.945945945945944 247.7837837837838 61.491891891891896Q242.5945945945946 65.03783783783784 234.20540540540543 65.03783783783784Z"/><rect class="blink" x="265.7" y="18" width="25.9" height="46"/></svg>
+      <p class="lead">Um desktop Linux feito para o terminal. Preto no branco, branco no preto, um acento que você escolhe, uma fonte só.</p>
+      <p style="margin-top:16px">Troque o modo, o acento ou o movimento na barra acima. A página inteira muda junto, do mesmo jeito que o sistema: Hyprland, a shell, o terminal, o editor e a tela de bloqueio leem os mesmos tokens.</p>
+    </div>
+    <svg class="bigmark" viewBox="0 0 64 64" role="img" aria-label="marca: um c com o cursor de terminal dentro"><path d="M0 0H64V20H20V44H64V64H0Z"/><rect class="blink" x="34" y="20" width="12" height="24"/></svg>
+  </div>
+
+  <section id="desktop">
+    <div class="stack">
+      <h2>O desktop</h2>
+      <p>Uma barra de texto, janelas de terminal em mosaico e nada mais. O hub no centro é um programa de terminal; aqui ele está reconstruído com os mesmos itens, a mesma busca e a mesma animação. Digite, use as setas, e experimente <code>&gt;acento</code>.</p>
+    </div>
+    <div style="margin-top:28px">
+      <div class="desk" id="desk">
+        <div class="bar">
+          <div class="ws" id="ws"><b id="wsb"></b></div>
+          <div class="ttl" id="ttl">hx tokens/tokens.toml</div>
+          <div class="st">
+            <button data-open="wiremix · áudio">vol 42</button><button data-open="impala · rede">Casa 5G</button><button data-open="btop · monitor">87%</button><button class="ck" data-open="btop · monitor">qua 1  14:32</button>
+          </div>
+        </div>
+        <div class="tiles">
+          <div class="win on" id="w1">
+            <div class="h">tokens/tokens.toml</div>
+<div class="code"><span class="ln">11</span><span class="k">[motion.duration]</span>   <span class="c"># milissegundos</span>
+<span class="ln">12</span>instant = 90
+<span class="ln">13</span>fast = 160
+<span class="ln">14</span>base = 240
+<span class="ln">15</span>slow = 360
+<span class="ln">16</span>
+<span class="ln">17</span><span class="k">[motion.curve.out]</span>
+<span class="ln">18</span>points = [0.16, 1.0, 0.30, 1.0]
+<span class="ln">19</span>
+<span class="ln">20</span><span class="k">[motion.spring.settle]</span>
+<span class="ln">21</span>mass = 1.0
+<span class="ln">22</span>stiffness = 320.0
+<span class="ln">23</span>damping_ratio = <span class="cur">1</span>.0   <span class="c"># 1.0 = amortecimento crítico</span></div>
+            <div class="hx"><b>NOR</b><span>tokens/tokens.toml [+]</span><span style="margin-left:auto">23:17</span><span>toml</span></div>
+          </div>
+          <div class="win" id="w2">
+            <div class="h">~/clios</div>
+            <div class="yz">
+              <ul><li class="d"><span>brand/</span></li><li class="d"><span>config/</span></li><li class="d hov"><span>crates/</span></li><li class="d"><span>docs/</span></li><li class="d"><span>iso/</span></li><li class="d"><span>packages/</span></li><li class="d"><span>scripts/</span></li><li class="d"><span>seed/</span></li><li class="d"><span>system/</span></li><li class="d"><span>templates/</span></li><li class="d"><span>tests/</span></li><li class="d"><span>tokens/</span></li><li><span>Cargo.toml</span><span class="mute">1,1 KB</span></li><li><span>README.md</span><span class="mute">8,3 KB</span></li></ul>
+              <ul class="pv"><li class="d"><span>clios-core/</span></li><li class="d"><span>clios/</span></li></ul>
+            </div>
+          </div>
+        </div>
+        <svg class="corner" viewBox="0 0 64 64" aria-hidden="true"><path d="M0 0H64V20H20V44H64V64H0Z"/><rect class="blink" x="34" y="20" width="12" height="24"/></svg>
+        <div class="toast" id="toast" hidden role="status"></div>
+        <div class="hub in" id="hub" role="dialog" aria-label="hub">
+          <div class="hd"><span><b>clios</b><i>▌</i></span><span id="hubst">ember · dark</span></div>
+          <label class="pr"><span>❯</span><input id="hq" type="text" autocomplete="off" spellcheck="false" placeholder="buscar apps, ações, tudo" aria-label="buscar no hub"></label>
+          <div class="rule"></div>
+          <ol id="hl" role="listbox" aria-label="resultados"></ol>
+          <div class="ft" id="hf"></div>
+        </div>
+      </div>
+      <p class="cap">Ilustração montada com HTML. Os itens do hub vêm de <code>config/clios/hub.toml</code>; o conteúdo das janelas é o do repositório. Os componentes reais, renderizados pelo Qt, estão em <a href="https://github.com/kitsuneislife/clios/tree/claude/compassionate-archimedes-bnjzm4/docs/img">docs/img</a>.</p>
+      <div class="row" style="margin-top:16px"><button id="hubbtn">abrir o hub</button><span class="lbl">no sistema: <code>SUPER + espaço</code></span></div>
+    </div>
+  </section>
+
+  <section id="cor">
+    <div class="stack">
+      <h2>Cor</h2>
+      <p>Neutros puros e um acento. <code>surface</code>, <code>raised</code> e <code>line</code> ficam quase invisíveis de propósito: a hierarquia vem de linhas e de peso de fonte, sem sombra nem gradiente. As razões abaixo são calculadas aqui, na hora, contra o fundo do modo atual.</p>
+    </div>
+    <div class="two" style="margin-top:28px">
+      <div class="scroll"><table class="tbl" id="neutrals"><thead><tr><th>token</th><th>valor</th><th class="num">contraste</th><th>uso</th></tr></thead><tbody></tbody></table></div>
+      <div class="scroll"><table class="tbl" id="acctbl"><thead><tr><th>acento</th><th>valor</th><th class="num">contra o fundo</th><th class="num">texto sobre ele</th></tr></thead><tbody></tbody></table></div>
+    </div>
+    <p style="margin-top:20px">Todo acento passa de 4.5:1 nos dois modos. Os testes de <code>clios-core</code> quebram o build se algum cair abaixo disso. Um hex qualquer, como <code>--accent "#7CFF00"</code>, é aceito e ajustado até passar, mantendo o matiz.</p>
+  </section>
+
+  <section id="movimento">
+    <div class="stack">
+      <h2>Movimento</h2>
+      <p>Quatro regras. Entrada rápida e saída mais rápida ainda, cerca de 60% do tempo. Uma família de curvas. Mola só para o que ocupa espaço, amortecida de forma crítica, então nada quica. E um nível de movimento que o usuário controla (use os botões acima para ver cada um).</p>
+    </div>
+    <div class="grid" style="margin-top:28px" id="curves"></div>
+
+    <div class="grid" style="margin-top:24px">
+      <div class="curve">
+        <h3>durações</h3>
+        <div class="bars" id="bars"></div>
+        <div class="row"><button id="playbars">tocar</button></div>
+      </div>
+      <div class="curve">
+        <h3>entrada e saída</h3>
+        <div class="demo" id="demo"><p class="mute" style="max-width:28ch">entra em 240 ms, sai em 144 ms</p>
+          <div class="card" id="card"><small>sistema</small><b>Captura salva</b><span>~/Pictures/Screenshots</span></div></div>
+        <div class="row"><button id="playcard">alternar</button></div>
+      </div>
+      <div class="curve">
+        <h3>a mola <span class="mute">(a linha tracejada é o que o CLIOS evita)</span></h3>
+        <svg id="spring" viewBox="0 0 220 130" role="img" aria-label="resposta de uma mola criticamente amortecida, sem overshoot, contra uma subamortecida que quica"></svg>
+        <p class="mute" style="font-size:12px">rigidez 320, massa 1, razão de amortecimento 1.0. Janelas e workspaces assentam sem passar do ponto.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="marca">
+    <div class="stack">
+      <h2>A marca</h2>
+      <p>Um quadrado com a boca aberta, que forma um "c", e o cursor de terminal esperando dentro. O wordmark repete o bloco depois do <code>s</code>. Cinco proporções foram testadas em 110, 48, 28, 18 e 12 px. A segunda é a escolhida: lê como "c" em qualquer tamanho, e o traço de 20 casa com o peso da Geist Mono. A primeira, com a coluna de 36, virava um borrão pequena.</p>
+    </div>
+    <div class="vars" id="vars" style="margin-top:28px"></div>
+  </section>
+
+  <section id="stack">
+    <div class="stack">
+      <h2>A stack</h2>
+      <p>Uma escolha por função. O custo de cada uma está em <code>docs/STACK.md</code>.</p>
+    </div>
+    <div class="scroll" style="margin-top:24px"><table class="tbl">
+      <thead><tr><th>função</th><th>escolha</th><th>em vez de</th></tr></thead>
+      <tbody>
+        <tr><td>base</td><td>Arch Linux, ISO por archiso</td><td>NixOS, Void, Alpine</td></tr>
+        <tr><td>compositor</td><td>Hyprland 0.56, config em Lua</td><td>niri, sway</td></tr>
+        <tr><td>shell</td><td>Quickshell: barra, OSD, notificações, papel de parede</td><td>Waybar + mako + swayosd + hyprpaper</td></tr>
+        <tr><td>terminal</td><td>foot, em modo servidor</td><td>Ghostty, Kitty, Alacritty</td></tr>
+        <tr><td>shell interativo</td><td>fish, starship, zoxide, fzf</td><td>zsh</td></tr>
+        <tr><td>editor</td><td>Helix</td><td>Neovim</td></tr>
+        <tr><td>arquivos, git, monitor</td><td>yazi, lazygit, btop</td><td>ranger, gitui, bottom</td></tr>
+        <tr><td>rede, áudio, bluetooth</td><td>iwd + impala, PipeWire + wiremix, bluetui</td><td>NetworkManager, PulseAudio</td></tr>
+        <tr><td>música, anime</td><td>spotify_player, ani-cli + mpv</td><td></td></tr>
+        <tr><td>login, bloqueio</td><td>greetd + tuigreet, hyprlock + hypridle</td><td>sddm, swaylock</td></tr>
+        <tr><td>navegador</td><td>Firefox, a única exceção gráfica</td><td>qutebrowser</td></tr>
+        <tr><td>fonte</td><td>Geist Mono, em tudo</td><td></td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section id="estado">
+    <div class="stack"><h2>Estado</h2>
+    <p>Escrito e testado em CI, num Linux sem Wayland. Ainda não foi executado numa sessão de verdade.</p></div>
+    <div class="two" style="margin-top:28px">
+      <div class="stack"><h3>testado</h3>
+        <ul class="plain">
+          <li>138 testes de Rust, mais clippy e rustfmt</li>
+          <li>contraste de todo acento e texto, nos dois modos</li>
+          <li>os templates de cada app em 48 combinações de modo, acento e movimento</li>
+          <li>o config Lua do Hyprland contra o stub oficial da API, e o próprio validador contra 18 configs erradas</li>
+          <li>os componentes da shell renderizados fora do Quickshell, sem avisos</li>
+          <li>o hub: busca, teclado, mouse, confirmação, cada quadro da animação</li>
+        </ul></div>
+      <div class="stack"><h3>nunca rodou</h3>
+        <ul class="plain no">
+          <li>nenhuma peça dentro de uma sessão Hyprland ou do Quickshell</li>
+          <li>os nomes dos pacotes do Arch foram conferidos por pesquisa, não por instalação</li>
+          <li>a ISO ainda não foi montada</li>
+          <li>nada foi testado em hardware</li>
+        </ul></div>
+    </div>
+  </section>
+
+  <footer><span>CLIOS · MIT</span><a href="https://github.com/kitsuneislife/clios/tree/claude/compassionate-archimedes-bnjzm4">github.com/kitsuneislife/clios</a></footer>
+</main>
+
+<script>
+(function(){
+"use strict";
+var $=function(s,r){return (r||document).querySelector(s)};
+var root=document.documentElement;
+var ACC={ember:["#FF5A1F","#CC3E00"],azure:["#4C8DFF","#1F5FD8"],violet:["#A07BFF","#6B3FE0"],rose:["#FF5C93","#D01F68"],mint:["#2FE0A0","#007A52"],signal:["#FFD21F","#8A6A00"],mono:["#F5F5F5","#0A0A0A"]};
+var NEU={dark:{bg:"#000000",surface:"#0A0A0A",raised:"#151515",line:"#2A2A2A",mute:"#6B6B6B",dim:"#A8A8A8",fg:"#F5F5F5"},
+         light:{bg:"#FFFFFF",surface:"#F6F6F6",raised:"#ECECEC",line:"#D2D2D2",mute:"#767676",dim:"#4D4D4D",fg:"#0A0A0A"}};
+var USE={bg:"fundo de tudo",surface:"notificação, OSD",raised:"linha selecionada",line:"bordas de 1 px",mute:"dicas, comentários",dim:"texto secundário",fg:"texto"};
+var RED={dark:"#FF6166",light:"#C42B2B"};
+
+/* ── cor ───────────────────────────────── */
+function rgb(h){h=h.replace("#","");return [0,2,4].map(function(i){return parseInt(h.substr(i,2),16)})}
+function hex(a){return "#"+a.map(function(v){return Math.round(v).toString(16).padStart(2,"0")}).join("").toUpperCase()}
+function lum(h){var c=rgb(h).map(function(v){v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)});return .2126*c[0]+.7152*c[1]+.0722*c[2]}
+function cr(a,b){var x=lum(a),y=lum(b);if(x<y){var t=x;x=y;y=t}return (x+.05)/(y+.05)}
+function blend(a,b,t){var A=rgb(a),B=rgb(b);return hex(A.map(function(v,i){return v+(B[i]-v)*t}))}
+
+var st={mode:"dark",accent:"ember",motion:"full"};
+try{var sv=JSON.parse(localStorage.getItem("clios-board")||"null");if(sv){if(NEU[sv.mode])st.mode=sv.mode;if(ACC[sv.accent])st.accent=sv.accent;if(["full","reduced","off"].indexOf(sv.motion)>=0)st.motion=sv.motion}}catch(e){}
+if(!localStorageHas()){st.mode=matchMedia("(prefers-color-scheme: light)").matches?"light":"dark"}
+if(!localStorageHas()&&matchMedia("(prefers-reduced-motion: reduce)").matches)st.motion="reduced";
+function localStorageHas(){try{return !!localStorage.getItem("clios-board")}catch(e){return false}}
+
+/* ── controles ─────────────────────────── */
+var accEl=$("#accents");
+Object.keys(ACC).forEach(function(n){var b=document.createElement("button");b.type="button";b.id="a-"+n;b.dataset.v=n;b.setAttribute("aria-label","acento "+n);b.title=n;accEl.appendChild(b)});
+
+function apply(){
+  root.setAttribute("data-theme",st.mode);
+  root.setAttribute("data-motion",st.motion);
+  var n=NEU[st.mode],a=ACC[st.accent][st.mode==="dark"?0:1];
+  var ink=cr(a,n.bg)>=cr(a,n.fg)?n.bg:n.fg; /* o texto sobre o acento é o neutro de maior contraste */
+  var s=root.style;
+  s.setProperty("--accent",a);s.setProperty("--accent-ink",ink);s.setProperty("--accent-soft",blend(n.bg,a,.18));s.setProperty("--red",RED[st.mode]);
+  Object.keys(ACC).forEach(function(k){var b=$("#a-"+k);b.style.setProperty("--c",ACC[k][st.mode==="dark"?0:1]);b.setAttribute("aria-pressed",String(k===st.accent))});
+  ["dark","light"].forEach(function(m){$("#m-"+m).setAttribute("aria-pressed",String(m===st.mode))});
+  ["full","reduced","off"].forEach(function(m){$("#mo-"+m).setAttribute("aria-pressed",String(m===st.motion))});
+  $("#hubst").textContent=st.accent+" · "+st.mode;
+  tables();drawCurves();drawSpring();vars();
+  try{localStorage.setItem("clios-board",JSON.stringify(st))}catch(e){}
+}
+$("#mode").addEventListener("click",function(e){var b=e.target.closest("button");if(b){st.mode=b.dataset.v;apply()}});
+$("#motion").addEventListener("click",function(e){var b=e.target.closest("button");if(b){st.motion=b.dataset.v;apply()}});
+accEl.addEventListener("click",function(e){var b=e.target.closest("button");if(b){st.accent=b.dataset.v;apply()}});
+
+function ratio(x){return x.toFixed(1)}
+function tables(){
+  var n=NEU[st.mode],tb=$("#neutrals tbody");tb.innerHTML="";
+  Object.keys(USE).forEach(function(k){var r=cr(n[k],n.bg);
+    tb.insertAdjacentHTML("beforeend",'<tr><td><i class="chip" style="--c:'+n[k]+'"></i>'+k+'</td><td class="num">'+n[k]+'</td><td class="num">'+(k==="bg"?"":ratio(r)+":1")+'</td><td class="mute">'+USE[k]+'</td></tr>')});
+  var ta=$("#acctbl tbody");ta.innerHTML="";
+  Object.keys(ACC).forEach(function(k){var c=ACC[k][st.mode==="dark"?0:1],r=cr(c,n.bg),ik=cr(c,n.bg)>=cr(c,n.fg)?n.bg:n.fg,r2=cr(c,ik);
+    ta.insertAdjacentHTML("beforeend",'<tr><td><i class="chip" style="--c:'+c+'"></i>'+k+(k===st.accent?" ←":"")+'</td><td class="num">'+c+'</td><td class="num '+(r>=4.5?"ok":"low")+'">'+ratio(r)+':1</td><td class="num '+(r2>=4.5?"ok":"low")+'">'+ratio(r2)+':1</td></tr>')});
+}
+
+/* ── curvas ────────────────────────────── */
+var CURVES=[{n:"out",p:[.16,1,.3,1],u:"chegadas: janela, notificação, OSD"},{n:"in",p:[.7,0,.84,0],u:"saídas"},{n:"inout",p:[.65,0,.35,1],u:"trocas de lugar"}];
+function drawCurves(){
+  var host=$("#curves");if(host.dataset.done){host.querySelectorAll("path.cv").forEach(function(p){});return}
+  host.dataset.done="1";
+  CURVES.forEach(function(c,i){
+    var W=220,H=130,pl=16,pr=10,pt=10,pb=18,w=W-pl-pr,h=H-pt-pb;
+    function X(x){return pl+x*w}function Y(y){return pt+(1-y)*h}
+    var d="M"+X(0)+" "+Y(0)+" C "+X(c.p[0])+" "+Y(c.p[1])+" "+X(c.p[2])+" "+Y(c.p[3])+" "+X(1)+" "+Y(1);
+    var el=document.createElement("div");el.className="curve";
+    el.innerHTML='<h3>'+c.n+' <span class="mute">cubic-bezier('+c.p.join(", ")+')</span></h3>'+
+     '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="curva '+c.n+'"><rect class="ax" x="'+pl+'" y="'+pt+'" width="'+w+'" height="'+h+'"/>'+
+     '<path class="gl" d="M'+X(0)+' '+Y(0)+' L'+X(c.p[0])+' '+Y(c.p[1])+' M'+X(1)+' '+Y(1)+' L'+X(c.p[2])+' '+Y(c.p[3])+'"/>'+
+     '<path class="cv" d="'+d+'"/><circle class="pt" cx="'+X(c.p[0])+'" cy="'+Y(c.p[1])+'" r="3"/><circle class="pt" cx="'+X(c.p[2])+'" cy="'+Y(c.p[3])+'" r="3"/>'+
+     '<text class="tx" x="'+pl+'" y="'+(H-4)+'">0</text><text class="tx" x="'+(W-pr-6)+'" y="'+(H-4)+'">1</text></svg>'+
+     '<div class="track"><i id="tk'+i+'"></i></div><div class="mute" style="font-size:12px">'+c.u+'</div><div class="row"><button data-play="'+i+'">tocar</button></div>';
+    host.appendChild(el);
+  });
+  host.addEventListener("click",function(e){var b=e.target.closest("[data-play]");if(!b)return;
+    var i=+b.dataset.play,t=$("#tk"+i),c=CURVES[i],box=t.parentElement.clientWidth-22,ms=parseInt(getComputedStyle(root).getPropertyValue("--t-slow"))||0;
+    var dur=(st.motion==="off")?0:(st.motion==="reduced"?240:700);
+    t.animate([{transform:"translateX(0)"},{transform:"translateX("+box+"px)"}],{duration:dur,easing:"cubic-bezier("+c.p.join(",")+")",fill:"forwards"});
+    setTimeout(function(){t.animate([{transform:"translateX("+box+"px)"},{transform:"translateX(0)"}],{duration:dur,easing:"cubic-bezier("+c.p.join(",")+")",fill:"forwards"})},dur+400)});
+}
+function drawSpring(){
+  var W=220,H=130,pl=16,pr=10,pt=10,pb=18,w=W-pl-pr,h=H-pt-pb,T=1.0;
+  function X(t){return pl+t/T*w}function Y(v){return pt+(1-v/1.4)*h}
+  var k=320,m=1,om=Math.sqrt(k/m),crit="",under="";
+  for(var i=0;i<=80;i++){var t=T*i/80;
+    var xc=1-(1+om*t)*Math.exp(-om*t);
+    var z=.35,wd=om*Math.sqrt(1-z*z),xu=1-Math.exp(-z*om*t)*(Math.cos(wd*t)+z/Math.sqrt(1-z*z)*Math.sin(wd*t));
+    crit+=(i?" L":"M")+X(t).toFixed(1)+" "+Y(xc).toFixed(1);under+=(i?" L":"M")+X(t).toFixed(1)+" "+Y(xu).toFixed(1)}
+  $("#spring").innerHTML='<rect class="ax" x="'+pl+'" y="'+pt+'" width="'+w+'" height="'+h+'" style="stroke:var(--line);fill:none"/>'+
+   '<line x1="'+pl+'" x2="'+(W-pr)+'" y1="'+Y(1)+'" y2="'+Y(1)+'" style="stroke:var(--mute);stroke-dasharray:2 4"/>'+
+   '<path d="'+under+'" style="stroke:var(--mute);fill:none;stroke-dasharray:4 4;stroke-width:1.5"/>'+
+   '<path d="'+crit+'" style="stroke:var(--accent);fill:none;stroke-width:2"/>'+
+   '<text class="tx" x="'+(W-pr-4)+'" y="'+(Y(1)-4)+'" text-anchor="end" style="fill:var(--mute);font:11px var(--font)">alvo</text>';
+}
+function bars(){
+  var D=[["instant",90,"troca de seleção"],["fast",160,"fades, cursor"],["base",240,"janelas, OSD"],["slow",360,"tema"]],h=$("#bars");
+  D.forEach(function(d){h.insertAdjacentHTML("beforeend",'<div><span>'+d[0]+'</span><span class="bg"><span class="fg" data-ms="'+d[1]+'"></span></span><span class="num mute">'+d[1]+' ms</span></div>')});
+  $("#playbars").addEventListener("click",function(){
+    h.querySelectorAll(".fg").forEach(function(f){var ms=+f.dataset.ms*(st.motion==="off"?0:st.motion==="reduced"?.5:1);
+      f.animate([{width:"0%"},{width:"100%"}],{duration:ms,easing:"cubic-bezier(.16,1,.3,1)",fill:"forwards"})})});
+  h.querySelectorAll(".fg").forEach(function(f){f.style.width="100%"});
+}
+var shown=false;
+$("#playcard").addEventListener("click",function(){var c=$("#card");shown=!shown;
+  if(shown){c.classList.remove("hide");c.classList.add("show")}else{c.classList.remove("show");c.classList.add("hide")}});
+setTimeout(function(){$("#card").classList.add("show");shown=true},10);
+
+/* ── marca: as cinco variantes ─────────── */
+function vars(){
+  var h=$("#vars");if(h.dataset.done)return;h.dataset.done="1";
+  var V=[["A","traço 36, cursor 14×24",{sp:36,arm:20,cx:43,cw:14,ch:24}],["B","traço 20, cursor 12×24",{sp:20,arm:20,cx:34,cw:12,ch:24},1],["C","traço 16, cursor 12×24",{sp:16,arm:16,cx:30,cw:12,ch:24}],["D","traço 18, cursor 14×28",{sp:18,arm:18,cx:32,cw:14,ch:28}],["E","traço 20, cursor 10×20",{sp:20,arm:20,cx:30,cw:10,ch:20}]];
+  V.forEach(function(v){var g=v[2],mt=g.arm,mb=64-g.arm,cy=(64-g.ch)/2;
+    function svg(sz){return '<svg width="'+sz+'" height="'+sz+'" viewBox="0 0 64 64" aria-hidden="true"><path d="M0 0H64V'+mt+'H'+g.sp+'V'+mb+'H64V64H0Z"/><rect x="'+g.cx+'" y="'+cy+'" width="'+g.cw+'" height="'+g.ch+'"/></svg>'}
+    h.insertAdjacentHTML("beforeend",'<div class="var'+(v[3]?" pick":"")+'"><div class="mute" style="font-size:12px">'+v[0]+(v[3]?" · escolhida":"")+'</div><div class="sizes">'+svg(96)+svg(48)+svg(28)+svg(18)+svg(12)+'</div><div class="mute" style="font-size:12px">'+v[1]+'</div></div>')});
+}
+
+/* ── desktop: workspaces ───────────────── */
+var WS=[1,2,3,4,7],wsEl=$("#ws"),wsb=$("#wsb"),wsI=1;
+WS.forEach(function(n,i){var b=document.createElement("button");b.type="button";b.textContent=n;b.dataset.i=i;wsEl.appendChild(b)});
+var TITLES=["foot ~/clios","hx tokens/tokens.toml","yazi ~/clios","btop","mpv"];
+function ws(i){wsI=i;wsb.style.transform="translateX("+(i*2.6)+"em)";
+  wsEl.querySelectorAll("button").forEach(function(b,j){if(j===i)b.setAttribute("aria-current","true");else b.removeAttribute("aria-current")});
+  $("#ttl").textContent=TITLES[i];
+  $("#w1").classList.toggle("on",i!==2);$("#w2").classList.toggle("on",i===2)}
+wsEl.addEventListener("click",function(e){var b=e.target.closest("button");if(b)ws(+b.dataset.i)});
+ws(1);
+var tt;function toast(t,m){var el=$("#toast");el.innerHTML="<small>"+t+"</small><b>"+m+"</b>";el.classList.remove("out");el.hidden=false;
+  clearTimeout(tt);tt=setTimeout(function(){el.classList.add("out");setTimeout(function(){el.hidden=true},parseInt(getComputedStyle(root).getPropertyValue("--t-exit"))+40)},2600)}
+$(".bar .st").addEventListener("click",function(e){var b=e.target.closest("button");if(b)toast("clios open",b.dataset.open+" (abriria numa janela flutuante)")});
+
+/* ── o hub ─────────────────────────────── */
+var TUI=[["arquivos","yazi"],["editor","hx"],["git","lazygit"],["monitor","btop"],["áudio","wiremix"],["rede","impala"],["bluetooth","bluetui"],["música","spotify_player"],["anime","ani-cli"],["e-mail","aerc"],["feeds","newsboat"],["terminal","fish"]];
+var KW={arquivos:"yazi files pastas",editor:"helix hx texto",git:"lazygit commit",monitor:"btop cpu ram",áudio:"wiremix volume som",rede:"impala wifi internet",bluetooth:"bluetui fone",música:"spotify tocar",anime:"ani-cli assistir",["e-mail"]:"aerc correio",feeds:"newsboat rss",terminal:"shell fish"};
+var APPS=["Firefox","mpv","Zathura","imv"];
+var KEYS=[["abrir o hub","super + space"],["terminal","super + return"],["fechar janela","super + q"],["tela cheia","super + f"],["foco: esquerda","super + h"],["mover janela: direita","super + shift + l"],["ir para a workspace 3","super + 3"],["tema: claro ou escuro","super + F1"],["tema: próximo acento","super + F2"],["captura: região","print"]];
+var WIN=[["hx tokens/tokens.toml","ws 2"],["yazi ~/clios","ws 3"],["foot ~/clios","ws 1"]];
+var items=[];
+TUI.forEach(function(t){items.push({k:"tui",t:t[0],kw:KW[t[0]]||"",run:function(){toast("clios open",t[1]+" (abriria numa janela de terminal)")}})});
+APPS.forEach(function(a){items.push({k:"app",t:a,kw:"",run:function(){toast("hub",a+" (abriria o app)")}})});
+Object.keys(ACC).forEach(function(n){items.push({k:"ação",t:"acento: "+n,kw:"accent color cor tema",sw:n,act:true,run:function(){st.accent=n;apply()}})});
+items.push({k:"ação",t:"tema: alternar claro e escuro",kw:"theme dark light modo",act:true,run:function(){st.mode=st.mode==="dark"?"light":"dark";apply()}});
+items.push({k:"ação",t:"movimento: alternar nível",kw:"motion animacao reduzido",act:true,run:function(){st.motion={full:"reduced",reduced:"off",off:"full"}[st.motion];apply()}});
+items.push({k:"ação",t:"captura: região",kw:"screenshot print",act:true,run:function(){toast("captura","salva, copiada e avisada")}});
+items.push({k:"ação",t:"bloquear",kw:"lock tela",act:true,run:function(){toast("hyprlock","a tela bloquearia aqui")}});
+items.push({k:"ação",t:"suspender",kw:"sleep",act:true,run:function(){toast("systemctl suspend","suspenderia")}});
+items.push({k:"ação",t:"reiniciar",kw:"reboot",act:true,confirm:true,run:function(){toast("systemctl reboot","reiniciaria (é só uma ilustração)")}});
+items.push({k:"ação",t:"desligar",kw:"poweroff",act:true,confirm:true,run:function(){toast("systemctl poweroff","desligaria (é só uma ilustração)")}});
+KEYS.forEach(function(x){items.push({k:"atalho",t:x[0],hint:x[1],kw:""})});
+WIN.forEach(function(x){items.push({k:"janela",t:x[0],hint:x[1],run:function(){toast("hyprctl","foco em "+x[0])}})});
+var SC={"":["tui","app","ação"],"@":["janela"],"?":["atalho"],">":["ação"]};
+var hq=$("#hq"),hl=$("#hl"),hf=$("#hf"),hub=$("#hub"),sel=0,hits=[],armed=null,armT=0,hist={};
+
+function score(q,s){q=q.toLowerCase();s=s.toLowerCase();var qi=0,sc=0,prev=-2,idx=[];
+  for(var i=0;i<s.length&&qi<q.length;i++){if(s[i]===q[qi]){sc+=10+(prev===i-1?8:0)+(i===0||/[\s:]/.test(s[i-1])?6:0);idx.push(i);prev=i;qi++}}
+  return qi===q.length?{sc:sc-(s.length-q.length)*.2,idx:idx}:null}
+function rank(){
+  var raw=hq.value,pre=raw.charAt(0),scope=SC[pre]?pre:"",q=(SC[pre]&&pre?raw.slice(1):raw).trim(),out=[];
+  items.forEach(function(it,i){if(SC[scope].indexOf(it.k)<0)return;
+    if(!q){if(scope===""&&it.k==="ação"&&!hist[it.t])return;out.push({i:i,sc:(hist[it.t]||0)*50,idx:[]});return}
+    var m=score(q,it.t);if(m){out.push({i:i,sc:m.sc*3+(hist[it.t]||0)*10,idx:m.idx});return}
+    var k=it.kw&&score(q,it.t+" "+it.kw);if(k)out.push({i:i,sc:k.sc,idx:[]})});
+  out.sort(function(a,b){return b.sc-a.sc});return {scope:scope,hits:out.slice(0,8),q:q,total:out.length}}
+function esc(s){return s.replace(/[&<>]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;"}[c]})}
+function draw(reveal){
+  var r=rank();hits=r.hits;if(sel>=hits.length)sel=Math.max(0,hits.length-1);
+  hl.innerHTML="";
+  hits.forEach(function(h,j){var it=items[h.i],t="";
+    for(var c=0;c<it.t.length;c++)t+=h.idx.indexOf(c)>=0?"<mark>"+esc(it.t[c])+"</mark>":esc(it.t[c]);
+    var right=armed&&armed.i===h.i?"↵ confirmar":(it.hint?it.hint+(r.scope===""?"  "+it.k:""):(r.scope===""?it.k:""));
+    var li=document.createElement("li");li.setAttribute("role","option");li.dataset.j=j;li.setAttribute("aria-selected",String(j===sel));if(armed&&armed.i===h.i)li.className="arm";
+    li.innerHTML='<span class="t">'+(it.sw?'<i class="dot" style="--c:'+ACC[it.sw][st.mode==="dark"?0:1]+'"></i>':"")+t+'</span><span class="k">'+esc(right)+'</span>';hl.appendChild(li);
+    if(reveal&&st.motion!=="off"){var d=st.motion==="full"?14*Math.min(j,12):0;
+      li.animate([{opacity:0},{opacity:1}],{duration:parseInt(getComputedStyle(root).getPropertyValue("--t-fast"))||1,delay:d,easing:"cubic-bezier(.16,1,.3,1)",fill:"backwards"})}});
+  if(!hits.length){hl.innerHTML='<li style="cursor:default;color:var(--mute)">'+(hq.value?"nada encontrado":"digite para buscar")+'</li>'}
+  var a=armed&&hits[sel]&&armed.i===hits[sel].i;
+  hf.innerHTML=a?'<span style="color:var(--red)">↵ de novo para confirmar: '+esc(items[armed.i].t)+'</span>':
+    '<span><b>↵</b> abrir   <b>esc</b> fechar   <b>tab</b> escopo</span><span>'+(hq.value?(hits.length?(sel+1)+"/"+r.total:""):"@ janelas  ? atalhos  &gt; ações")+'</span>'}
+function run(j){var h=hits[j];if(!h)return;var it=items[h.i];if(!it.run)return;
+  if(it.confirm&&!(armed&&armed.i===h.i&&Date.now()-armT<3000)){armed={i:h.i};armT=Date.now();draw(false);setTimeout(function(){if(armed&&Date.now()-armT>=2990){armed=null;draw(false)}},3050);return}
+  armed=null;hist[it.t]=(hist[it.t]||0)+1;it.run();
+  if(!it.act||it.t.indexOf("captura")===0||it.t==="bloquear"||it.t==="suspender"){closeHub()}else{hq.value="";sel=0;draw(true)}}
+function openHub(){hub.hidden=false;hub.classList.remove("in");void hub.offsetWidth;hub.classList.add("in");hq.value="";sel=0;armed=null;draw(true);try{hq.focus({preventScroll:true})}catch(e){}}
+function closeHub(){hub.hidden=true}
+hq.addEventListener("input",function(){sel=0;armed=null;draw(false)});
+hq.addEventListener("keydown",function(e){
+  if(e.key==="ArrowDown"||(e.ctrlKey&&(e.key==="n"||e.key==="j"))){e.preventDefault();sel=hits.length?(sel+1)%hits.length:0;armed=null;draw(false)}
+  else if(e.key==="ArrowUp"||(e.ctrlKey&&(e.key==="p"||e.key==="k"))){e.preventDefault();sel=hits.length?(sel-1+hits.length)%hits.length:0;armed=null;draw(false)}
+  else if(e.key==="Enter"){e.preventDefault();run(sel)}
+  else if(e.key==="Escape"){e.preventDefault();closeHub()}
+  else if(e.key==="Tab"){e.preventDefault();var o=["","@","?",">"],p=SC[hq.value.charAt(0)]&&hq.value.charAt(0)?hq.value.charAt(0):"",n=o[(o.indexOf(p)+(e.shiftKey?3:1))%4],rest=p?hq.value.slice(1):hq.value;hq.value=n+rest;sel=0;draw(true)}});
+hl.addEventListener("mousemove",function(e){var li=e.target.closest("li[data-j]");if(li&&+li.dataset.j!==sel){sel=+li.dataset.j;armed=null;hl.querySelectorAll("li").forEach(function(x,j){x.setAttribute("aria-selected",String(j===sel))});}});
+hl.addEventListener("click",function(e){var li=e.target.closest("li[data-j]");if(li){sel=+li.dataset.j;run(sel)}});
+$("#hubbtn").addEventListener("click",openHub);
+
+bars();apply();draw(true);
+})();
+</script>

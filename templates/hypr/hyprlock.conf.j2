@@ -1,0 +1,70 @@
+# Gerado por `clios theme apply`. Não edite.
+
+general {
+    hide_cursor = true
+    ignore_empty_input = true
+    fail_timeout = 1500
+}
+
+animations {
+    enabled = {{ motion.enabled | bool }}
+    bezier = out, {{ motion.curve.out.x1 }}, {{ motion.curve.out.y1 }}, {{ motion.curve.out.x2 }}, {{ motion.curve.out.y2 }}
+    animation = fadeIn, 1, {{ [motion.duration.base / 100, 0.1] | max }}, out
+    animation = fadeOut, 1, {{ [motion.duration.fast / 100, 0.1] | max }}, out
+    animation = inputFieldColors, 1, {{ [motion.duration.fast / 100, 0.1] | max }}, out
+    animation = inputFieldFade, 1, {{ [motion.duration.fast / 100, 0.1] | max }}, out
+    animation = inputFieldWidth, 1, {{ [motion.duration.base / 100, 0.1] | max }}, out
+    animation = inputFieldDots, 1, {{ [motion.duration.instant / 100, 0.1] | max }}, out
+}
+
+background {
+    monitor =
+    color = {{ c.bg | hypr }}
+}
+
+# Hora, grande e quieta.
+label {
+    monitor =
+    text = $TIME
+    color = {{ c.fg | hypr }}
+    font_size = 88
+    font_family = {{ font.mono }}
+    position = 0, 90
+    halign = center
+    valign = center
+}
+
+input-field {
+    monitor =
+    size = 320, 44
+    outline_thickness = 1
+    rounding = 0
+    dots_size = 0.28
+    dots_spacing = 0.3
+    dots_center = true
+    outer_color = {{ c.line | hypr }}
+    inner_color = {{ c.surface | hypr }}
+    font_color = {{ c.fg | hypr }}
+    font_family = {{ font.mono }}
+    check_color = {{ c.accent | hypr }}
+    fail_color = {{ c.red | hypr }}
+    capslock_color = {{ c.yellow | hypr }}
+    fade_on_empty = false
+    placeholder_text = <span foreground="##{{ c.mute | bare }}">senha</span>
+    fail_text = <span foreground="##{{ c.red | bare }}">$FAIL</span>
+    position = 0, -30
+    halign = center
+    valign = center
+}
+
+# Marca no canto: o nome e o cursor em acento.
+label {
+    monitor =
+    text = clios<span foreground="##{{ c.accent | bare }}">▌</span>
+    color = {{ c.dim | hypr }}
+    font_size = 14
+    font_family = {{ font.mono }}
+    position = 28, 24
+    halign = left
+    valign = bottom
+}

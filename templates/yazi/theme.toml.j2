@@ -1,0 +1,28 @@
+# Gerado por `clios theme apply`. Não edite.
+
+[mgr]
+cwd = { fg = "{{ c.accent | hex }}" }
+hovered = { fg = "{{ c.on_accent | hex }}", bg = "{{ c.accent | hex }}" }
+preview_hovered = { underline = true }
+border_symbol = "│"
+border_style = { fg = "{{ c.line | hex }}" }
+
+[tabs]
+active = { fg = "{{ c.on_accent | hex }}", bg = "{{ c.accent | hex }}", bold = true }
+inactive = { fg = "{{ c.dim | hex }}", bg = "{{ c.surface | hex }}" }
+
+[mode]
+normal_main = { fg = "{{ c.on_accent | hex }}", bg = "{{ c.accent | hex }}", bold = true }
+normal_alt = { fg = "{{ c.dim | hex }}", bg = "{{ c.surface | hex }}" }
+select_main = { fg = "{{ c.bg | hex }}", bg = "{{ c.fg | hex }}", bold = true }
+select_alt = { fg = "{{ c.dim | hex }}", bg = "{{ c.surface | hex }}" }
+unset_main = { fg = "{{ c.bg | hex }}", bg = "{{ c.dim | hex }}", bold = true }
+unset_alt = { fg = "{{ c.dim | hex }}", bg = "{{ c.surface | hex }}" }
+
+[filetype]
+rules = [
+  { name = "*/", fg = "{{ c.accent | hex }}" },
+  { name = "*", is = "orphan", fg = "{{ c.red | hex }}" },
+  { name = "*", is = "exec", fg = "{{ c.fg | hex }}", bold = true },
+  { name = "*", fg = "{{ c.dim | hex }}" },
+]

@@ -1,0 +1,39 @@
+# Gerado por `clios theme apply`. Não edite.
+# Variáveis globais (-g) para valerem nesta sessão sem poluir o armazenamento universal.
+
+set -g fish_color_normal {{ c.fg | bare }}
+set -g fish_color_command {{ c.fg | bare }} --bold
+set -g fish_color_keyword {{ c.accent | bare }}
+set -g fish_color_quote {{ c.dim | bare }}
+set -g fish_color_redirection {{ c.dim | bare }}
+set -g fish_color_end {{ c.mute | bare }}
+set -g fish_color_error {{ c.red | bare }}
+set -g fish_color_param {{ c.dim | bare }}
+set -g fish_color_option {{ c.dim | bare }}
+set -g fish_color_comment {{ c.mute | bare }} --italics
+set -g fish_color_selection --background={{ c.accent_soft | bare }}
+set -g fish_color_operator {{ c.accent | bare }}
+set -g fish_color_escape {{ c.accent | bare }}
+set -g fish_color_autosuggestion {{ c.mute | bare }}
+set -g fish_color_cancel {{ c.mute | bare }}
+set -g fish_color_search_match --background={{ c.raised | bare }}
+set -g fish_color_valid_path --underline
+set -g fish_color_host {{ c.dim | bare }}
+set -g fish_color_user {{ c.dim | bare }}
+set -g fish_color_cwd {{ c.accent | bare }}
+set -g fish_color_cwd_root {{ c.red | bare }}
+set -g fish_color_history_current --bold
+
+set -g fish_pager_color_completion {{ c.dim | bare }}
+set -g fish_pager_color_description {{ c.mute | bare }}
+set -g fish_pager_color_prefix {{ c.accent | bare }} --bold
+set -g fish_pager_color_progress {{ c.mute | bare }}
+set -g fish_pager_color_selected_background --background={{ c.raised | bare }}
+set -g fish_pager_color_selected_completion {{ c.fg | bare }}
+set -g fish_pager_color_selected_prefix {{ c.accent | bare }} --bold
+
+# fzf: sem borda, o acento só no que está selecionado.
+set -gx FZF_DEFAULT_OPTS "--height=40% --layout=reverse --border=none --info=inline-right --prompt='❯ ' --pointer='▌' --marker='▌' \
+--color=bg:-1,bg+:{{ c.raised | hex }},fg:{{ c.dim | hex }},fg+:{{ c.fg | hex }},hl:{{ c.accent | hex }},hl+:{{ c.accent | hex }},\
+info:{{ c.mute | hex }},prompt:{{ c.accent | hex }},pointer:{{ c.accent | hex }},marker:{{ c.accent | hex }},spinner:{{ c.accent | hex }},\
+header:{{ c.mute | hex }},border:{{ c.line | hex }},gutter:-1"

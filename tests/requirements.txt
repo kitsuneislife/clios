@@ -1,0 +1,4 @@
+lupa
+PySide6-Essentials
+fonttools
+shellcheck-py

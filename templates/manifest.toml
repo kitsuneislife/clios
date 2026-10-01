@@ -1,0 +1,63 @@
+# Cada template vira um arquivo em ~/.config (ou em @state/ para arquivos que não são dotfiles).
+# `clios theme apply` renderiza tudo e depois roda os hooks.
+
+[[template]]
+src = "quickshell/theme.json.j2"
+dst = "@state/theme.json"
+
+[[template]]
+src = "hypr/theme.lua.j2"
+dst = "hypr/theme.lua"
+
+[[template]]
+src = "hypr/hyprlock.conf.j2"
+dst = "hypr/hyprlock.conf"
+
+[[template]]
+src = "foot/colors.ini.j2"
+dst = "foot/colors.ini"
+
+[[template]]
+src = "helix/clios.toml.j2"
+dst = "helix/themes/clios.toml"
+
+[[template]]
+src = "fish/clios-colors.fish.j2"
+dst = "fish/conf.d/clios-colors.fish"
+
+[[template]]
+src = "starship/starship.toml.j2"
+dst = "starship.toml"
+
+[[template]]
+src = "btop/clios.theme.j2"
+dst = "btop/themes/clios.theme"
+
+[[template]]
+src = "yazi/theme.toml.j2"
+dst = "yazi/theme.toml"
+
+[[template]]
+src = "lazygit/config.yml.j2"
+dst = "lazygit/config.yml"
+
+[[template]]
+src = "mpv/mpv.conf.j2"
+dst = "mpv/mpv.conf"
+
+# Hooks: avisam os apps que estão abertos. Falha de hook nunca derruba o `theme apply`.
+
+[[hook]]
+name = "hyprland"
+if_running = "Hyprland"
+run = ["hyprctl", "reload"]
+
+[[hook]]
+name = "helix"
+if_running = "hx"
+run = ["pkill", "-USR1", "-x", "hx"]
+
+[[hook]]
+name = "btop"
+if_running = "btop"
+run = ["pkill", "-USR2", "-x", "btop"]

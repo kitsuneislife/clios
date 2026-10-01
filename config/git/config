@@ -1,0 +1,26 @@
+# CLIOS · git (XDG). O seu nome e e-mail ficam em ~/.gitconfig, que tem prioridade.
+[init]
+	defaultBranch = main
+[core]
+	pager = delta
+[interactive]
+	diffFilter = delta --color-only
+[delta]
+	navigate = true
+	line-numbers = true
+	syntax-theme = ansi
+[pull]
+	rebase = true
+[push]
+	autoSetupRemote = true
+[merge]
+	conflictstyle = zdiff3
+[diff]
+	algorithm = histogram
+	colorMoved = default
+[rerere]
+	enabled = true
+[branch]
+	sort = -committerdate
+[column]
+	ui = auto

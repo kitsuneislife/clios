@@ -1,0 +1,36 @@
+# Gerado por `clios theme apply`. Não edite.
+gui:
+  nerdFontsVersion: "3"
+  showBottomLine: false
+  showRandomTip: false
+  border: single
+  theme:
+    activeBorderColor:
+      - "{{ c.accent | hex }}"
+      - bold
+    inactiveBorderColor:
+      - "{{ c.line | hex }}"
+    searchingActiveBorderColor:
+      - "{{ c.accent | hex }}"
+      - bold
+    optionsTextColor:
+      - "{{ c.mute | hex }}"
+    selectedLineBgColor:
+      - "{{ c.raised | hex }}"
+    inactiveViewSelectedLineBgColor:
+      - "{{ c.surface | hex }}"
+    cherryPickedCommitFgColor:
+      - "{{ c.accent | hex }}"
+    cherryPickedCommitBgColor:
+      - "{{ c.raised | hex }}"
+    unstagedChangesColor:
+      - "{{ c.red | hex }}"
+    defaultFgColor:
+      - "{{ c.fg | hex }}"
+git:
+  paging:
+    colorArg: always
+    pager: delta --paging=never
+update:
+  method: never
+disableStartupPopups: true

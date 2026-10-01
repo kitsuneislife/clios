@@ -1,0 +1,52 @@
+-- Gerado por `clios theme apply`. Não edite: a fonte é tokens/tokens.toml.
+-- modo: {{ mode }} · acento: {{ accent_name }}
+
+return {
+  mode = "{{ mode }}",
+  accent = "{{ accent_name }}",
+
+  color = {
+    bg          = "{{ c.bg | hypr }}",
+    surface     = "{{ c.surface | hypr }}",
+    raised      = "{{ c.raised | hypr }}",
+    line        = "{{ c.line | hypr }}",
+    mute        = "{{ c.mute | hypr }}",
+    dim         = "{{ c.dim | hypr }}",
+    fg          = "{{ c.fg | hypr }}",
+    accent      = "{{ c.accent | hypr }}",
+    accent_dim  = "{{ c.accent_dim | hypr }}",
+    on_accent   = "{{ c.on_accent | hypr }}",
+    red         = "{{ c.red | hypr }}",
+  },
+
+  font = "{{ font.mono }}",
+
+  ui = {
+    gap_in     = {{ ui.gap_in }},
+    gap_out    = {{ ui.gap_out }},
+    border     = {{ ui.border }},
+    radius     = {{ ui.radius }},
+    bar_height = {{ ui.bar_height }},
+  },
+
+  motion = {
+    enabled = {{ motion.enabled | bool }},
+    spatial = {{ motion.spatial | bool }},
+    ms = {
+      instant = {{ motion.duration.instant }},
+      fast    = {{ motion.duration.fast }},
+      base    = {{ motion.duration.base }},
+      slow    = {{ motion.duration.slow }},
+    },
+    curve = {
+{% for name, k in motion.curve | items %}
+      ["{{ name }}"] = { {{ k.x1 }}, {{ k.y1 }}, {{ k.x2 }}, {{ k.y2 }} },
+{% endfor %}
+    },
+    spring = {
+{% for name, s in motion.spring | items %}
+      ["{{ name }}"] = { mass = {{ s.mass }}, stiffness = {{ s.stiffness }}, damping = {{ s.damping }} },
+{% endfor %}
+    },
+  },
+}

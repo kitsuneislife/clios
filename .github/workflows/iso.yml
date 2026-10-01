@@ -1,0 +1,25 @@
+name: iso
+
+# Monta a ISO ao vivo. Manual, ou ao publicar uma tag. Ainda não foi executado:
+# espere ajustes na primeira rodada.
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*"]
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    container:
+      image: archlinux:latest
+      options: --privileged
+    steps:
+      - name: dependências
+        run: pacman -Syu --noconfirm archiso rust git base-devel
+      - uses: actions/checkout@v4
+      - name: ISO
+        run: ./iso/build.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: clios-iso
+          path: iso/out/*.iso

@@ -1,0 +1,129 @@
+# CLIOS design tokens.
+#
+# Fonte única de verdade. Hyprland, Quickshell, foot, helix, fish, btop, yazi,
+# lazygit, hyprlock e o hub leem os valores daqui (via `clios theme apply`).
+# Nenhum app guarda cor, duração ou curva própria.
+#
+# Regra de ouro: preto no branco, branco no preto, e UM acento que o usuário escolhe.
+
+[font]
+mono = "GeistMono Nerd Font"
+# Tamanho em pt para terminais; a shell deriva os tamanhos dela de `ui.text`.
+size = 11.0
+
+[ui]
+# Tudo em pixels lógicos. Grade de 4.
+gap_in = 6
+gap_out = 12
+border = 2
+radius = 0          # cantos retos: o terminal é uma grade
+bar_height = 28
+text = 13           # corpo da shell
+text_small = 11
+
+# ---------------------------------------------------------------------------
+# Movimento
+# ---------------------------------------------------------------------------
+# Princípios:
+#   1. Entrada rápida, saída ainda mais rápida (a saída dura ~60% da entrada).
+#   2. Uma família de curvas. Chegadas desaceleram (out), trocas suavizam (inout).
+#   3. Mola só para o que ocupa espaço (janelas, workspaces), sempre amortecida
+#      de forma crítica. Nada quica.
+#   4. `clios motion reduced|off` respeita quem não quer movimento.
+
+[motion.duration]   # milissegundos
+instant = 90
+fast = 160
+base = 240
+slow = 360
+
+[motion.curve.out]
+points = [0.16, 1.0, 0.30, 1.0]
+[motion.curve.inout]
+points = [0.65, 0.0, 0.35, 1.0]
+[motion.curve.in]
+points = [0.70, 0.0, 0.84, 0.0]
+[motion.curve.linear]
+points = [0.0, 0.0, 1.0, 1.0]
+
+[motion.spring.settle]
+mass = 1.0
+stiffness = 320.0
+damping_ratio = 1.0   # 1.0 = amortecimento crítico, sem overshoot
+
+# ---------------------------------------------------------------------------
+# Neutros
+# ---------------------------------------------------------------------------
+# bg      fundo de tudo
+# surface painéis recuados (barra, notificação)
+# raised  item selecionado, hover
+# line    bordas e divisores (1px)
+# mute    texto desabilitado, dicas, comentários
+# dim     texto secundário
+# fg      texto principal
+
+[mode.dark]
+bg      = "#000000"
+surface = "#0A0A0A"
+raised  = "#151515"
+line    = "#2A2A2A"
+mute    = "#6B6B6B"
+dim     = "#A8A8A8"
+fg      = "#F5F5F5"
+
+[mode.dark.ansi]
+black   = "#151515"
+red     = "#FF6166"
+green   = "#4FCB8B"
+yellow  = "#E8BE4F"
+blue    = "#6AA3FF"
+magenta = "#C98BF5"
+cyan    = "#4FC9DD"
+white   = "#A8A8A8"
+
+[mode.light]
+bg      = "#FFFFFF"
+surface = "#F6F6F6"
+raised  = "#ECECEC"
+line    = "#D2D2D2"
+mute    = "#767676"
+dim     = "#4D4D4D"
+fg      = "#0A0A0A"
+
+[mode.light.ansi]
+black   = "#0A0A0A"
+red     = "#C42B2B"
+green   = "#1B7A47"
+yellow  = "#8A5F00"
+blue    = "#1F5ACC"
+magenta = "#8B3BB8"
+cyan    = "#0B7288"
+white   = "#767676"
+
+# ---------------------------------------------------------------------------
+# Acentos
+# ---------------------------------------------------------------------------
+# Cada acento tem uma variante por modo, calibrada para >= 4.5:1 contra o fundo
+# (os testes de `clios-core` falham se alguém quebrar isso).
+
+[accent.ember]
+dark  = "#FF5A1F"
+light = "#CC3E00"
+[accent.azure]
+dark  = "#4C8DFF"
+light = "#1F5FD8"
+[accent.violet]
+dark  = "#A07BFF"
+light = "#6B3FE0"
+[accent.rose]
+dark  = "#FF5C93"
+light = "#D01F68"
+[accent.mint]
+dark  = "#2FE0A0"
+light = "#007A52"
+[accent.signal]
+dark  = "#FFD21F"
+light = "#8A6A00"
+[accent.mono]
+dark  = "#F5F5F5"
+light = "#0A0A0A"

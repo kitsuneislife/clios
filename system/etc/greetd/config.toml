@@ -1,0 +1,9 @@
+# CLIOS · greetd. O tuigreet é um login em terminal: combina com o resto e não puxa um toolkit gráfico.
+# As cores usam os nomes ANSI, que o kernel já pinta com a paleta do CLIOS (vt.default_*).
+
+[terminal]
+vt = 1
+
+[default_session]
+command = "tuigreet --time --time-format '%H:%M' --asterisks --remember --remember-session --cmd start-hyprland --theme 'border=white;text=white;prompt=white;time=darkgray;action=darkgray;button=white;container=black;input=white'"
+user = "greeter"

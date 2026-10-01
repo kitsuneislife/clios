@@ -1,0 +1,17 @@
+[package]
+name = "clios-core"
+description = "Tokens de design, tema e sincronização de dotfiles do CLIOS"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+minijinja.workspace = true
+serde.workspace = true
+toml.workspace = true
+
+[dev-dependencies]
+serde_json.workspace = true
