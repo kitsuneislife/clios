@@ -6,3 +6,5 @@
 /iso/airootfs/usr/local/bin/clios
 /iso/airootfs/etc/skel
 .venv
+__pycache__/
+*.pyc

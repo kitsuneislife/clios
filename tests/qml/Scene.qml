@@ -39,6 +39,7 @@ Rectangle {
             clock: "qua 1  14:32"
             caffeine: true
             night: true
+            focusLeft: 1380
         }
     }
 

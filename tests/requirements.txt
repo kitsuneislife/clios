@@ -2,3 +2,4 @@ lupa
 PySide6-Essentials
 fonttools
 shellcheck-py
+pyte        # só para tests/tools/termshot.py (imagens da documentação)
