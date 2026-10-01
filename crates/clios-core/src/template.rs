@@ -4,6 +4,7 @@
 //!   hex            #RRGGBB
 //!   bare           RRGGBB
 //!   rgb            r, g, b
+//!   semi           r;g;b                 (sequências SGR e fastfetch: `38;2;{{ c | semi }}`)
 //!   hypr           rgb(RRGGBB)           (Hyprland)
 //!   hypra(0.5)     rgba(RRGGBBAA)        (Hyprland, com alfa)
 //!   alpha(0.5)     #RRGGBBAA
@@ -36,6 +37,7 @@ pub fn environment() -> Environment<'static> {
     env.add_filter("hex", |v: &str| rgb(v).map(Rgb::hex));
     env.add_filter("bare", |v: &str| rgb(v).map(Rgb::bare));
     env.add_filter("rgb", |v: &str| rgb(v).map(|c| format!("{}, {}, {}", c.r, c.g, c.b)));
+    env.add_filter("semi", |v: &str| rgb(v).map(|c| format!("{};{};{}", c.r, c.g, c.b)));
     env.add_filter("hypr", |v: &str| rgb(v).map(|c| format!("rgb({})", c.bare())));
     env.add_filter("hypra", |v: &str, a: f64| rgb(v).map(|c| format!("rgba({}{:02X})", c.bare(), alpha_byte(a))));
     env.add_filter("alpha", |v: &str, a: f64| rgb(v).map(|c| format!("{}{:02X}", c.hex(), alpha_byte(a))));
@@ -70,6 +72,7 @@ mod tests {
         assert_eq!(r("{{ c.accent | hex }}"), "#FF5A1F");
         assert_eq!(r("{{ c.accent | bare }}"), "FF5A1F");
         assert_eq!(r("{{ c.accent | rgb }}"), "255, 90, 31");
+        assert_eq!(r("{{ c.accent | semi }}"), "255;90;31");
         assert_eq!(r("{{ c.accent | hypr }}"), "rgb(FF5A1F)");
         assert_eq!(r("{{ c.accent | hypra(0.5) }}"), "rgba(FF5A1F80)");
         assert_eq!(r("{{ c.accent | alpha(1.0) }}"), "#FF5A1FFF");

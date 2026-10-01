@@ -10,6 +10,7 @@ ShellRoot {
     ThemeFile {}
     Wallpaper {}
     Bar {}
+    Battery {}
     Osd {}
     Notifications {}
 }

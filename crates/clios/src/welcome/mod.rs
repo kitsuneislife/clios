@@ -12,6 +12,7 @@ use std::io;
 use std::time::{Duration, Instant};
 
 use anyhow::{Result, bail};
+use clios_core::GreetMode;
 use clios_core::{Mode, MotionLevel, Theme};
 use ratatui::buffer::Buffer;
 use ratatui::crossterm::event::{
@@ -75,6 +76,9 @@ pub enum Setting {
     Accent,
     Motion,
     Wallpaper,
+    Prompt,
+    Greet,
+    Saver,
     Power,
     Caffeine,
     Night,
@@ -92,6 +96,9 @@ impl Setting {
             Setting::Accent => "acento",
             Setting::Motion => "movimento",
             Setting::Wallpaper => "papel de parede",
+            Setting::Prompt => "prompt",
+            Setting::Greet => "saudação",
+            Setting::Saver => "proteção de tela",
             Setting::Power => "energia",
             Setting::Caffeine => "modo café",
             Setting::Night => "modo noturno",
@@ -165,7 +172,15 @@ impl App {
         let theme = ctx.theme()?;
         let (catalog, warn) = crate::catalog::load(&ctx.paths);
         let power = if ctx.sandboxed { None } else { read_power() };
-        let mut settings = vec![Setting::Mode, Setting::Accent, Setting::Motion, Setting::Wallpaper];
+        let mut settings = vec![
+            Setting::Mode,
+            Setting::Accent,
+            Setting::Motion,
+            Setting::Wallpaper,
+            Setting::Prompt,
+            Setting::Greet,
+            Setting::Saver,
+        ];
         if power.is_some() {
             settings.push(Setting::Power);
         }
@@ -322,6 +337,18 @@ impl App {
             Setting::Wallpaper => {
                 wp::Choice::parse(&self.ctx.state.wallpaper).map_or_else(|_| "?".into(), |c| c.label())
             }
+            Setting::Prompt => self.ctx.state.prompt.id().into(),
+            Setting::Greet => match self.ctx.state.greet {
+                GreetMode::All => "tudo",
+                GreetMode::Boot => "só ao ligar",
+                GreetMode::Off => "nunca",
+            }
+            .into(),
+            Setting::Saver => match self.ctx.state.saver.as_str() {
+                "auto" => "rodízio".to_string(),
+                "off" => "desligada".to_string(),
+                other => other.to_string(),
+            },
             Setting::Power => self.power.as_deref().map_or("indisponível", power_label).into(),
             Setting::Caffeine => state_word(self.caffeine).into(),
             Setting::Night => state_word(self.night).into(),
@@ -360,6 +387,24 @@ impl App {
                 Ok(format!("movimento {next}"))
             }
             Setting::Wallpaper => Ok(format!("papel de parede: {}", wp::step_quiet(&mut self.ctx, delta)?.label())),
+            Setting::Prompt => {
+                let next = self.ctx.state.prompt.step(delta);
+                crate::cmd::prompt::set_quiet(&mut self.ctx, next)?;
+                Ok(format!("prompt {}: {}", next.id(), next.blurb()))
+            }
+            Setting::Greet => {
+                self.ctx.state.greet = self.ctx.state.greet.step(delta);
+                self.ctx.save_state()?;
+                Ok(format!("saudação do terminal: {}", crate::cmd::greet::describe(self.ctx.state.greet)))
+            }
+            Setting::Saver => {
+                let (cat, _) = crate::catalog::load(&self.ctx.paths);
+                let all = crate::cmd::saver::valid_settings(&cat);
+                let cur = all.iter().position(|v| *v == self.ctx.state.saver).unwrap_or(0) as isize;
+                self.ctx.state.saver = all[(cur + delta).rem_euclid(all.len() as isize) as usize].clone();
+                self.ctx.save_state()?;
+                Ok(format!("proteção de tela: {}", crate::cmd::saver::describe(&self.ctx.state.saver)))
+            }
             Setting::Power => {
                 let Some(cur) = self.power.clone() else { bail!("powerprofilesctl indisponível") };
                 let i = POWER_PROFILES.iter().position(|p| *p == cur).unwrap_or(1) as isize;
@@ -435,7 +480,12 @@ impl App {
                 let Some(i) = self.selected_app() else { return };
                 let t = self.catalog.tui[i].clone();
                 if self.installed[i] {
-                    let a = Action::Tui { id: t.id.clone(), argv: t.cmd.clone(), float: t.float, hold: t.hold };
+                    let a = Action::Tui {
+                        id: t.id.clone(),
+                        argv: t.launch_argv(&self.theme),
+                        float: t.float,
+                        hold: t.hold,
+                    };
                     self.open_action(&a, &t.name, now);
                 } else if t.pkg.is_empty() {
                     self.say(format!("{} não tem pacote para instalar", t.name), now);

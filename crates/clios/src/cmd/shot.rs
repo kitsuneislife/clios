@@ -28,7 +28,7 @@ fn timestamp() -> Result<String> {
     Ok(String::from_utf8_lossy(&out.stdout).trim().to_string())
 }
 
-fn geometry(target: Target, accent_hex: &str) -> Result<Option<String>> {
+pub(crate) fn geometry(target: Target, accent_hex: &str) -> Result<Option<String>> {
     match target {
         Target::Screen => Ok(None),
         Target::Region => {

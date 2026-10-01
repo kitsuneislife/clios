@@ -7,6 +7,9 @@ return function(_)
     hl.exec_cmd("hypridle")
     hl.exec_cmd("/usr/lib/hyprpolkitagent/hyprpolkitagent")
 
+    -- Pendrives e HDs externos montam sozinhos (e avisam); `udiskie-umount --all` ejeta tudo.
+    hl.exec_cmd("udiskie --no-tray")
+
     -- Histórico da área de transferência (lido pelo hub com `"`).
     hl.exec_cmd("wl-paste --type text --watch cliphist store")
     hl.exec_cmd("wl-paste --type image --watch cliphist store")

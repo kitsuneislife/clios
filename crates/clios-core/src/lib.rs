@@ -14,6 +14,6 @@ pub mod wallpaper;
 
 pub use color::Rgb;
 pub use paths::Paths;
-pub use state::State;
+pub use state::{GreetMode, PromptStyle, State};
 pub use theme::Theme;
 pub use tokens::{Mode, MotionLevel, Tokens};

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=E-mail (aerc)
+Comment=Escreve o e-mail no aerc, numa janela de terminal
+Exec=footclient -a clios.tui.mail aerc %u
+Terminal=false
+NoDisplay=true
+Categories=Network;Email;
+MimeType=x-scheme-handler/mailto;

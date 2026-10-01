@@ -57,6 +57,10 @@ dst = "lazydocker/config.yml"
 src = "atuin/clios.toml.j2"
 dst = "atuin/themes/clios.toml"
 
+[[template]]
+src = "fastfetch/config.jsonc.j2"
+dst = "fastfetch/config.jsonc"
+
 # Hooks: avisam os apps que estão abertos. Falha de hook nunca derruba o `theme apply`.
 
 [[hook]]

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Editor (helix)
+Comment=Abre o arquivo no helix, numa janela de terminal
+Exec=footclient -a clios.tui.edit hx %F
+Terminal=false
+NoDisplay=true
+Categories=Utility;TextEditor;
+MimeType=text/plain;text/markdown;text/x-shellscript;text/x-python;text/x-rust;text/x-csrc;text/x-chdr;text/x-c++src;text/x-log;text/csv;text/x-toml;application/json;application/x-yaml;application/toml;application/x-shellscript;application/xml;text/xml;

@@ -73,6 +73,7 @@ Scope {
                 caffeine: Status.caffeine
                 night: Status.night
                 dnd: Status.dnd
+                focusLeft: Status.focusLeft
                 battery: win.battery && win.battery.isPresent && win.battery.isLaptopBattery ? win.fraction(win.battery.percentage) : -1
                 charging: win.battery ? win.battery.state === UPowerDeviceState.Charging : false
                 clock: Qt.formatDateTime(clock.date, "ddd d  HH:mm")
@@ -83,7 +84,10 @@ Scope {
                 onBatteryClicked: open("monitor")
                 onClockClicked: open("monitor")
                 // clicar num indicador desliga o que ele mostra
-                onIndicatorClicked: name => Quickshell.execDetached(name === "rec" ? ["clios", "rec", "stop"] : ["clios", name, "off"])
+                onIndicatorClicked: name => Quickshell.execDetached(
+                    name === "rec" ? ["clios", "rec", "stop"]
+                    : name === "focus" ? ["clios", "focus", "stop"]
+                    : ["clios", name, "off"])
             }
         }
     }

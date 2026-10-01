@@ -122,6 +122,14 @@ build_clios() {
   run cargo build --release --locked --manifest-path "$REPO/Cargo.toml"
   run $SUDO install -Dm755 "$REPO/target/release/clios" /usr/local/bin/clios
 
+  # Autocompletar (tab) no fish e no bash, com os ids do catálogo.
+  if ((DRY)); then
+    note "autocompletar: clios completions fish e bash em /usr/share"
+  else
+    "$REPO/target/release/clios" completions fish | $SUDO install -Dm644 /dev/stdin /usr/share/fish/vendor_completions.d/clios.fish
+    "$REPO/target/release/clios" completions bash | $SUDO install -Dm644 /dev/stdin /usr/share/bash-completion/completions/clios
+  fi
+
   # O clios acha o checkout em ~/.local/share/clios (ou /usr/share/clios).
   local link="$HOME/.local/share/clios"
   if [[ -e "$link" && "$(readlink -f "$link")" != "$REPO" ]]; then
@@ -165,7 +173,8 @@ configure_system() {
     < <(find "$REPO/system" -type f | sort)
 
   say "serviços"
-  for svc in greetd iwd bluetooth power-profiles-daemon upower systemd-resolved; do
+  # nftables: firewall de entrada fechada (system/etc/nftables.conf); timesyncd: a hora certa, sem pedir nada.
+  for svc in greetd iwd bluetooth power-profiles-daemon upower systemd-resolved systemd-timesyncd nftables; do
     run $SUDO systemctl enable "$svc.service"
   done
   # Manutenção que ninguém lembra de fazer: cache do pacman, espelhos, índice do `pkgfile`.

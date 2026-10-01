@@ -1,12 +1,41 @@
 //! `clios fetch`: o resumo do sistema, com a marca ao lado (o neofetch do CLIOS).
+//!
+//! Com o `fastfetch` instalado, ele faz o trabalho (mais módulos: GPU, bateria, terminal) lendo a
+//! config que o tema gera em ~/.config/fastfetch. Sem ele, o desenho embutido abaixo cobre o essencial.
+
+use std::path::PathBuf;
+use std::process::Command;
 
 use anyhow::Result;
 use clios_core::Theme;
+use clios_core::fsutil::write_atomic;
 
 use crate::art;
 use crate::ctx::Ctx;
+use crate::sys::is_installed;
 use crate::sysinfo::{self, Info};
 use crate::ui;
+
+/// Altura da marca no resumo, em linhas de terminal.
+const LOGO_ROWS: u32 = 10;
+
+pub fn logo_path(ctx: &Ctx) -> PathBuf {
+    ctx.paths.state.join("fetch-logo.ansi")
+}
+
+/// Escreve a marca (com as cores do tema) onde a config do fastfetch espera. O `theme apply` chama isto,
+/// então até um `fastfetch` solto, fora do `clios fetch`, mostra a marca na cor certa.
+pub fn write_logo(ctx: &Ctx, theme: &Theme) -> Result<()> {
+    let body = art::mark_ansi(theme, LOGO_ROWS, true).join("\n");
+    write_atomic(&logo_path(ctx), body.as_bytes())
+}
+
+/// O comando do fastfetch, ou `None` se não dá para usá-lo (não instalado, ou o tema ainda não gerou a config).
+pub fn fastfetch_argv(ctx: &Ctx) -> Option<Vec<String>> {
+    let cfg = ctx.paths.config.join("fastfetch/config.jsonc");
+    (is_installed("fastfetch") && cfg.is_file())
+        .then(|| vec!["fastfetch".into(), "-c".into(), cfg.display().to_string()])
+}
 
 /// As linhas `(rótulo, valor)`, na ordem de exibição.
 pub fn rows(info: &Info, theme: &Theme, wallpaper: &str, motion: &str) -> Vec<(&'static str, String)> {
@@ -38,8 +67,16 @@ pub fn rows(info: &Info, theme: &Theme, wallpaper: &str, motion: &str) -> Vec<(&
 }
 
 pub fn run(ctx: &Ctx) -> Result<()> {
-    let info = sysinfo::gather();
     let theme = ctx.theme()?;
+    if ui::color_enabled() {
+        if let Some(argv) = fastfetch_argv(ctx) {
+            write_logo(ctx, &theme)?;
+            if Command::new(&argv[0]).args(&argv[1..]).status().is_ok_and(|s| s.success()) {
+                return Ok(());
+            }
+        }
+    }
+    let info = sysinfo::gather();
     let rows = rows(&info, &theme, &ctx.state.wallpaper, &ctx.state.motion.to_string());
     let who = if info.user.is_empty() { info.host.clone() } else { format!("{}@{}", info.user, info.host) };
 
@@ -51,9 +88,8 @@ pub fn run(ctx: &Ctx) -> Result<()> {
         return Ok(());
     }
 
-    const ART_ROWS: u32 = 10;
-    let art = art::mark_ansi(&theme, ART_ROWS, true);
-    let pad = " ".repeat((ART_ROWS * 2) as usize);
+    let art = art::mark_ansi(&theme, LOGO_ROWS, true);
+    let pad = " ".repeat((LOGO_ROWS * 2) as usize);
     let mut text: Vec<String> = Vec::new();
     text.push(ui::bold(&who));
     text.push(ui::dim(&"─".repeat(who.chars().count())));

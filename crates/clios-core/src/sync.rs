@@ -105,6 +105,15 @@ pub struct Linked {
     pub action: LinkAction,
 }
 
+/// Para onde vai um arquivo de `config/`. Quase tudo vai para ~/.config; só `applications/` (os .desktop
+/// que ensinam o xdg-open a abrir arquivos nos apps de terminal) vai para ~/.local/share/applications.
+pub fn static_dst(paths: &Paths, rel: &Path) -> PathBuf {
+    match rel.strip_prefix("applications") {
+        Ok(inner) => paths.xdg_data_home().join("applications").join(inner),
+        Err(_) => paths.config.join(rel),
+    }
+}
+
 pub fn link_static(paths: &Paths, mode: LinkMode, dry_run: bool) -> Result<Vec<Linked>> {
     let base = paths.static_dir();
     let mut files = Vec::new();
@@ -114,7 +123,7 @@ pub fn link_static(paths: &Paths, mode: LinkMode, dry_run: bool) -> Result<Vec<L
     let mut out = Vec::with_capacity(files.len());
     for src in files {
         let rel = src.strip_prefix(&base).expect("arquivo está dentro de config/");
-        let dst = paths.config.join(rel);
+        let dst = static_dst(paths, rel);
         out.push(Linked { action: place(&src, &dst, mode, dry_run)?, dst });
     }
     Ok(out)
@@ -353,5 +362,44 @@ mod tests {
         let sb = sandbox("drylink");
         link_static(&sb.paths, LinkMode::Symlink, true).unwrap();
         assert!(!sb.paths.config.join("app").exists());
+    }
+
+    #[test]
+    fn desktop_files_go_to_xdg_data_and_everything_else_to_config() {
+        let sb = sandbox("static-dst");
+        let p = &sb.paths;
+        assert_eq!(
+            static_dst(p, Path::new("applications/x.desktop")),
+            p.home.join(".local/share/applications/x.desktop")
+        );
+        assert_eq!(static_dst(p, Path::new("fish/config.fish")), p.config.join("fish/config.fish"));
+        assert_eq!(static_dst(p, Path::new("mimeapps.list")), p.config.join("mimeapps.list"));
+    }
+
+    /// Cada `tipo=app.desktop` do mimeapps.list que aponta para um .desktop do CLIOS tem que existir
+    /// e declarar o tipo; os que apontam para apps dos pacotes só podem ser de apps que o CLIOS instala.
+    #[test]
+    fn mimeapps_only_point_to_desktop_files_that_exist_and_claim_the_type() {
+        let cfg = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../config");
+        let mime = fs::read_to_string(cfg.join("mimeapps.list")).unwrap();
+        let known_packages = ["org.pwmt.zathura.desktop", "imv.desktop", "mpv.desktop", "firefox.desktop"];
+        let mut n = 0;
+        for line in mime.lines().filter(|l| l.contains('=') && !l.starts_with('#')) {
+            let (ty, app) = line.split_once('=').unwrap();
+            n += 1;
+            if app.starts_with("clios-") {
+                let body = fs::read_to_string(cfg.join("applications").join(app))
+                    .unwrap_or_else(|_| panic!("{app} não existe em config/applications"));
+                let types = body.lines().find_map(|l| l.strip_prefix("MimeType=")).unwrap_or_default();
+                assert!(types.split(';').any(|t| t == ty), "{app} não declara {ty}");
+                assert!(
+                    body.contains("Exec=footclient -a clios.tui."),
+                    "{app} abre um app de terminal pelo footclient"
+                );
+            } else {
+                assert!(known_packages.contains(&app), "{ty}: {app} não é de um pacote que o CLIOS instala");
+            }
+        }
+        assert!(n >= 30, "só {n} associações");
     }
 }

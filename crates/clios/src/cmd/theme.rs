@@ -59,6 +59,11 @@ pub fn apply(ctx: &Ctx, mut opts: ApplyOptions) -> Result<Summary> {
         eprintln!("aviso: papel de parede não atualizado: {e:#}");
     }
 
+    // A marca do `clios fetch` também acompanha o tema.
+    if let Err(e) = super::fetch::write_logo(ctx, &theme) {
+        eprintln!("aviso: marca do fetch não atualizada: {e:#}");
+    }
+
     if opts.hooks && changed > 0 {
         run_hooks(&manifest);
     }

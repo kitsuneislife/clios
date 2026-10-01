@@ -27,7 +27,7 @@ pub fn static_items(
                     Kind::Tui,
                     format!("tui:{}", t.id),
                     t.name.clone(),
-                    Action::Tui { id: t.id.clone(), argv: t.cmd.clone(), float: t.float, hold: t.hold },
+                    Action::Tui { id: t.id.clone(), argv: t.launch_argv(theme), float: t.float, hold: t.hold },
                 )
                 .keywords(format!("{} {}", t.keywords, t.desc)),
             );
@@ -209,7 +209,7 @@ mod tests {
             }
             other => panic!("ação inesperada: {other:?}"),
         }
-        assert_eq!(cava.hint, "mídia");
+        assert_eq!(cava.hint, "diversão");
         assert!(cava.keywords.contains("barras"), "a busca acha pela descrição");
     }
 

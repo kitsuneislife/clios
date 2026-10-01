@@ -142,6 +142,7 @@ pub fn info(ctx: &Ctx, id: &str) -> Result<()> {
     if !t.tip.is_empty() {
         println!("{} {}", ui::dim("dica:"), t.tip);
     }
+    println!("{} {}  {}", ui::dim("trabalho:"), t.job, ui::dim("(o único app do catálogo para isso)"));
     println!("{} clios open {}", ui::dim("abrir:"), t.id);
     println!("{} {}", ui::dim("pacote:"), t.pkg);
     Ok(())

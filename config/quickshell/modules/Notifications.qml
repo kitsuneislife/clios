@@ -31,7 +31,15 @@ Scope {
         bodySupported: true
         imageSupported: false
         onNotification: n => {
-            if (dnd && n.urgency !== NotificationUrgency.Critical) return
+            const silenced = dnd && n.urgency !== NotificationUrgency.Critical
+            // Tudo vai para o histórico (`clios notifs`, super + shift + n), inclusive o que o não perturbe silencia.
+            // O formato `--campo=valor` impede que um texto começando com "-" seja lido como opção.
+            const urgency = n.urgency === NotificationUrgency.Critical ? "critical"
+                : n.urgency === NotificationUrgency.Low ? "low" : "normal"
+            Quickshell.execDetached(["clios", "notifs", "add",
+                "--app=" + n.appName, "--summary=" + n.summary, "--body=" + n.body, "--urgency=" + urgency]
+                .concat(silenced ? ["--silenced"] : []))
+            if (silenced) return
             n.tracked = true
         }
     }

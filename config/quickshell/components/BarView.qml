@@ -22,6 +22,7 @@ Rectangle {
     property bool caffeine: false
     property bool night: false
     property bool dnd: false
+    property int focusLeft: 0          // segundos; 0 sem bloco de foco
 
     signal workspaceActivated(int id)
     signal audioClicked
@@ -67,6 +68,12 @@ Rectangle {
             text: "● gravando"
             color: Tokens.red
             onClicked: root.indicatorClicked("rec")
+        }
+        Segment {
+            visible: root.focusLeft > 0
+            text: "foco " + Math.ceil(root.focusLeft / 60) + "m"
+            color: Tokens.accent
+            onClicked: root.indicatorClicked("focus")
         }
         Segment {
             visible: root.dnd
