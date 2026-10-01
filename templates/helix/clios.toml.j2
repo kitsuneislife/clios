@@ -1,0 +1,108 @@
+# Gerado por `clios theme apply`. Não edite.
+# Sintaxe quase monocromática: peso e itálico fazem o trabalho que o matiz faria.
+# O acento marca só o que importa (palavras-chave, cursor, modo).
+
+"ui.background" = { bg = "bg" }
+"ui.text" = "fg"
+"ui.text.focus" = { fg = "fg", modifiers = ["bold"] }
+"ui.text.inactive" = "mute"
+"ui.text.directory" = "accent"
+"ui.window" = { fg = "line" }
+"ui.help" = { fg = "fg", bg = "surface" }
+"ui.popup" = { fg = "fg", bg = "surface" }
+"ui.popup.info" = { fg = "fg", bg = "surface" }
+"ui.menu" = { fg = "dim", bg = "surface" }
+"ui.menu.selected" = { fg = "on_accent", bg = "accent" }
+"ui.menu.scroll" = { fg = "mute", bg = "surface" }
+
+"ui.cursor" = { fg = "bg", bg = "dim" }
+"ui.cursor.primary" = { fg = "on_accent", bg = "accent" }
+"ui.cursor.match" = { fg = "accent", modifiers = ["bold", "underlined"] }
+"ui.cursor.primary.insert" = { fg = "on_accent", bg = "accent" }
+"ui.selection" = { bg = "accent_soft" }
+"ui.selection.primary" = { bg = "accent_soft" }
+"ui.cursorline.primary" = { bg = "surface" }
+"ui.highlight" = { bg = "raised" }
+
+"ui.linenr" = "mute"
+"ui.linenr.selected" = { fg = "fg", modifiers = ["bold"] }
+"ui.gutter" = { bg = "bg" }
+"ui.virtual.ruler" = { bg = "surface" }
+"ui.virtual.whitespace" = "line"
+"ui.virtual.indent-guide" = "line"
+"ui.virtual.inlay-hint" = { fg = "mute", modifiers = ["italic"] }
+"ui.virtual.jump-label" = { fg = "accent", modifiers = ["bold"] }
+
+"ui.statusline" = { fg = "dim", bg = "surface" }
+"ui.statusline.inactive" = { fg = "mute", bg = "surface" }
+"ui.statusline.normal" = { fg = "on_accent", bg = "accent", modifiers = ["bold"] }
+"ui.statusline.insert" = { fg = "bg", bg = "fg", modifiers = ["bold"] }
+"ui.statusline.select" = { fg = "bg", bg = "dim", modifiers = ["bold"] }
+"ui.bufferline" = { fg = "mute", bg = "bg" }
+"ui.bufferline.active" = { fg = "fg", bg = "bg", modifiers = ["bold"] }
+"ui.bufferline.background" = { bg = "surface" }
+
+comment = { fg = "mute", modifiers = ["italic"] }
+keyword = "accent"
+"keyword.control" = "accent"
+"keyword.directive" = "accent"
+string = "dim"
+"string.regexp" = "dim"
+"string.special" = "dim"
+constant = { fg = "fg", modifiers = ["bold"] }
+"constant.numeric" = "fg"
+"constant.character.escape" = "accent"
+function = "fg"
+"function.macro" = "accent"
+type = { fg = "fg", modifiers = ["italic"] }
+"type.builtin" = { fg = "dim", modifiers = ["italic"] }
+variable = "fg"
+"variable.builtin" = { fg = "dim", modifiers = ["italic"] }
+"variable.parameter" = "dim"
+operator = "dim"
+punctuation = "mute"
+"punctuation.delimiter" = "mute"
+attribute = "dim"
+namespace = "dim"
+label = "accent"
+special = "accent"
+tag = "accent"
+
+"markup.heading" = { fg = "fg", modifiers = ["bold"] }
+"markup.bold" = { modifiers = ["bold"] }
+"markup.italic" = { modifiers = ["italic"] }
+"markup.link.url" = { fg = "accent", modifiers = ["underlined"] }
+"markup.link.text" = "fg"
+"markup.quote" = { fg = "dim", modifiers = ["italic"] }
+"markup.raw" = "dim"
+"markup.list" = "accent"
+
+"diff.plus" = "green"
+"diff.minus" = "red"
+"diff.delta" = "yellow"
+
+error = "red"
+warning = "yellow"
+info = "blue"
+hint = "mute"
+"diagnostic.error" = { underline = { color = "red", style = "curl" } }
+"diagnostic.warning" = { underline = { color = "yellow", style = "curl" } }
+"diagnostic.info" = { underline = { color = "blue", style = "curl" } }
+"diagnostic.hint" = { underline = { color = "mute", style = "curl" } }
+"diagnostic.unnecessary" = { modifiers = ["dim"] }
+
+[palette]
+bg = "{{ c.bg | hex }}"
+surface = "{{ c.surface | hex }}"
+raised = "{{ c.raised | hex }}"
+line = "{{ c.line | hex }}"
+mute = "{{ c.mute | hex }}"
+dim = "{{ c.dim | hex }}"
+fg = "{{ c.fg | hex }}"
+accent = "{{ c.accent | hex }}"
+accent_soft = "{{ c.accent_soft | hex }}"
+on_accent = "{{ c.on_accent | hex }}"
+red = "{{ c.red | hex }}"
+green = "{{ c.green | hex }}"
+yellow = "{{ c.yellow | hex }}"
+blue = "{{ c.blue | hex }}"

@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Na sessão ao vivo, `clios` procura o checkout em /usr/share/clios (já na ISO).
+# Este atalho só confere o ambiente e mostra como instalar.
+clios doctor || true
+cat <<'MSG'
+
+Instalar no disco:
+  1. archinstall                 (perfil "minimal", systemd-boot)
+  2. reinicie, entre no sistema novo, e rode:
+       git clone https://github.com/kitsuneislife/clios && cd clios && ./scripts/bootstrap.sh
+MSG

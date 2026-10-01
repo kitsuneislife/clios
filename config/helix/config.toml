@@ -1,0 +1,43 @@
+# CLIOS · helix
+# Um editor modal completo num binário só, sem plugins para manter: LSP, tree-sitter,
+# seleção múltipla e fuzzy finder já vêm dentro. O tema é gerado (themes/clios.toml).
+theme = "clios"
+
+[editor]
+line-number = "relative"
+cursorline = true
+color-modes = true
+bufferline = "multiple"
+true-color = true
+auto-format = true
+idle-timeout = 50
+completion-trigger-len = 1
+scrolloff = 6
+mouse = true
+
+[editor.cursor-shape]
+insert = "bar"
+normal = "block"
+select = "underline"
+
+[editor.statusline]
+left = ["mode", "spinner", "file-name", "read-only-indicator", "file-modification-indicator"]
+right = ["diagnostics", "selections", "position", "file-type"]
+separator = "│"
+
+[editor.lsp]
+display-messages = true
+
+[editor.indent-guides]
+render = true
+character = "▏"
+skip-levels = 1
+
+[editor.inline-diagnostics]
+cursor-line = "warning"
+
+[keys.normal]
+C-s = ":write"
+
+[keys.insert]
+C-s = ["normal_mode", ":write"]

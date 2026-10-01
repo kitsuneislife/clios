@@ -1,0 +1,48 @@
+{
+  "mode": "{{ mode }}",
+  "accent": "{{ accent_name }}",
+  "font": { "mono": "{{ font.mono }}" },
+  "ui": {
+    "gapIn": {{ ui.gap_in }},
+    "gapOut": {{ ui.gap_out }},
+    "border": {{ ui.border }},
+    "radius": {{ ui.radius }},
+    "barHeight": {{ ui.bar_height }},
+    "text": {{ ui.text }},
+    "textSmall": {{ ui.text_small }}
+  },
+  "color": {
+    "bg": {{ c.bg | qml }},
+    "surface": {{ c.surface | qml }},
+    "raised": {{ c.raised | qml }},
+    "line": {{ c.line | qml }},
+    "mute": {{ c.mute | qml }},
+    "dim": {{ c.dim | qml }},
+    "fg": {{ c.fg | qml }},
+    "accent": {{ c.accent | qml }},
+    "accentDim": {{ c.accent_dim | qml }},
+    "accentSoft": {{ c.accent_soft | qml }},
+    "onAccent": {{ c.on_accent | qml }},
+    "red": {{ c.red | qml }},
+    "green": {{ c.green | qml }},
+    "yellow": {{ c.yellow | qml }}
+  },
+  "motion": {
+    "enabled": {{ motion.enabled | bool }},
+    "spatial": {{ motion.spatial | bool }},
+    "instant": {{ motion.duration.instant }},
+    "fast": {{ motion.duration.fast }},
+    "base": {{ motion.duration.base }},
+    "slow": {{ motion.duration.slow }},
+    "curve": {
+{% for name, k in motion.curve | items %}
+      "{{ name }}": [{{ k.x1 }}, {{ k.y1 }}, {{ k.x2 }}, {{ k.y2 }}]{{ "," if not loop.last }}
+{% endfor %}
+    }
+  },
+  "accents": [
+{% for a in accents %}
+    { "name": "{{ a.name }}", "color": {{ a.color | qml }} }{{ "," if not loop.last }}
+{% endfor %}
+  ]
+}

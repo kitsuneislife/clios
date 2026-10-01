@@ -1,0 +1,48 @@
+# Gerado por `clios theme apply`. Não edite.
+# Uma linha. Diretório, git, e o cursor. Nada mais pede atenção até pedir.
+
+"$schema" = "https://starship.rs/config-schema.json"
+
+add_newline = false
+palette = "clios"
+
+format = "$directory$git_branch$git_status$character"
+right_format = "$cmd_duration$status"
+
+[palettes.clios]
+fg = "{{ c.fg | hex }}"
+dim = "{{ c.dim | hex }}"
+mute = "{{ c.mute | hex }}"
+accent = "{{ c.accent | hex }}"
+red = "{{ c.red | hex }}"
+
+[character]
+success_symbol = "[❯](accent)"
+error_symbol = "[❯](red)"
+vimcmd_symbol = "[❮](accent)"
+
+[directory]
+style = "dim"
+truncation_length = 3
+truncate_to_repo = true
+truncation_symbol = "…/"
+format = "[$path]($style) "
+
+[git_branch]
+style = "mute"
+symbol = ""
+format = "[$symbol$branch]($style) "
+
+[git_status]
+style = "accent"
+format = "[$all_status$ahead_behind]($style) "
+
+[cmd_duration]
+min_time = 2000
+style = "mute"
+format = "[$duration]($style) "
+
+[status]
+disabled = false
+style = "red"
+format = "[$status]($style) "

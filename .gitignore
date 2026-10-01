@@ -1,0 +1,8 @@
+/target
+*.log
+.qmlls.ini
+/iso/work
+/iso/out
+/iso/airootfs/usr/local/bin/clios
+/iso/airootfs/etc/skel
+.venv

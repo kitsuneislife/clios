@@ -1,0 +1,40 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: dependências do sistema
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fish libegl1 libxkbcommon0 libfontconfig1 libdbus-1-3
+
+      - name: fonte para os PNGs do QML (Geist Mono, OFL)
+        run: |
+          git clone --depth 1 --filter=blob:none --sparse https://github.com/vercel/geist-font.git /tmp/geist-font
+          git -C /tmp/geist-font sparse-checkout set fonts/GeistMono
+          echo "GEIST_MONO_DIR=/tmp/geist-font/fonts/GeistMono/ttf" >> "$GITHUB_ENV"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r tests/requirements.txt
+
+      - name: bateria completa
+        run: ./tests/run.sh
+
+      - name: capturas do QML
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: qml-shots
+          path: target/qml-shots/
+          if-no-files-found: ignore

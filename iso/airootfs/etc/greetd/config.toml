@@ -1,0 +1,11 @@
+# Sessão ao vivo: entra direto, sem pedir senha.
+[terminal]
+vt = 1
+
+[default_session]
+command = "tuigreet --time --cmd start-hyprland"
+user = "greeter"
+
+[initial_session]
+command = "start-hyprland"
+user = "live"
