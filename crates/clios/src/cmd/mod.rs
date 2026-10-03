@@ -15,6 +15,7 @@ pub mod saver;
 pub mod selfupdate;
 pub mod session;
 pub mod shot;
+pub mod snap;
 pub mod status;
 pub mod sync;
 pub mod term;

@@ -191,6 +191,56 @@ configure_system() {
   fi
 }
 
+# ── fotografias do sistema (btrfs + snapper) ──────────────────────────────
+# Cada transação do pacman ganha uma fotografia antes e outra depois (snap-pac); `clios snap` lista, compara e desfaz.
+configure_snapshots() {
+  ((SYSTEM)) || return 0
+  local fs
+  fs="$(findmnt -no FSTYPE / 2>/dev/null || true)"
+  if [[ "$fs" != btrfs ]]; then
+    note "fotografias do sistema puladas: a raiz é ${fs:-desconhecida}, e elas precisam de btrfs"
+    return 0
+  fi
+  say "fotografias do sistema (snapper)"
+  run $SUDO pacman -S --needed --noconfirm snapper snap-pac
+  if [[ ! -f /etc/snapper/configs/root ]]; then
+    if findmnt -n /.snapshots >/dev/null 2>&1; then
+      # O archinstall já monta o subvolume @.snapshots em /.snapshots, e o snapper quer criar o dele.
+      # O caminho da ArchWiki: deixa o snapper criar a config, apaga o subvolume dele e monta o do archinstall de novo.
+      run $SUDO umount /.snapshots
+      run $SUDO rmdir /.snapshots
+      run $SUDO snapper -c root create-config /
+      run $SUDO btrfs subvolume delete /.snapshots
+      run $SUDO mkdir /.snapshots
+      run $SUDO mount -a
+      run $SUDO chmod 750 /.snapshots
+    else
+      run $SUDO snapper -c root create-config /
+    fi
+  fi
+  # Sem fotografias de hora em hora (as do pacman bastam), poucas guardadas, e o seu usuário lista e cria sem sudo.
+  run $SUDO snapper -c root set-config TIMELINE_CREATE=no NUMBER_LIMIT=12 NUMBER_LIMIT_IMPORTANT=6 \
+    "ALLOW_USERS=$TARGET_USER" SYNC_ACL=yes
+  run $SUDO systemctl enable snapper-cleanup.timer
+
+  # Com o limine, as fotografias aparecem no menu de boot: dá para voltar mesmo se o sistema não subir.
+  if [[ -d /boot/limine || -f /boot/EFI/limine/limine.conf || -f /boot/limine.conf ]]; then
+    local helper=""
+    for h in paru yay; do command -v "$h" >/dev/null && { helper="$h"; break; }; done
+    if ((AUR)) && [[ -n "$helper" ]]; then
+      run "$helper" -S --needed --noconfirm limine-snapper-sync
+      run $SUDO systemctl enable limine-snapper-sync.service
+    else
+      note "para as fotografias aparecerem no menu do limine, instale limine-snapper-sync (AUR)"
+    fi
+  else
+    note "o menu do systemd-boot não lista fotografias; \`clios snap undo\` desfaz com o sistema rodando"
+  fi
+  if ! ((DRY)) && ! $SUDO snapper -c root list 2>/dev/null | grep -q "clios bootstrap"; then
+    $SUDO snapper -c root create -c number -d "clios bootstrap" || warn "não consegui tirar a primeira fotografia"
+  fi
+}
+
 configure_cmdline() {
   ((CMDLINE)) || return 0
   say "linha de comando do kernel (systemd-boot)"
@@ -215,6 +265,7 @@ build_clios
 sync_dotfiles
 install_extras
 configure_system
+configure_snapshots
 configure_cmdline
 
 say "pronto"

@@ -115,6 +115,14 @@ pub fn run(ctx: &Ctx) -> Result<bool> {
         println!("  ✗ falta {}  {}", hypr.display(), ui::dim("rode: clios sync"));
     }
 
+    match super::snap::unavailable() {
+        None => println!("  ✓ fotografias do sistema (snapper)  {}", ui::dim("clios snap")),
+        Some(why) => println!("  · sem fotografias do sistema  {}", ui::dim(&why)),
+    }
+    if super::snap::reboot_pending() {
+        println!("  · o kernel foi atualizado e falta reiniciar");
+    }
+
     if missing_required == 0 {
         println!("\ntudo que é obrigatório está no lugar.");
     } else {

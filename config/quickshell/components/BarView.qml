@@ -23,6 +23,7 @@ Rectangle {
     property bool night: false
     property bool dnd: false
     property int focusLeft: 0          // segundos; 0 sem bloco de foco
+    property bool reboot: false        // kernel novo esperando um reinício
 
     signal workspaceActivated(int id)
     signal audioClicked
@@ -63,6 +64,12 @@ Rectangle {
         height: parent.height
         spacing: 0
 
+        Segment {
+            visible: root.reboot
+            text: "reiniciar"
+            color: Tokens.accent
+            onClicked: root.indicatorClicked("reboot")
+        }
         Segment {
             visible: root.rec
             text: "● gravando"

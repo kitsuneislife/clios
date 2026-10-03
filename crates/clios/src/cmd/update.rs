@@ -185,7 +185,7 @@ fn fetch_feed() -> Result<String> {
 }
 
 /// Pergunta sim ou não. `default` vale para o Enter vazio.
-fn ask(question: &str, default: bool) -> bool {
+pub(crate) fn ask(question: &str, default: bool) -> bool {
     let hint = if default { "[S/n]" } else { "[s/N]" };
     print!("{question} {hint} ");
     let _ = std::io::stdout().flush();
@@ -241,6 +241,13 @@ pub fn run(ctx: &Ctx, news_only: bool, yes: bool) -> Result<bool> {
         return Ok(true);
     }
 
+    let snaps = super::snap::unavailable().is_none();
+    if snaps {
+        println!(
+            "{}",
+            ui::dim("o snap-pac fotografa o sistema antes e depois; `clios snap undo` desfaz se der errado")
+        );
+    }
     let ok = if is_installed("paru") {
         Command::new("paru").arg("-Syu").status()
     } else {
@@ -255,6 +262,15 @@ pub fn run(ctx: &Ctx, news_only: bool, yes: bool) -> Result<bool> {
     }
     let _ = clios_core::fsutil::write_atomic(&stamp_file(ctx), format!("{}\n", now()).as_bytes());
 
+    if super::snap::reboot_pending() {
+        println!(
+            "\n{}",
+            ui::bold("o kernel foi atualizado: reinicie quando puder (até lá, módulos novos não carregam).")
+        );
+    }
+    if snaps {
+        println!("{}", ui::dim("`clios snap diff` mostra o que esta atualização mudou"));
+    }
     let pacnew = find_pacnew(Path::new("/etc"), 3);
     if pacnew.is_empty() {
         println!("\n{}", ui::bold("pronto."));

@@ -15,6 +15,7 @@ Singleton {
     property bool dnd: false
     property bool rec: false
     property int focusLeft: 0           // segundos que faltam do bloco de foco; 0 sem bloco
+    property bool reboot: false         // o kernel foi atualizado e falta reiniciar
 
     Process {
         id: poll
@@ -30,6 +31,7 @@ Singleton {
                     dnd = j.dnd
                     rec = j.rec
                     focusLeft = j.focus || 0
+                    reboot = j.reboot === true
                 } catch (e) {
                     // mantém o último estado conhecido
                 }

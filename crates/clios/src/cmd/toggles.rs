@@ -273,6 +273,8 @@ pub struct All {
     pub rec: bool,
     /// Segundos que faltam do bloco de foco (`clios focus`); 0 sem bloco.
     pub focus: u64,
+    /// O kernel foi atualizado e falta reiniciar.
+    pub reboot: bool,
 }
 
 pub fn all(ctx: &Ctx) -> All {
@@ -283,6 +285,7 @@ pub fn all(ctx: &Ctx) -> All {
         dnd: dnd_on(ctx),
         rec: REC.running(ctx),
         focus: super::focus::remaining(ctx).unwrap_or(0),
+        reboot: super::snap::reboot_pending(),
     }
 }
 
@@ -357,5 +360,6 @@ mod tests {
         let j = serde_json::to_value(&a).unwrap();
         assert_eq!(j["dnd"], true);
         assert!(j["net"]["kind"].is_string());
+        assert!(j["reboot"].is_boolean());
     }
 }

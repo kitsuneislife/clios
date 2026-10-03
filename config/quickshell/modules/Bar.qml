@@ -74,6 +74,7 @@ Scope {
                 night: Status.night
                 dnd: Status.dnd
                 focusLeft: Status.focusLeft
+                reboot: Status.reboot
                 battery: win.battery && win.battery.isPresent && win.battery.isLaptopBattery ? win.fraction(win.battery.percentage) : -1
                 charging: win.battery ? win.battery.state === UPowerDeviceState.Charging : false
                 clock: Qt.formatDateTime(clock.date, "ddd d  HH:mm")
@@ -83,9 +84,10 @@ Scope {
                 onNetClicked: open("network")
                 onBatteryClicked: open("monitor")
                 onClockClicked: open("monitor")
-                // clicar num indicador desliga o que ele mostra
+                // clicar num indicador desliga o que ele mostra (o de reiniciar abre as ações de sessão)
                 onIndicatorClicked: name => Quickshell.execDetached(
-                    name === "rec" ? ["clios", "rec", "stop"]
+                    name === "reboot" ? ["clios", "open", "hub", ">"]
+                    : name === "rec" ? ["clios", "rec", "stop"]
                     : name === "focus" ? ["clios", "focus", "stop"]
                     : ["clios", name, "off"])
             }

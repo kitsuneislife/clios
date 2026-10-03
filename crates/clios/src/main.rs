@@ -161,6 +161,11 @@ enum Command {
         #[arg(long, short)]
         yes: bool,
     },
+    /// Fotografias do sistema (btrfs): o que cada atualização mudou, e desfazer uma delas.
+    Snap {
+        #[command(subcommand)]
+        command: Option<SnapCommand>,
+    },
     /// Atualiza o próprio CLIOS: puxa o repositório, recompila, reinstala e sincroniza.
     SelfUpdate {
         /// Só diz se há novidades, sem atualizar.
@@ -356,6 +361,30 @@ enum AppsCommand {
 }
 
 #[derive(Subcommand)]
+enum SnapCommand {
+    /// Lista as fotografias, as mais novas primeiro (o padrão).
+    List {
+        #[arg(long, short = 'n', default_value_t = 20)]
+        count: usize,
+    },
+    /// Tira uma fotografia agora.
+    New { description: Vec<String> },
+    /// O que mudou numa fotografia (o par de uma atualização) ou desde ela.
+    Diff {
+        number: u32,
+        /// Lista todos os arquivos, não só os pacotes.
+        #[arg(long)]
+        all: bool,
+    },
+    /// Desfaz uma atualização (ou tudo desde uma fotografia), com o sistema rodando.
+    Undo {
+        number: u32,
+        #[arg(long, short)]
+        yes: bool,
+    },
+}
+
+#[derive(Subcommand)]
 enum TermCommand {
     /// Avisa que um comando longo terminou, se o terminal dele não estiver em foco (o fish chama).
     #[command(hide = true)]
@@ -468,6 +497,12 @@ fn run() -> Result<bool> {
         Command::Term { here, float, cwd, run, command: None } => {
             cmd::term::open(cmd::term::Options { here, float, cwd, run })?
         }
+        Command::Snap { command } => match command.unwrap_or(SnapCommand::List { count: 20 }) {
+            SnapCommand::List { count } => cmd::snap::list(count)?,
+            SnapCommand::New { description } => cmd::snap::new(&description.join(" "))?,
+            SnapCommand::Diff { number, all } => cmd::snap::diff(number, all)?,
+            SnapCommand::Undo { number, yes } => cmd::snap::undo(number, yes)?,
+        },
         Command::Session { command } => match command.unwrap_or(SessionCommand::Show) {
             SessionCommand::Show => cmd::session::show(&ctx)?,
             SessionCommand::Save { quiet } => cmd::session::save(&ctx, quiet)?,
