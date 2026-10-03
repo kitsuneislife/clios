@@ -121,6 +121,8 @@ build_clios() {
   say "compilando o clios"
   run cargo build --release --locked --manifest-path "$REPO/Cargo.toml"
   run $SUDO install -Dm755 "$REPO/target/release/clios" /usr/local/bin/clios
+  # O portal de arquivos chama `clios-filechooser`: o mesmo binário, por outro nome.
+  run $SUDO ln -sf clios /usr/local/bin/clios-filechooser
 
   # Autocompletar (tab) no fish e no bash, com os ids do catálogo.
   if ((DRY)); then

@@ -3,6 +3,7 @@ pub mod bg;
 pub mod completions;
 pub mod doctor;
 pub mod fetch;
+pub mod filechooser;
 pub mod focus;
 pub mod greet;
 pub mod keys;

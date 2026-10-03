@@ -1,6 +1,8 @@
 -- O que sobe com a sessão. Quase tudo é daemon; os apps o usuário abre quando quer.
 return function(_)
   hl.on("hyprland.start", function()
+    -- Os portais (arquivos, captura de tela) são serviços do systemd e precisam saber qual é a tela.
+    hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP HYPRLAND_INSTANCE_SIGNATURE")
     -- O servidor do foot é o que deixa cada janela de terminal abrir instantaneamente.
     hl.exec_cmd("foot --server")
     hl.exec_cmd("quickshell")

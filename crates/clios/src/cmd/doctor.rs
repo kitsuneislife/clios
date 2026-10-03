@@ -115,6 +115,14 @@ pub fn run(ctx: &Ctx) -> Result<bool> {
         println!("  ✗ falta {}  {}", hypr.display(), ui::dim("rode: clios sync"));
     }
 
+    if std::path::Path::new("/usr/lib/xdg-desktop-portal-termfilechooser").exists() {
+        println!("  ✓ abrir e salvar arquivo no terminal (portal)");
+    } else {
+        println!(
+            "  · os diálogos de arquivo são os do GTK  {}",
+            ui::dim("paru -S xdg-desktop-portal-termfilechooser (o yazi vira o diálogo)")
+        );
+    }
     match super::snap::unavailable() {
         None => println!("  ✓ fotografias do sistema (snapper)  {}", ui::dim("clios snap")),
         Some(why) => println!("  · sem fotografias do sistema  {}", ui::dim(&why)),

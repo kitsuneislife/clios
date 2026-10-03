@@ -105,6 +105,16 @@ enum Command {
         #[command(subcommand)]
         command: Option<SessionCommand>,
     },
+    /// O diálogo de abrir e salvar arquivo no terminal (o portal chama `clios-filechooser`, que abre isto).
+    #[command(hide = true)]
+    Filechooser {
+        #[arg(long, value_enum)]
+        mode: cmd::filechooser::Mode,
+        #[arg(long)]
+        path: PathBuf,
+        #[arg(long)]
+        out: PathBuf,
+    },
     /// Papel de parede: estilos que seguem o tema e as suas imagens (sem argumento, abre o seletor).
     Wallpaper {
         #[command(subcommand)]
@@ -503,6 +513,7 @@ fn run() -> Result<bool> {
             SnapCommand::Diff { number, all } => cmd::snap::diff(number, all)?,
             SnapCommand::Undo { number, yes } => cmd::snap::undo(number, yes)?,
         },
+        Command::Filechooser { mode, path, out } => cmd::filechooser::ui(mode, &path, &out)?,
         Command::Session { command } => match command.unwrap_or(SessionCommand::Show) {
             SessionCommand::Show => cmd::session::show(&ctx)?,
             SessionCommand::Save { quiet } => cmd::session::save(&ctx, quiet)?,
@@ -632,6 +643,18 @@ fn run() -> Result<bool> {
 }
 
 fn main() -> ExitCode {
+    // `clios-filechooser` é um link para este binário: o portal de arquivos chama por esse nome, com argumentos dele.
+    let mut args = std::env::args();
+    let argv0 = args.next().unwrap_or_default();
+    if std::path::Path::new(&argv0).file_name().is_some_and(|n| n == "clios-filechooser") {
+        return match cmd::filechooser::portal(&args.collect::<Vec<_>>()) {
+            Ok(()) => ExitCode::SUCCESS,
+            Err(e) => {
+                eprintln!("clios-filechooser: {e:#}");
+                ExitCode::FAILURE
+            }
+        };
+    }
     match run() {
         Ok(true) => ExitCode::SUCCESS,
         Ok(false) => ExitCode::FAILURE,

@@ -1,0 +1,9 @@
+# O diálogo de abrir e salvar arquivo no terminal: `clios-filechooser` abre uma janela flutuante com o yazi
+# (e, para salvar, um campo de nome com a pasta sugerida). Pacote: xdg-desktop-portal-termfilechooser (AUR).
+[filechooser]
+cmd=/usr/local/bin/clios-filechooser
+default_dir=$HOME/Downloads
+# O CLIOS pergunta o nome do arquivo; o arquivo de instruções do portal não é necessário.
+create_help_file=0
+open_mode=suggested
+save_mode=last
