@@ -70,6 +70,54 @@ fn run_capture(prog: &str, args: &[&str]) -> Option<String> {
     out.status.success().then(|| String::from_utf8_lossy(&out.stdout).into_owned())
 }
 
+/// Algumas palavras em português que o fend não conhece, e a vírgula decimal: `1,5 km em milhas` vira
+/// `1.5 km to miles`.
+pub fn calc_expr(input: &str) -> String {
+    const WORDS: &[(&str, &str)] = &[
+        ("em", "to"),
+        ("para", "to"),
+        ("de", "of"),
+        ("vezes", "*"),
+        ("mais", "+"),
+        ("menos", "-"),
+        ("dias", "days"),
+        ("dia", "day"),
+        ("horas", "hours"),
+        ("hora", "hour"),
+        ("minutos", "minutes"),
+        ("segundos", "seconds"),
+        ("semanas", "weeks"),
+        ("meses", "months"),
+        ("anos", "years"),
+        ("milhas", "miles"),
+        ("metros", "meters"),
+        ("pés", "feet"),
+        ("polegadas", "inches"),
+        ("libras", "pounds"),
+        ("hoje", "today"),
+    ];
+    let chars: Vec<char> = input.chars().collect();
+    let mut fixed = String::with_capacity(input.len());
+    for (i, c) in chars.iter().enumerate() {
+        let between_digits =
+            i > 0 && i + 1 < chars.len() && chars[i - 1].is_ascii_digit() && chars[i + 1].is_ascii_digit();
+        fixed.push(if *c == ',' && between_digits { '.' } else { *c });
+    }
+    fixed
+        .split(' ')
+        .map(|w| WORDS.iter().find(|(pt, _)| w.eq_ignore_ascii_case(pt)).map_or(w, |(_, en)| en))
+        .collect::<Vec<_>>()
+        .join(" ")
+}
+
+/// Uma conta, pelo fend (`= 2^10`). `None` quando ele não entende ou não está instalado.
+pub fn calc(input: &str) -> Option<String> {
+    let out = run_capture("fend", &[&calc_expr(input)])?;
+    let r = out.trim();
+    let r = r.strip_prefix("approx. ").map_or_else(|| r.to_string(), |rest| format!("≈ {rest}"));
+    (!r.is_empty() && !r.contains('\n')).then_some(r)
+}
+
 pub fn windows() -> Vec<Item> {
     run_capture("hyprctl", &["clients", "-j"]).map(|s| windows_from_json(&s)).unwrap_or_default()
 }
@@ -174,6 +222,15 @@ pub fn clips_from_list(list: &str) -> Vec<Item> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn portuguese_math_reads_as_fend_math() {
+        assert_eq!(calc_expr("5 km em milhas"), "5 km to miles");
+        assert_eq!(calc_expr("18% de 230"), "18% of 230");
+        assert_eq!(calc_expr("1,5 + 2,25"), "1.5 + 2.25");
+        assert_eq!(calc_expr("max(1, 2)"), "max(1, 2)");
+        assert_eq!(calc_expr("3 dias em horas"), "3 days to hours");
+    }
 
     fn cat() -> Catalog {
         crate::catalog::builtin()

@@ -82,6 +82,39 @@ enum Command {
         /// Para `hub`: a consulta inicial.
         args: Vec<String>,
     },
+    /// Abre um terminal que o CLIOS reconhece (é o que `SUPER + Enter` chama): a sessão, o "abrir aqui" e o aviso de
+    /// comando longo dependem disso.
+    Term {
+        /// Na mesma pasta do terminal em foco.
+        #[arg(long, conflicts_with = "cwd")]
+        here: bool,
+        /// Flutuante e centralizado.
+        #[arg(long)]
+        float: bool,
+        /// Numa pasta.
+        #[arg(long, short = 'D', value_name = "PASTA")]
+        cwd: Option<PathBuf>,
+        #[command(subcommand)]
+        command: Option<TermCommand>,
+        /// Um comando para rodar dentro do shell (depois dele, o shell continua aberto).
+        #[arg(last = true)]
+        run: Vec<String>,
+    },
+    /// As janelas da última sessão: cada terminal na sua pasta, com o editor que estava aberto, na mesma workspace.
+    Session {
+        #[command(subcommand)]
+        command: Option<SessionCommand>,
+    },
+    /// O diálogo de abrir e salvar arquivo no terminal (o portal chama `clios-filechooser`, que abre isto).
+    #[command(hide = true)]
+    Filechooser {
+        #[arg(long, value_enum)]
+        mode: cmd::filechooser::Mode,
+        #[arg(long)]
+        path: PathBuf,
+        #[arg(long)]
+        out: PathBuf,
+    },
     /// Papel de parede: estilos que seguem o tema e as suas imagens (sem argumento, abre o seletor).
     Wallpaper {
         #[command(subcommand)]
@@ -138,6 +171,11 @@ enum Command {
         #[arg(long, short)]
         yes: bool,
     },
+    /// Fotografias do sistema (btrfs): o que cada atualização mudou, e desfazer uma delas.
+    Snap {
+        #[command(subcommand)]
+        command: Option<SnapCommand>,
+    },
     /// Atualiza o próprio CLIOS: puxa o repositório, recompila, reinstala e sincroniza.
     SelfUpdate {
         /// Só diz se há novidades, sem atualizar.
@@ -166,13 +204,24 @@ enum Command {
         #[arg(long, hide = true)]
         wait: bool,
     },
-    /// Modo noturno: tela mais quente (hyprsunset).
+    /// Modo noturno: tela mais quente (hyprsunset). `clios night auto 20:30-06:45` agenda todo dia.
     Night {
         #[arg(value_enum, default_value = "toggle")]
-        switch: cmd::toggles::Switch,
+        switch: cmd::toggles::NightSwitch,
+        /// Com `auto`: o horário (início-fim, como 20:30-06:45) ou `off`.
+        #[arg(value_name = "HORÁRIO")]
+        when: Option<String>,
         /// Temperatura em kelvin (1000 a 10000).
         #[arg(long, short)]
         temp: Option<u32>,
+        /// Para o autostart: liga o agendado, se houver.
+        #[arg(long, hide = true)]
+        login: bool,
+    },
+    /// A saúde da bateria e o limite de carga (sem argumento, mostra).
+    Battery {
+        #[command(subcommand)]
+        command: Option<BatteryCommand>,
     },
     /// Não perturbe: silencia as notificações (as urgentes passam).
     Dnd {
@@ -333,6 +382,77 @@ enum AppsCommand {
 }
 
 #[derive(Subcommand)]
+enum BatteryCommand {
+    /// Mostra carga, saúde, ciclos e limite (o padrão).
+    Show,
+    /// Para a carga num ponto (50 a 100), também depois de reiniciar; `off` volta a 100%.
+    Limit {
+        #[arg(value_name = "PORCENTAGEM|off")]
+        value: String,
+    },
+}
+
+#[derive(Subcommand)]
+enum SnapCommand {
+    /// Lista as fotografias, as mais novas primeiro (o padrão).
+    List {
+        #[arg(long, short = 'n', default_value_t = 20)]
+        count: usize,
+    },
+    /// Tira uma fotografia agora.
+    New { description: Vec<String> },
+    /// O que mudou numa fotografia (o par de uma atualização) ou desde ela.
+    Diff {
+        number: u32,
+        /// Lista todos os arquivos, não só os pacotes.
+        #[arg(long)]
+        all: bool,
+    },
+    /// Desfaz uma atualização (ou tudo desde uma fotografia), com o sistema rodando.
+    Undo {
+        number: u32,
+        #[arg(long, short)]
+        yes: bool,
+    },
+}
+
+#[derive(Subcommand)]
+enum TermCommand {
+    /// Avisa que um comando longo terminou, se o terminal dele não estiver em foco (o fish chama).
+    #[command(hide = true)]
+    Done {
+        #[arg(long)]
+        secs: u64,
+        #[arg(long, default_value_t = 0, allow_hyphen_values = true)]
+        status: i32,
+        cmd: Vec<String>,
+    },
+}
+
+#[derive(Subcommand)]
+enum SessionCommand {
+    /// Mostra o que está salvo (o padrão).
+    Show,
+    /// Salva as janelas de agora (isto também acontece sozinho a cada minuto).
+    Save {
+        #[arg(long, short)]
+        quiet: bool,
+    },
+    /// Reabre as janelas salvas.
+    Restore {
+        /// Para o autostart: só reabre se a escolha for reabrir, e avisa por notificação.
+        #[arg(long)]
+        login: bool,
+    },
+    /// Reabrir no login (o padrão).
+    On,
+    /// O login começa com a mesa limpa.
+    Off,
+    /// Apaga a sessão salva.
+    Forget,
+}
+
+#[derive(Subcommand)]
 enum SaverCommand {
     /// Lista as cenas e mostra a escolhida.
     List,
@@ -403,6 +523,27 @@ fn run() -> Result<bool> {
             hub::run(&ctx, hub::Options { dump, snapshot, query, at_ms: at, demo })?
         }
         Command::Open { id, args } => hub::open(&ctx, &id, &args)?,
+        Command::Term { command: Some(TermCommand::Done { secs, status, cmd }), .. } => {
+            cmd::term::done(secs, status, &cmd.join(" "))?
+        }
+        Command::Term { here, float, cwd, run, command: None } => {
+            cmd::term::open(cmd::term::Options { here, float, cwd, run })?
+        }
+        Command::Snap { command } => match command.unwrap_or(SnapCommand::List { count: 20 }) {
+            SnapCommand::List { count } => cmd::snap::list(count)?,
+            SnapCommand::New { description } => cmd::snap::new(&description.join(" "))?,
+            SnapCommand::Diff { number, all } => cmd::snap::diff(number, all)?,
+            SnapCommand::Undo { number, yes } => cmd::snap::undo(number, yes)?,
+        },
+        Command::Filechooser { mode, path, out } => cmd::filechooser::ui(mode, &path, &out)?,
+        Command::Session { command } => match command.unwrap_or(SessionCommand::Show) {
+            SessionCommand::Show => cmd::session::show(&ctx)?,
+            SessionCommand::Save { quiet } => cmd::session::save(&ctx, quiet)?,
+            SessionCommand::Restore { login } => cmd::session::restore(&ctx, login)?,
+            SessionCommand::On => cmd::session::set(&mut ctx, true)?,
+            SessionCommand::Off => cmd::session::set(&mut ctx, false)?,
+            SessionCommand::Forget => cmd::session::forget(&ctx)?,
+        },
         Command::Status { what: StatusWhat::Net } => cmd::status::run_net()?,
         Command::Status { what: StatusWhat::All } => println!("{}", serde_json::to_string(&cmd::toggles::all(&ctx))?),
         Command::Wallpaper { command, snapshot: Some(size), select } => {
@@ -467,9 +608,19 @@ fn run() -> Result<bool> {
                 cmd::focus::run(&ctx, what.as_deref())?
             }
         }
-        Command::Night { switch, temp } => {
-            println!("noturno {}", cmd::toggles::state_word(cmd::toggles::night(&ctx, switch, temp)?))
+        Command::Night { login: true, .. } => cmd::toggles::night_login(&ctx)?,
+        Command::Night { switch: cmd::toggles::NightSwitch::Auto, when, .. } => {
+            cmd::toggles::night_auto(&mut ctx, when.as_deref().unwrap_or("20:30-06:45"))?
         }
+        Command::Night { switch, temp, when, .. } => {
+            anyhow::ensure!(when.is_none(), "o horário só vale com `auto` (clios night auto 20:30-06:45)");
+            let on = cmd::toggles::night(&ctx, switch.plain(), temp)?;
+            println!("noturno {}", cmd::toggles::state_word(on))
+        }
+        Command::Battery { command } => match command.unwrap_or(BatteryCommand::Show) {
+            BatteryCommand::Show => cmd::battery::show()?,
+            BatteryCommand::Limit { value } => cmd::battery::limit(&value)?,
+        },
         Command::Dnd { switch } => {
             println!("não perturbe {}", cmd::toggles::state_word(cmd::toggles::dnd(&ctx, switch)?))
         }
@@ -524,6 +675,18 @@ fn run() -> Result<bool> {
 }
 
 fn main() -> ExitCode {
+    // `clios-filechooser` é um link para este binário: o portal de arquivos chama por esse nome, com argumentos dele.
+    let mut args = std::env::args();
+    let argv0 = args.next().unwrap_or_default();
+    if std::path::Path::new(&argv0).file_name().is_some_and(|n| n == "clios-filechooser") {
+        return match cmd::filechooser::portal(&args.collect::<Vec<_>>()) {
+            Ok(()) => ExitCode::SUCCESS,
+            Err(e) => {
+                eprintln!("clios-filechooser: {e:#}");
+                ExitCode::FAILURE
+            }
+        };
+    }
     match run() {
         Ok(true) => ExitCode::SUCCESS,
         Ok(false) => ExitCode::FAILURE,

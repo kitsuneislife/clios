@@ -12,6 +12,8 @@ pub enum Kind {
     Clip,
     /// App do catálogo que ainda não está instalado.
     Install,
+    /// O resultado de uma conta (`=`), calculado pelo fend.
+    Calc,
 }
 
 impl Kind {
@@ -24,6 +26,7 @@ impl Kind {
             Kind::Key => "atalho",
             Kind::Clip => "clip",
             Kind::Install => "instalar",
+            Kind::Calc => "conta",
         }
     }
 }
@@ -38,11 +41,12 @@ pub enum Scope {
     Actions,
     Clipboard,
     Install,
+    Calc,
 }
 
 impl Scope {
-    pub const CYCLE: [Scope; 6] =
-        [Scope::All, Scope::Windows, Scope::Keys, Scope::Actions, Scope::Clipboard, Scope::Install];
+    pub const CYCLE: [Scope; 7] =
+        [Scope::All, Scope::Windows, Scope::Keys, Scope::Actions, Scope::Clipboard, Scope::Install, Scope::Calc];
 
     pub fn prefix(self) -> &'static str {
         match self {
@@ -52,6 +56,7 @@ impl Scope {
             Scope::Actions => ">",
             Scope::Clipboard => "\"",
             Scope::Install => "+",
+            Scope::Calc => "=",
         }
     }
 
@@ -63,6 +68,7 @@ impl Scope {
             Scope::Actions => "ações",
             Scope::Clipboard => "clipboard",
             Scope::Install => "instalar",
+            Scope::Calc => "conta",
         }
     }
 
@@ -92,6 +98,7 @@ impl Scope {
             Scope::Actions => kind == Kind::Action,
             Scope::Clipboard => kind == Kind::Clip,
             Scope::Install => kind == Kind::Install,
+            Scope::Calc => kind == Kind::Calc,
         }
     }
 }
@@ -118,6 +125,8 @@ pub enum Action {
     Clip(String),
     /// Muda o escopo da busca sem fechar o hub.
     Scope(Scope),
+    /// Copia o texto para a área de transferência (e avisa).
+    Copy(String),
 }
 
 #[derive(Debug, Clone)]
@@ -204,6 +213,27 @@ pub fn builtin_actions(theme: &Theme) -> Vec<Item> {
         a("focus-stop", "foco: parar", "focus foco parar", &["focus", "stop"]),
         a("caffeine", "modo café: ligar ou desligar", "caffeine cafe tela acordado inhibit", &["caffeine"]),
         a("night", "modo noturno: ligar ou desligar", "night noturno quente hyprsunset redshift", &["night"]),
+        a(
+            "night-auto",
+            "modo noturno: todo dia das 20:30 às 06:45",
+            "night noturno agendar horario automatico",
+            &["night", "auto", "20:30-06:45"],
+        ),
+        a("night-auto-off", "modo noturno: só à mão", "night noturno agendado desligar", &["night", "auto", "off"]),
+        a(
+            "session-restore",
+            "sessão: reabrir as janelas salvas",
+            "session sessao restaurar janelas",
+            &["session", "restore"],
+        ),
+        a("session-on", "sessão: reabrir no login", "session sessao login restaurar", &["session", "on"]),
+        a("session-off", "sessão: começar com a mesa limpa", "session sessao login limpa", &["session", "off"]),
+        a(
+            "snap-new",
+            "fotografia do sistema: tirar agora",
+            "snap snapshot snapper fotografia backup",
+            &["snap", "new", "hub"],
+        ),
         a("dnd", "não perturbe: ligar ou desligar", "dnd silencio notificacoes mute", &["dnd"]),
         a("rec", "gravar a tela: região", "rec record gravar video wf-recorder", &["rec", "region"]),
         a("rec-screen", "gravar a tela: inteira", "rec record gravar video", &["rec", "screen"]),
@@ -295,9 +325,9 @@ mod tests {
     #[test]
     fn scope_cycle_wraps_both_ways() {
         assert_eq!(Scope::All.next(false), Scope::Windows);
-        assert_eq!(Scope::Install.next(false), Scope::All);
+        assert_eq!(Scope::Calc.next(false), Scope::All);
         assert_eq!(Scope::Clipboard.next(false), Scope::Install);
-        assert_eq!(Scope::All.next(true), Scope::Install);
+        assert_eq!(Scope::All.next(true), Scope::Calc);
     }
 
     #[test]

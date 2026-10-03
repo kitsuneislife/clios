@@ -24,8 +24,10 @@ return function(_)
   bind(M .. " + Tab", hl.dsp.focus({ workspace = "previous" }), "alternar para a workspace anterior")
 
   -- ── terminal ─────────────────────────────────────────────────────────────
-  bind(M .. " + Return", run("footclient"), "terminal")
-  bind(M .. " + SHIFT + Return", run("footclient -a clios.float.term -W 100x30"), "terminal flutuante")
+  -- `clios term` abre o footclient com uma ficha: é o que permite reabrir a sessão e abrir na mesma pasta.
+  bind(M .. " + Return", run("clios term"), "terminal")
+  bind(M .. " + SHIFT + Return", run("clios term --float"), "terminal flutuante")
+  bind(M .. " + CTRL + Return", run("clios term --here"), "terminal na mesma pasta do que está em foco")
   bind(M .. " + S", hl.dsp.workspace.toggle_special("scratch"), "scratchpad: mostrar ou esconder")
   bind(M .. " + CTRL + S", hl.dsp.window.move({ workspace = "special:scratch" }), "enviar janela ao scratchpad")
 
@@ -57,6 +59,11 @@ return function(_)
     bind(M .. " + " .. key, hl.dsp.focus({ direction = dir }), "foco: " .. dir)
     bind(M .. " + SHIFT + " .. key, hl.dsp.window.move({ direction = dir }), "mover janela: " .. dir)
   end
+
+  -- monitores: O de "outro". Com um monitor só, não fazem nada.
+  bind(M .. " + O", hl.dsp.focus({ monitor = "+1" }), "foco no outro monitor")
+  bind(M .. " + SHIFT + O", hl.dsp.window.move({ monitor = "+1" }), "mandar a janela para o outro monitor")
+  bind(M .. " + CTRL + O", hl.dsp.workspace.move({ monitor = "+1" }), "mandar a workspace para o outro monitor")
 
   -- redimensionar: modo `resize` (SUPER + R), h j k l, Esc sai
   bind(M .. " + R", hl.dsp.submap("resize"), "modo redimensionar (h j k l, esc sai)")

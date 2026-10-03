@@ -523,6 +523,36 @@ tip = "clios wallpaper add foto.jpg --set traz uma imagem sua"
 keywords = "wallpaper fundo background tela imagem"
 
 [[tui]]
+id = "snap"
+job = "fotografias-do-sistema"
+name = "fotografias"
+cmd = ["clios", "snap"]
+bin = "clios"
+pkg = "clios"
+category = "sistema"
+tier = "core"
+float = true
+hold = true
+desc = "o que cada atualização mudou no sistema, e o caminho de volta (btrfs + snapper)"
+tip = "clios snap undo N desfaz a atualização N com o sistema rodando"
+keywords = "snap snapshot snapper fotografia rollback desfazer voltar btrfs backup"
+
+[[tui]]
+id = "battery"
+job = "saúde-da-bateria"
+name = "bateria"
+cmd = ["clios", "battery"]
+bin = "clios"
+pkg = "clios"
+category = "sistema"
+tier = "core"
+float = true
+hold = true
+desc = "carga, saúde e ciclos da bateria, e o limite de carga que poupa a bateria"
+tip = "clios battery limit 80 para a carga em 80%, também depois de reiniciar"
+keywords = "bateria battery saude health ciclos limite carga charge threshold"
+
+[[tui]]
 id = "update"
 job = "atualizar"
 name = "atualizar"

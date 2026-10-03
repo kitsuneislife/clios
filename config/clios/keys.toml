@@ -27,6 +27,11 @@ bind = ["SUPER + Return"]
 what = "abre um terminal"
 
 [[group.key]]
+keys = "super + ctrl + enter"
+bind = ["SUPER + CTRL + Return"]
+what = "terminal na mesma pasta do que está em foco"
+
+[[group.key]]
 keys = "super + esc"
 bind = ["SUPER + Escape"]
 what = "bloquear, suspender, reiniciar ou sair"
@@ -130,6 +135,16 @@ what = "trocar a direção da divisão"
 keys = "super + ."
 bind = ["SUPER + period"]
 what = "fixar a janela em todas as workspaces"
+
+[[group.key]]
+keys = "super + o"
+bind = ["SUPER + O"]
+what = "foco no outro monitor"
+
+[[group.key]]
+keys = "super + shift + o / ctrl + o"
+bind = ["SUPER + SHIFT + O", "SUPER + CTRL + O"]
+what = "janela / workspace para o outro monitor"
 
 [[group.key]]
 keys = "super + arrastar"

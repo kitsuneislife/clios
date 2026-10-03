@@ -52,6 +52,41 @@ function open --description 'abrir com o app padrão, sem prender o terminal'
     end
 end
 
+# Comando que não existe: o pkgfile (o índice dos pacotes, atualizado por um timer) diz onde ele está.
+function fish_command_not_found
+    printf '%s: comando não encontrado\n' $argv[1] >&2
+    type -q pkgfile; or return
+    set -l pkgs (pkgfile --binaries -- $argv[1] 2>/dev/null)
+    test (count $pkgs) -gt 0; or return
+    printf '  \e[2mestá em %s · instale com\e[0m sudo pacman -S %s\n' (string join ', ' $pkgs) (string split -f2 / -- $pkgs[1]) >&2
+end
+
+# A ficha do terminal (`clios term`): a pasta e o comando de agora. É o que deixa o `clios session` reabrir cada
+# terminal onde ele estava e o SUPER + ctrl + Enter abrir outro na mesma pasta. Só builtins: nada de processo por prompt.
+if set -q CLIOS_TERM; and set -q XDG_RUNTIME_DIR
+    set -g __clios_card $XDG_RUNTIME_DIR/clios/term/$CLIOS_TERM
+    mkdir -p (path dirname $__clios_card)
+    function __clios_card_prompt --on-event fish_prompt
+        printf 'cwd\t%s\ncmd\t\n' $PWD >$__clios_card
+    end
+    function __clios_card_exec --on-event fish_preexec
+        printf 'cwd\t%s\ncmd\t%s\n' $PWD (string join ' ' -- (string split \n -- $argv[1])) >$__clios_card
+    end
+    function __clios_card_exit --on-event fish_exit
+        rm -f $__clios_card
+    end
+end
+
+# Comando longo (mais de 15 s) num terminal que você não está olhando: uma notificação diz que terminou, e como.
+if type -q clios; and set -q HYPRLAND_INSTANCE_SIGNATURE
+    function __clios_long --on-event fish_postexec
+        set -l st $status
+        test "$CMD_DURATION" -gt 15000 2>/dev/null; or return
+        clios term done --secs (math -s0 $CMD_DURATION / 1000) --status $st -- $argv[1] >/dev/null 2>&1 &
+        disown 2>/dev/null
+    end
+end
+
 # O terminal se apresenta: o resumo do sistema no primeiro terminal depois de ligar, e duas linhas na primeira
 # vez que uma workspace vazia recebe um. O resto do tempo, silêncio. `clios greet --mode off` desliga.
 # Só dentro do Hyprland, fora de ssh, uma vez por shell (um `fish` dentro de outro não repete).

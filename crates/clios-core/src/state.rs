@@ -130,6 +130,10 @@ pub struct State {
     pub greet: GreetMode,
     /// A proteção de tela: `auto` (reveza entre a marca e os brinquedos instalados), `off`, `marca` ou o id de um brinquedo.
     pub saver: String,
+    /// Reabrir no login as janelas da última sessão (`clios session`).
+    pub session: bool,
+    /// O modo noturno agendado: `off` ou `HH:MM-HH:MM` (começa e termina; pode passar da meia-noite).
+    pub night: String,
 }
 
 impl Default for State {
@@ -142,6 +146,8 @@ impl Default for State {
             prompt: PromptStyle::Minimal,
             greet: GreetMode::All,
             saver: "auto".into(),
+            session: true,
+            night: "off".into(),
         }
     }
 }
@@ -190,6 +196,8 @@ mod tests {
             prompt: PromptStyle::Zen,
             greet: GreetMode::Boot,
             saver: "bonsai".into(),
+            session: false,
+            night: "20:30-06:45".into(),
         };
         s.save(&d.join("a/b/state.toml")).unwrap();
         assert_eq!(State::load(&d.join("a/b/state.toml")).unwrap(), s);
@@ -214,6 +222,8 @@ mod tests {
         .unwrap();
         let s = State::load(&d.join("state.toml")).unwrap();
         assert_eq!((s.prompt, s.greet, s.saver.as_str()), (PromptStyle::Minimal, GreetMode::All, "auto"));
+        assert!(s.session);
+        assert_eq!(s.night, "off");
     }
 
     #[test]

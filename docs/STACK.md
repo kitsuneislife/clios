@@ -12,7 +12,7 @@ Hyprland e Quickshell andam rápido e o Arch os entrega logo; o AUR cobre as TUI
 Descartados: NixOS, que daria reprodutibilidade de verdade, mas cobra a linguagem Nix e tende a ficar atrás do Hyprland em versão; Void e Alpine, mais leves em disco, mas com menos pacotes prontos do ecossistema Wayland (e musl, no caso do Alpine, que ainda pega alguns programas).
 Custo: rolling release pede atualizar com atenção. O `bootstrap.sh` e os testes existem para tornar isso previsível.
 
-Kernel `linux` padrão, `systemd-boot` (sem menu: `timeout 0`), zram como swap. O console de texto, até o login, usa a paleta do CLIOS pelos parâmetros `vt.default_*` do kernel (`clios theme cmdline`).
+Kernel `linux` padrão, zram como swap, e de preferência btrfs com os subvolumes padrão do `archinstall` (é o que liga as fotografias do sistema, abaixo). Carregador de boot: o `systemd-boot` (sem menu: `timeout 0`) funciona; o limine é o recomendado quando há btrfs, porque lista as fotografias no menu de boot. O console de texto, até o login, usa a paleta do CLIOS pelos parâmetros `vt.default_*` do kernel (`clios theme cmdline`).
 
 ## Compositor: Hyprland
 
@@ -119,9 +119,31 @@ Também entram no shell: **atuin** (Ctrl+R com busca difusa e contexto, tudo loc
 
 **Brinquedos.** Cada brinquedo do catálogo (`diversao`) que sabe rodar sozinho tem um campo `saver`, com `{color}` e `{n}` no lugar da cor: o CLIOS acha o matiz do seu acento e entrega a cor ANSI mais perto dele (a maioria dos brinquedos só fala as oito cores ANSI). A proteção de tela (`clios saver`) reveza entre a marca e os brinquedos instalados, ou fica numa cena só, ou desliga (`clios saver set`). O hypridle fecha a janela ao primeiro sinal de vida. `clios play` roda um aqui mesmo, e `SUPER + Z` abre um ao acaso.
 
+## Sessões
+
+**Terminais com ficha.** O `SUPER + Enter` chama `clios term`, que abre o footclient com uma ficha no título inicial (`clios-term:<ficha>`) e na variável `CLIOS_TERM`. O título muda logo, mas o Hyprland guarda o inicial, e é assim que uma janela leva à sua ficha. O fish escreve nela a pasta e o comando em execução, a cada prompt, só com builtins (um `printf` para um arquivo em `$XDG_RUNTIME_DIR`): nenhum processo novo por prompt.
+
+**A sessão.** A cada minuto, `clios session save` cruza as janelas do `hyprctl clients` com as fichas. No login, `clios session restore` reabre cada janela pela regra do `exec` do Hyprland, na workspace dela e sem roubar o foco. Os terminais reabertos usam o `foot` sem servidor: a regra do `exec` acha a janela pelo processo, e no modo servidor todas as janelas são do mesmo processo. Só voltam a rodar programas interativos conhecidos (editores, `less`, `man` e os binários do catálogo) e nunca uma linha com pipe, redirecionamento ou substituição.
+
+Descartados: as ferramentas genéricas de sessão do Hyprland (hyprflow, hypr-session-restore e afins), que reabrem o app mas não sabem o que havia dentro de um terminal; o tmux-resurrect, que exige o tmux.
+
+**Comando longo.** O fish mede cada comando; passando de 15 segundos, chama `clios term done`, que só notifica se a janela daquele terminal não estiver em foco.
+
+## Fotografias do sistema
+
+**snapper + snap-pac**, ligados pelo bootstrap quando a raiz é btrfs: cada transação do pacman ganha uma fotografia antes e outra depois, sem fotografias de hora em hora (12 guardadas, 6 importantes). O seu usuário está em `ALLOW_USERS`, então listar e comparar não pedem sudo. Com o limine, o **limine-snapper-sync** (AUR) põe as fotografias no menu de boot.
+
+`clios snap undo` usa o `snapper undochange`, que devolve os arquivos da raiz com o sistema rodando. O kernel mora no /boot (FAT), fora das fotografias, então uma transação que trocou o kernel é recusada: desfazer deixaria módulos e imagem desencontrados. Para esse caso, o caminho é o menu de boot ou o cache do pacman.
+
+Descartados: o Timeshift (pensado para a interface gráfica e para o rsync), e fotografias de hora em hora (enchem o disco e quase nunca são as que você quer).
+
+## O diálogo de arquivo
+
+**xdg-desktop-portal-termfilechooser** (AUR, o fork mantido do hunkyburrito). Quando um app pede um arquivo pelo portal, ele chama `clios-filechooser`, que é o próprio binário do clios por outro nome. Abrir usa o yazi como seletor (`--chooser-file`); salvar mostra um campo de nome com a pasta sugerida, e `tab` abre o yazi para trocar de pasta. O `hyprland-portals.conf` põe o termfilechooser na frente e o GTK como reserva, e uma política em `/etc/firefox/policies` faz o Firefox usar o portal.
+
 ## Pequenas ferramentas
 
-`clios update` (lê o feed de notícias do Arch antes de atualizar e avisa de intervenção manual e de `.pacnew`), `caffeine` (systemd-inhibit), `night` (hyprsunset), `dnd` (a shell observa um arquivo), `focus` (um bloco de foco: liga o não perturbe, a barra conta o tempo e avisa no fim), `rec` (wf-recorder), `pick` (hyprpicker), `ocr` (grim, slurp e tesseract: copia o texto de uma região da tela), `notifs` (o histórico de notificações, inclusive as que o silêncio engoliu), `power` (power-profiles-daemon), `keys` (os atalhos no terminal) e `saver`, a proteção de tela própria. Cada uma é um comando, um atalho e uma ação no hub, e o que fica ligado aparece na barra.
+`clios update` (lê o feed de notícias do Arch antes de atualizar e avisa de intervenção manual e de `.pacnew`), `caffeine` (systemd-inhibit), `night` (hyprsunset), `dnd` (a shell observa um arquivo), `focus` (um bloco de foco: liga o não perturbe, a barra conta o tempo e avisa no fim), `rec` (wf-recorder), `pick` (hyprpicker), `ocr` (grim, slurp e tesseract: copia o texto de uma região da tela), `notifs` (o histórico de notificações, inclusive as que o silêncio engoliu), `power` (power-profiles-daemon), `keys` (os atalhos no terminal), `battery` (saúde, ciclos e um limite de carga que o systemd-tmpfiles reaplica a cada boot) e `saver`, a proteção de tela própria. O `night` também agenda (`clios night auto 20:30-06:45`): o CLIOS escreve dois perfis no `hyprsunset.conf` e o hyprsunset troca sozinho. No hub, `=` faz contas pelo fend. Cada uma é um comando, um atalho e uma ação no hub, e o que fica ligado aparece na barra.
 
 ## Discos, arquivos, hora e firewall
 
@@ -148,7 +170,6 @@ A regra "tudo no terminal" tem um limite: sites que exigem um navegador de verda
 
 - **Plymouth**: uma animação de boot é decoração, e atrasa. O boot é `systemd-boot` direto para o login, com o console já na paleta certa.
 - **tmux** como padrão: o Hyprland já divide a tela.
-- **Gerenciador de snapshots**: btrfs com snapper é uma boa escolha, mas depende de como você particiona. Fica como recomendação, não como imposição.
 - **Instalador próprio**: por enquanto `archinstall` + `scripts/bootstrap.sh`.
 
 ## Fontes das medidas

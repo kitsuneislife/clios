@@ -1,3 +1,5 @@
 # Pacotes do AUR. Precisam de um helper (paru ou yay). Opcionais: o desktop funciona sem eles.
 ani-cli
+# O diálogo de abrir e salvar arquivo no terminal (config/xdg-desktop-portal-termfilechooser).
+xdg-desktop-portal-termfilechooser
 # paru não está aqui: o bootstrap o compila sozinho (bootstrap_paru).

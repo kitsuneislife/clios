@@ -231,6 +231,31 @@ td s{color:var(--mute)}
 .wsrow button .n{color:var(--mute);font-size:11px;margin-left:4px}
 .wsrow button[aria-pressed="true"] .n{color:var(--accent-ink)}
 
+.sess{border:1px solid var(--line);border-radius:var(--r);background:var(--surface);padding:18px;display:grid;gap:14px;margin-top:28px}
+.sessdesk{display:grid;gap:12px;grid-template-columns:repeat(3,minmax(0,1fr))}
+@media(max-width:760px){.sessdesk{grid-template-columns:minmax(0,1fr)}}
+.wscol{border:1px solid var(--line);border-radius:var(--r);background:var(--bg);padding:10px;display:flex;flex-direction:column;gap:8px;min-height:176px;min-width:0;transition:background var(--t-slow) var(--out),border-color var(--t-slow) var(--out)}
+.wscol h4{font-size:11.5px;color:var(--mute);font-weight:500;display:flex;justify-content:space-between;gap:8px}
+.sessdesk.off .wscol{background:var(--surface);border-style:dashed}
+.swin{border:1.5px solid var(--line);border-radius:6px;padding:7px 10px;font-size:12.5px;display:grid;gap:1px;min-width:0;
+  transition:opacity var(--t-base) var(--out),transform var(--t-base) var(--out),border-color var(--t-base) var(--out)}
+.swin b{font-weight:500;color:var(--fg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.swin span{color:var(--mute);font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.swin .why{color:var(--accent);white-space:normal}
+.swin.back{border-color:var(--accent)}
+.swin.gone{opacity:0;transform:translateY(4px) scale(.97)}
+.snap{display:grid;gap:18px;grid-template-columns:minmax(0,1fr);margin-top:22px}
+@media(min-width:900px){.snap{grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);align-items:start}}
+.snaplist{display:grid;gap:8px}
+.snaplist button{display:grid;grid-template-columns:7ch minmax(0,1fr) auto;gap:4px 12px;text-align:left;padding:9px 12px;border-radius:var(--r);background:var(--bg);align-items:baseline}
+.snaplist button[aria-pressed="true"]{background:var(--accent)}
+.snaplist button .n{font-variant-numeric:tabular-nums;font-weight:700}
+.snaplist button .w{color:var(--mute);font-size:12px;grid-column:2/4}
+.snaplist button[aria-pressed="true"] .w{color:var(--accent-ink)}
+.snapout{min-height:250px}
+.dlg input{font:inherit;color:var(--fg);background:transparent;border:0;border-bottom:1px solid var(--line);padding:0;width:22ch;caret-color:var(--accent);border-radius:0}
+.dlg input:focus-visible{outline:0;border-bottom-color:var(--accent)}
+.dlg .t{color:var(--accent);font-weight:700}
 .toys{display:grid;gap:18px;grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr));margin-top:32px}
 .toy{border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:var(--bg);display:flex;flex-direction:column}
 .toy img{display:block;width:100%;height:auto;background:var(--bg)}
@@ -308,7 +333,7 @@ footer.site h3{color:var(--fg);margin-bottom:8px;font-size:13px}
       clios
     </a>
     <nav class="nav" aria-label="Seções">
-      <a href="#proposta">proposta</a><a href="#funcionamento">funcionamento</a><a href="#desktop">desktop</a><a href="#terminal">terminal</a><a href="#brinquedos">brinquedos</a><a href="#atalhos">atalhos</a><a href="#apps">apps</a><a href="#instalar">instalar</a><a href="#mudancas">mudanças</a>
+      <a href="#proposta">proposta</a><a href="#funcionamento">funcionamento</a><a href="#desktop">desktop</a><a href="#terminal">terminal</a><a href="#sessao">sessão</a><a href="#brinquedos">brinquedos</a><a href="#atalhos">atalhos</a><a href="#apps">apps</a><a href="#instalar">instalar</a><a href="#mudancas">mudanças</a>
     </nav>
     <div class="sw" id="accents" role="group" aria-label="Acento"></div>
     <div class="seg" role="group" aria-label="Modo"><button type="button" data-mode="dark" aria-pressed="true">escuro</button><button type="button" data-mode="light" aria-pressed="false">claro</button></div>
@@ -538,9 +563,63 @@ T.motion.duration.base = <span id="g-base">240</span></div></div>
   </div>
 </section>
 
+<section id="sessao" aria-labelledby="t-sess">
+  <div class="stack">
+    <span class="eyebrow"><b>05</b>nada se perde</span>
+    <h2 id="t-sess">Desligue com tudo aberto</h2>
+    <p class="lead">No próximo login, cada terminal volta na pasta e na workspace onde estava, com o editor que estava aberto. Um desktop gráfico reabre o programa; o CLIOS sabe o que havia dentro dele, porque quase tudo aqui é terminal.</p>
+    <p>Cada terminal nasce com uma ficha, e o fish anota nela a pasta e o comando de agora, sem abrir processo nenhum. A sessão é salva a cada minuto. Na volta, só programas interativos rodam de novo: um <code>cargo build</code> volta como um shell na pasta dele, nunca recomeça sozinho.</p>
+  </div>
+  <div class="sess" role="group" aria-label="Simulador do clios session">
+    <div class="wsrow">
+      <button type="button" id="ss-off">desligar</button>
+      <button type="button" id="ss-on" disabled>ligar</button>
+      <div class="seg" role="group" aria-label="No login"><button type="button" data-ss="restore" aria-pressed="true">reabrir</button><button type="button" data-ss="off" aria-pressed="false">mesa limpa</button></div>
+      <span class="lbl" id="ss-state" aria-live="polite">ligado</span>
+    </div>
+    <div class="sessdesk" id="ssdesk"></div>
+    <p class="log" id="ss-log">Desligue e ligue de novo. É a mesma regra de <code>crates/clios/src/cmd/session.rs</code>.</p>
+  </div>
+
+  <div class="stack" style="margin-top:56px">
+    <h3>Atualizar sem medo</h3>
+    <p>Com a raiz em btrfs, cada <code>pacman</code> ganha uma fotografia antes e outra depois. <code>clios snap diff</code> diz quais pacotes mudaram e <code>clios snap undo</code> desfaz a atualização com o sistema rodando, sem pendrive. Uma atualização que trocou o kernel é recusada, com o motivo: o kernel mora no <code>/boot</code>, fora da fotografia, e desfazer só metade deixaria o sistema sem boot. Com o limine, as fotografias também aparecem no menu de boot.</p>
+  </div>
+  <div class="snap">
+    <div class="snaplist" id="snaplist" role="group" aria-label="Fotografias"></div>
+    <div class="stack" style="gap:10px">
+      <div class="termwin snapout" id="snapout" aria-live="polite"></div>
+      <div class="row"><button type="button" id="snap-undo">desfazer esta</button><span class="lbl">nada aqui toca no seu computador</span></div>
+    </div>
+  </div>
+
+  <div class="two" style="margin-top:56px">
+    <div class="stack">
+      <h3>Até o diálogo de arquivo é um terminal</h3>
+      <p>Quando o Firefox pergunta onde salvar, abre uma janela flutuante: a pasta sugerida, um campo de nome com o cursor antes da extensão, e <kbd>tab</kbd> para escolher outra pasta no yazi. Para abrir um arquivo, o próprio yazi é o seletor. Experimente o campo ao lado.</p>
+      <p class="lbl">O portal é o xdg-desktop-portal-termfilechooser; sem ele, volta o diálogo do GTK.</p>
+    </div>
+    <div class="termwin dlg"><span class="t">salvar como</span>
+
+<span class="m">pasta</span>  ~/Downloads
+<span class="m">nome</span>   <input id="dlg-name" value="relatório-anual.pdf" aria-label="Nome do arquivo" spellcheck="false" autocomplete="off">
+
+<span class="m">enter salva · tab escolhe a pasta · esc cancela</span>
+<span id="dlg-out"> </span></div>
+  </div>
+
+  <div class="cards">
+    <div class="card"><h3><span>Contas no hub</span><kbd>=</kbd></h3><div class="termwin" style="padding:10px 12px;font-size:12px" aria-label="O hub calculando 5 km em milhas"><span class="a">❯</span> <span class="a">=</span>5 km em milhas
+<span class="a">❯</span> <b>≈ 3.1068559612 miles</b></div><p><code>= 18% de 230</code>, <code>= 3 dias em horas</code>. É o fend por trás, com vírgula decimal e um pouco de português. Enter copia.</p></div>
+    <div class="card"><h3>Na mesma pasta</h3><p><kbd>super</kbd> <span class="plus">+</span> <kbd>ctrl</kbd> <span class="plus">+</span> <kbd>enter</kbd> abre outro terminal já na pasta do que está em foco.</p><p>E um comando de mais de 15 segundos avisa quando termina, se você estiver olhando outra janela.</p></div>
+    <div class="card"><h3>Só a saída</h3><p><kbd>ctrl</kbd> <span class="plus">+</span> <kbd>shift</kbd> <span class="plus">+</span> <kbd>y</kbd> copia a saída do último comando, sem o prompt. O fish marca cada prompt, e o foot sabe onde cada saída começa.</p></div>
+    <div class="card"><h3>Bateria e noite</h3><p><code>clios battery limit 80</code> para a carga em 80%, também depois de reiniciar. <code>clios night auto 20:30-06:45</code> esquenta a tela sozinho, todo dia.</p></div>
+  </div>
+</section>
+
 <section id="brinquedos" aria-labelledby="t-toys">
   <div class="stack">
-    <span class="eyebrow"><b>05</b>brinquedos</span>
+    <span class="eyebrow"><b>06</b>brinquedos</span>
     <h2 id="t-toys">Para olhar enquanto o café esfria</h2>
     <p class="lead">Um desktop de terminal tem direito a um aquário. Os brinquedos do catálogo viram parte do sistema: revezam na proteção de tela, aceitam a cor do seu acento e têm um atalho.</p>
   </div>
@@ -559,7 +638,7 @@ T.motion.duration.base = <span id="g-base">240</span></div></div>
 
 <section id="atalhos" aria-labelledby="t-keys">
   <div class="stack">
-    <span class="eyebrow"><b>06</b>atalhos</span>
+    <span class="eyebrow"><b>07</b>atalhos</span>
     <h2 id="t-keys">Atalhos</h2>
     <p class="lead">A tecla <kbd>super</kbd> faz o desktop, e as mãos ficam no <kbd>h</kbd> <kbd>j</kbd> <kbd>k</kbd> <kbd>l</kbd>. Com <kbd>shift</kbd> a ação é mover, com <kbd>ctrl</kbd> é variar. Estes são os principais; <kbd>super</kbd> <span class="plus">+</span> <kbd>/</kbd> lista os {{binds}}, e <code>clios keys</code> mostra no terminal.</p>
   </div>
@@ -572,7 +651,7 @@ T.motion.duration.base = <span id="g-base">240</span></div></div>
 
 <section id="apps" aria-labelledby="t-apps">
   <div class="stack">
-    <span class="eyebrow"><b>07</b>apps</span>
+    <span class="eyebrow"><b>08</b>apps</span>
     <h2 id="t-apps">{{apps}} apps, um para cada trabalho</h2>
     <p class="lead">O catálogo está em <code>config/clios/hub.toml</code>. Os {{core}} essenciais vêm instalados; o resto aparece no hub com <code>+</code> e instala com Enter, ou por <code>clios apps install</code>. Cada entrada tem uma descrição, uma dica de uso e o trabalho que faz.</p>
   </div>
@@ -585,12 +664,12 @@ T.motion.duration.base = <span id="g-base">240</span></div></div>
 
 <section id="instalar" aria-labelledby="t-inst">
   <div class="stack">
-    <span class="eyebrow"><b>08</b>instalar</span>
+    <span class="eyebrow"><b>09</b>instalar</span>
     <h2 id="t-inst">Instalar</h2>
     <p class="lead">Em cima de um Arch mínimo. O script é idempotente e deixa os seus arquivos de configuração em <code>*.clios-bak</code> antes de trocá-los.</p>
   </div>
   <ol class="steps">
-    <li><div><strong>Instale o Arch</strong><p>Com o <code>archinstall</code>, perfil <em>minimal</em> e <code>systemd-boot</code>.</p></div></li>
+    <li><div><strong>Instale o Arch</strong><p>Com o <code>archinstall</code>, perfil <em>minimal</em>. Escolha <strong>btrfs</strong> com os subvolumes padrão para ter as fotografias do sistema, e o <strong>limine</strong> se quiser vê-las no menu de boot.</p></div></li>
     <li><div><strong>Baixe o CLIOS</strong></div><div class="cmd"><code><span class="pr">❯</span>git clone https://github.com/kitsuneislife/clios &amp;&amp; cd clios</code><button type="button" data-copy="git clone https://github.com/kitsuneislife/clios && cd clios">copiar</button></div></li>
     <li><div><strong>Veja o que vai acontecer</strong></div><div class="cmd"><code><span class="pr">❯</span>./scripts/bootstrap.sh --dry-run</code><button type="button" data-copy="./scripts/bootstrap.sh --dry-run">copiar</button></div></li>
     <li><div><strong>Instale</strong><p>Pacotes, o binário <code>clios</code>, os dotfiles, o tema e os serviços.</p></div><div class="cmd"><code><span class="pr">❯</span>./scripts/bootstrap.sh</code><button type="button" data-copy="./scripts/bootstrap.sh">copiar</button></div></li>
@@ -607,11 +686,13 @@ T.motion.duration.base = <span id="g-base">240</span></div></div>
       <li>O config Lua do Hyprland, contra o stub oficial da API, com um validador que reprova 18 configs erradas.</li>
       <li>Os componentes da shell, renderizados fora do Quickshell.</li>
       <li>Os configs gerados, contra o starship, o fastfetch e o nft de verdade.</li>
+      <li>A sessão, as fotografias e o diálogo de arquivo, em funções puras; a ficha do terminal, no fish de verdade.</li>
       <li>O hub, o guia, o seletor de papel de parede e a proteção de tela, em todos os tamanhos de terminal.</li>
     </ul></div>
     <div class="card no"><h3>O que nunca rodou</h3><ul>
       <li>Nenhuma peça foi executada numa sessão real do Hyprland, nem do Quickshell.</li>
       <li>Os nomes dos pacotes foram conferidos por pesquisa, não por instalação. O bootstrap pula e avisa os que não existirem.</li>
+      <li>O snapper e o portal de arquivos não rodaram de verdade: os formatos foram conferidos no código de cada um.</li>
       <li>A ISO nunca foi montada, e nada foi testado em hardware.</li>
     </ul><p style="margin-top:10px;font-size:13px">Se algo quebrar, <code>clios doctor</code> diz o que falta, e uma issue com a saída dele ajuda muito.</p></div>
   </div>
@@ -619,7 +700,7 @@ T.motion.duration.base = <span id="g-base">240</span></div></div>
 
 <section id="mudancas" aria-labelledby="t-log">
   <div class="stack">
-    <span class="eyebrow"><b>09</b>mudanças</span>
+    <span class="eyebrow"><b>10</b>mudanças</span>
     <h2 id="t-log">Mudanças</h2>
     <p>O mesmo texto do <a href="https://github.com/kitsuneislife/clios/blob/main/CHANGELOG.md">CHANGELOG.md</a>, versão por versão.</p>
   </div>
@@ -637,7 +718,7 @@ T.motion.duration.base = <span id="g-base">240</span></div></div>
 </div></footer>
 </main>
 
-<noscript><style>.chips,.sim,#pstyle{display:none}.scene{opacity:1;position:static}.desk{aspect-ratio:auto}</style></noscript>
+<noscript><style>.chips,.sim,.sess,#pstyle,#snap-undo{display:none}.scene{opacity:1;position:static}.desk{aspect-ratio:auto}</style></noscript>
 
 <script id="data" type="application/json">/*@data*/</script>
 <script>
@@ -888,6 +969,132 @@ $("#s-open").addEventListener("click", () => {
   simOut(out, `workspace ${sim.ws}, ${here} janela(s). <b>decide() → ${what}</b>: ${why}.`);
 });
 paintSim();
+
+/* ── a sessão (as mesmas regras de crates/clios/src/cmd/session.rs) ── */
+const SAFE = ["hx","helix","nvim","vim","vi","nano","less","man","glow","tig","lnav","ncdu","yazi","lazygit","btop"];
+function safeRun(cmd) {
+  cmd = cmd.trim();
+  if (!cmd || /[;|&<>`$\n\\]/.test(cmd)) return null;
+  return SAFE.includes(cmd.split(/\s+/)[0]) ? cmd : null;
+}
+const SESS = [
+  { ws: 1, kind: "term", cwd: "~/site", cmd: "hx index.html" },
+  { ws: 1, kind: "app", id: "git", label: "lazygit", cwd: "~/site" },
+  { ws: 2, kind: "term", cwd: "~/clios", cmd: "cargo build --release" },
+  { ws: 2, kind: "term", cwd: "~/clios", cmd: "" },
+  { ws: 3, kind: "gui", label: "firefox", cwd: "restaura as próprias abas" },
+];
+const ss = { on: true, mode: "restore", busy: false };
+function winTitle(w, after) {
+  if (w.kind === "app" || w.kind === "gui") return w.label;
+  if (!after) return w.cmd || "fish";
+  return safeRun(w.cmd) || "fish";
+}
+function paintSess(after) {
+  const host = $("#ssdesk"); host.textContent = "";
+  host.classList.toggle("off", !ss.on);
+  for (const ws of [1, 2, 3]) {
+    const col = document.createElement("div"); col.className = "wscol";
+    col.innerHTML = `<h4><span>workspace ${ws}</span><span></span></h4>`;
+    SESS.filter(w => w.ws === ws).forEach(w => {
+      const el = document.createElement("div"); el.className = "swin"; el.dataset.i = SESS.indexOf(w);
+      el.innerHTML = `<b></b><span></span>`;
+      $("b", el).textContent = winTitle(w, after); $("span", el).textContent = w.cwd;
+      if (after && w.kind === "term" && w.cmd && !safeRun(w.cmd)) {
+        const why = document.createElement("span"); why.className = "why"; why.textContent = `${w.cmd.split(/\s+/)[0]} não roda de novo sozinho`; el.append(why);
+      }
+      col.append(el);
+    });
+    host.append(col);
+  }
+  $("#ss-off").disabled = !ss.on || ss.busy; $("#ss-on").disabled = ss.on || ss.busy;
+}
+const stagger = () => S.motion === "full" ? 110 : S.motion === "reduced" ? 30 : 0;
+$("#ss-off").addEventListener("click", async () => {
+  if (ss.busy) return; ss.busy = true; paintSess(false);
+  const wins = $$("#ssdesk .swin");
+  for (const el of wins) { el.classList.add("gone"); await sleep(stagger()); }
+  await sleep(S.motion === "off" ? 0 : 260);
+  ss.on = false; ss.busy = false;
+  $("#ssdesk").querySelectorAll(".swin").forEach(el => el.remove());
+  $("#ssdesk").classList.add("off"); $("#ss-state").textContent = "desligado · sessão salva há 40 s";
+  $("#ss-log").innerHTML = "A sessão foi salva no último minuto, como sempre. Agora ligue.";
+  $("#ss-off").disabled = true; $("#ss-on").disabled = false;
+});
+$("#ss-on").addEventListener("click", async () => {
+  if (ss.busy) return; ss.busy = true; $("#ss-on").disabled = true;
+  $("#ss-state").textContent = "login…"; await sleep(500);
+  ss.on = true;
+  if (ss.mode === "off") {
+    paintSess(true); $$("#ssdesk .swin").forEach(el => el.remove());
+    $("#ss-state").textContent = "ligado";
+    $("#ss-log").innerHTML = "<b>clios session off</b>: o login começa com a mesa limpa. A sessão salva continua lá para um <b>clios session restore</b>.";
+    ss.busy = false; $("#ss-off").disabled = false; return;
+  }
+  paintSess(true);
+  const wins = $$("#ssdesk .swin"); wins.forEach(el => el.classList.add("gone"));
+  for (const el of wins) { await sleep(stagger() * 1.6); el.classList.remove("gone"); el.classList.add("back"); }
+  $("#ss-state").textContent = "ligado · 5 janelas de volta";
+  $("#ss-log").innerHTML = "Cada terminal voltou na sua pasta e na sua workspace, sem roubar o foco. O <b>hx</b> e o <b>lazygit</b> voltaram abertos; o <b>cargo build</b> voltou como um shell em ~/clios.";
+  setTimeout(() => $$("#ssdesk .swin.back").forEach(el => el.classList.remove("back")), 1600);
+  ss.busy = false; $("#ss-off").disabled = false;
+});
+$$("[data-ss]").forEach(b => b.addEventListener("click", () => { ss.mode = b.dataset.ss; $$("[data-ss]").forEach(x => x.setAttribute("aria-pressed", String(x === b))); }));
+paintSess(false);
+
+/* ── as fotografias (o formato do clios snap) ─────── */
+const SNAPS = [
+  { n: 41, post: 42, date: "2026-10-01 09:12", desc: "pacman -Syu", pk: [["helix","25.01-2","25.07-1"],["htop",null,"3.4.1-1"],["nano","8.0-1",null]], files: 214, kernel: false },
+  { n: 39, post: 40, date: "2026-09-28 20:02", desc: "pacman -Syu", pk: [["linux","6.16.9.arch1-1","6.17.1.arch1-1"],["mesa","25.1.7-1","25.2.0-1"]], files: 6120, kernel: true },
+  { n: 37, post: null, date: "2026-09-27 18:40", desc: "antes de mexer no fstab", pk: [], files: 3, kernel: false },
+];
+let snapSel = 0;
+const pkLine = ([n, a, b]) => !a ? `  ${n} ${b} <span class="m">(novo)</span>` : !b ? `  ${n} <span class="m">(removido)</span>` : `  ${n} ${a} <span class="a">→</span> ${b}`;
+function snapLabel(x) { return x.post ? `${x.n}→${x.post}` : `da ${x.n} até agora`; }
+function showDiff() {
+  const x = SNAPS[snapSel];
+  let out = `<span class="a">❯</span> clios snap diff ${x.n}\n<b>${snapLabel(x)}</b> <span class="m">${x.files} arquivos</span>\n\n`;
+  out += x.pk.length ? x.pk.map(pkLine).join("\n") : `  <span class="m">c</span> /etc/fstab\n  <span class="m">c</span> /etc/mkinitcpio.conf\n  <span class="m">+</span> /etc/crypttab.initramfs`;
+  if (x.kernel) out += `\n\n<span class="m">esta mudança inclui o kernel: para voltar, escolha a fotografia no menu de boot</span>`;
+  $("#snapout").innerHTML = out;
+}
+function buildSnaps() {
+  const host = $("#snaplist"); host.textContent = "";
+  SNAPS.forEach((x, i) => {
+    const b = document.createElement("button"); b.type = "button"; b.setAttribute("aria-pressed", String(i === snapSel));
+    b.innerHTML = `<span class="n">${x.post ? x.n + "→" + x.post : x.n}</span><span></span><span class="m">${x.kernel ? "*" : ""}</span><span class="w">${x.date}</span>`;
+    b.children[1].textContent = x.desc;
+    b.addEventListener("click", () => { snapSel = i; $$("button", host).forEach((y, k) => y.setAttribute("aria-pressed", String(k === i))); showDiff(); });
+    host.append(b);
+  });
+  showDiff();
+}
+$("#snap-undo").addEventListener("click", () => {
+  const x = SNAPS[snapSel];
+  let out = `<span class="a">❯</span> clios snap undo ${x.n}\n`;
+  if (x.kernel) {
+    out += `<span class="r">clios: ${snapLabel(x)} trocou o kernel, e o kernel do /boot não volta com a raiz:\ndesfazer deixaria o sistema sem boot.</span>\n<span class="m">Para voltar, reinicie e escolha a fotografia ${x.n} no menu de boot (com o\nlimine-snapper-sync), ou reinstale a versão anterior do pacote pelo cache.</span>`;
+  } else {
+    out += `<b>desfazer ${snapLabel(x)}</b> devolve ${x.files} arquivos ao que eram.\n` + x.pk.map(pkLine).join("\n") +
+      `\n<span class="m">a sua pasta pessoal não é tocada. Antes, uma fotografia nova guarda o estado de agora.</span>\ndesfazer? [s/N] <span class="a">s</span>\n\n<b>pronto.</b> reinicie para os serviços pegarem os arquivos antigos.\nSe precisar voltar: <span class="a">clios snap undo 43</span>.`;
+  }
+  $("#snapout").innerHTML = out;
+});
+buildSnaps();
+
+/* ── o diálogo de salvar ──────────────────────────── */
+const dlg = $("#dlg-name");
+dlg.addEventListener("focus", () => { const dot = dlg.value.lastIndexOf("."); if (dot > 0) requestAnimationFrame(() => dlg.setSelectionRange(dot, dot)); });
+dlg.addEventListener("keydown", e => {
+  const out = $("#dlg-out");
+  if (e.key === "Enter") {
+    e.preventDefault(); const v = dlg.value.trim();
+    if (!v || v === "." || v === ".." || v.includes("/")) { out.innerHTML = `<span class="r">${!v ? "o nome está vazio" : "esse nome não serve"}</span>`; return; }
+    out.innerHTML = `<span class="a">→</span> o Firefox recebe <b></b>`; $("b", out).textContent = `~/Downloads/${v}`;
+  } else if (e.key === "Escape") { out.innerHTML = `<span class="m">cancelado: o Firefox não salva nada</span>`; }
+  else if (e.key === "Tab") { e.preventDefault(); out.innerHTML = `<span class="m">aqui abriria o yazi; q confirma a pasta</span>`; }
+  else if (e.key === "/") { e.preventDefault(); }
+});
 
 /* ── os brinquedos e o acento ──────────────────────── */
 const HUES = [["red",1,0],["yellow",3,60],["green",2,120],["cyan",6,180],["blue",4,240],["magenta",5,300]];
