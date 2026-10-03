@@ -22,6 +22,14 @@ return function(_)
       hl.exec_cmd("footclient -a clios.scratch")
     end, { timeout = 800, type = "oneshot" })
 
+    -- As janelas da última sessão voltam (`clios session off` desliga), e a de agora é salva a cada minuto.
+    hl.timer(function()
+      hl.exec_cmd("clios session restore --login")
+    end, { timeout = 1200, type = "oneshot" })
+    hl.timer(function()
+      hl.exec_cmd("clios session save --quiet")
+    end, { timeout = 60000, type = "repeat" })
+
     -- No primeiro login, o guia de boas-vindas abre sozinho (depois disso, só com SUPER + F10).
     hl.timer(function()
       hl.exec_cmd("clios welcome --first-run")

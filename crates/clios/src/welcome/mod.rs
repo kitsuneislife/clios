@@ -79,6 +79,7 @@ pub enum Setting {
     Prompt,
     Greet,
     Saver,
+    Session,
     Power,
     Caffeine,
     Night,
@@ -99,6 +100,7 @@ impl Setting {
             Setting::Prompt => "prompt",
             Setting::Greet => "saudação",
             Setting::Saver => "proteção de tela",
+            Setting::Session => "sessão no login",
             Setting::Power => "energia",
             Setting::Caffeine => "modo café",
             Setting::Night => "modo noturno",
@@ -180,6 +182,7 @@ impl App {
             Setting::Prompt,
             Setting::Greet,
             Setting::Saver,
+            Setting::Session,
         ];
         if power.is_some() {
             settings.push(Setting::Power);
@@ -349,6 +352,7 @@ impl App {
                 "off" => "desligada".to_string(),
                 other => other.to_string(),
             },
+            Setting::Session => if self.ctx.state.session { "reabrir" } else { "mesa limpa" }.into(),
             Setting::Power => self.power.as_deref().map_or("indisponível", power_label).into(),
             Setting::Caffeine => state_word(self.caffeine).into(),
             Setting::Night => state_word(self.night).into(),
@@ -404,6 +408,15 @@ impl App {
                 self.ctx.state.saver = all[(cur + delta).rem_euclid(all.len() as isize) as usize].clone();
                 self.ctx.save_state()?;
                 Ok(format!("proteção de tela: {}", crate::cmd::saver::describe(&self.ctx.state.saver)))
+            }
+            Setting::Session => {
+                self.ctx.state.session = !self.ctx.state.session;
+                self.ctx.save_state()?;
+                Ok(if self.ctx.state.session {
+                    "as janelas da última sessão voltam no login".into()
+                } else {
+                    "o login começa com a mesa limpa".into()
+                })
             }
             Setting::Power => {
                 let Some(cur) = self.power.clone() else { bail!("powerprofilesctl indisponível") };

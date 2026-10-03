@@ -82,6 +82,29 @@ enum Command {
         /// Para `hub`: a consulta inicial.
         args: Vec<String>,
     },
+    /// Abre um terminal que o CLIOS reconhece (é o que `SUPER + Enter` chama): a sessão, o "abrir aqui" e o aviso de
+    /// comando longo dependem disso.
+    Term {
+        /// Na mesma pasta do terminal em foco.
+        #[arg(long, conflicts_with = "cwd")]
+        here: bool,
+        /// Flutuante e centralizado.
+        #[arg(long)]
+        float: bool,
+        /// Numa pasta.
+        #[arg(long, short = 'D', value_name = "PASTA")]
+        cwd: Option<PathBuf>,
+        #[command(subcommand)]
+        command: Option<TermCommand>,
+        /// Um comando para rodar dentro do shell (depois dele, o shell continua aberto).
+        #[arg(last = true)]
+        run: Vec<String>,
+    },
+    /// As janelas da última sessão: cada terminal na sua pasta, com o editor que estava aberto, na mesma workspace.
+    Session {
+        #[command(subcommand)]
+        command: Option<SessionCommand>,
+    },
     /// Papel de parede: estilos que seguem o tema e as suas imagens (sem argumento, abre o seletor).
     Wallpaper {
         #[command(subcommand)]
@@ -333,6 +356,42 @@ enum AppsCommand {
 }
 
 #[derive(Subcommand)]
+enum TermCommand {
+    /// Avisa que um comando longo terminou, se o terminal dele não estiver em foco (o fish chama).
+    #[command(hide = true)]
+    Done {
+        #[arg(long)]
+        secs: u64,
+        #[arg(long, default_value_t = 0, allow_hyphen_values = true)]
+        status: i32,
+        cmd: Vec<String>,
+    },
+}
+
+#[derive(Subcommand)]
+enum SessionCommand {
+    /// Mostra o que está salvo (o padrão).
+    Show,
+    /// Salva as janelas de agora (isto também acontece sozinho a cada minuto).
+    Save {
+        #[arg(long, short)]
+        quiet: bool,
+    },
+    /// Reabre as janelas salvas.
+    Restore {
+        /// Para o autostart: só reabre se a escolha for reabrir, e avisa por notificação.
+        #[arg(long)]
+        login: bool,
+    },
+    /// Reabrir no login (o padrão).
+    On,
+    /// O login começa com a mesa limpa.
+    Off,
+    /// Apaga a sessão salva.
+    Forget,
+}
+
+#[derive(Subcommand)]
 enum SaverCommand {
     /// Lista as cenas e mostra a escolhida.
     List,
@@ -403,6 +462,20 @@ fn run() -> Result<bool> {
             hub::run(&ctx, hub::Options { dump, snapshot, query, at_ms: at, demo })?
         }
         Command::Open { id, args } => hub::open(&ctx, &id, &args)?,
+        Command::Term { command: Some(TermCommand::Done { secs, status, cmd }), .. } => {
+            cmd::term::done(secs, status, &cmd.join(" "))?
+        }
+        Command::Term { here, float, cwd, run, command: None } => {
+            cmd::term::open(cmd::term::Options { here, float, cwd, run })?
+        }
+        Command::Session { command } => match command.unwrap_or(SessionCommand::Show) {
+            SessionCommand::Show => cmd::session::show(&ctx)?,
+            SessionCommand::Save { quiet } => cmd::session::save(&ctx, quiet)?,
+            SessionCommand::Restore { login } => cmd::session::restore(&ctx, login)?,
+            SessionCommand::On => cmd::session::set(&mut ctx, true)?,
+            SessionCommand::Off => cmd::session::set(&mut ctx, false)?,
+            SessionCommand::Forget => cmd::session::forget(&ctx)?,
+        },
         Command::Status { what: StatusWhat::Net } => cmd::status::run_net()?,
         Command::Status { what: StatusWhat::All } => println!("{}", serde_json::to_string(&cmd::toggles::all(&ctx))?),
         Command::Wallpaper { command, snapshot: Some(size), select } => {

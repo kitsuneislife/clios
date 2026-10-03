@@ -27,6 +27,11 @@ bind = ["SUPER + Return"]
 what = "abre um terminal"
 
 [[group.key]]
+keys = "super + ctrl + enter"
+bind = ["SUPER + CTRL + Return"]
+what = "terminal na mesma pasta do que está em foco"
+
+[[group.key]]
 keys = "super + esc"
 bind = ["SUPER + Escape"]
 what = "bloquear, suspender, reiniciar ou sair"
