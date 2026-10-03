@@ -52,6 +52,15 @@ function open --description 'abrir com o app padrão, sem prender o terminal'
     end
 end
 
+# Comando que não existe: o pkgfile (o índice dos pacotes, atualizado por um timer) diz onde ele está.
+function fish_command_not_found
+    printf '%s: comando não encontrado\n' $argv[1] >&2
+    type -q pkgfile; or return
+    set -l pkgs (pkgfile --binaries -- $argv[1] 2>/dev/null)
+    test (count $pkgs) -gt 0; or return
+    printf '  \e[2mestá em %s · instale com\e[0m sudo pacman -S %s\n' (string join ', ' $pkgs) (string split -f2 / -- $pkgs[1]) >&2
+end
+
 # A ficha do terminal (`clios term`): a pasta e o comando de agora. É o que deixa o `clios session` reabrir cada
 # terminal onde ele estava e o SUPER + ctrl + Enter abrir outro na mesma pasta. Só builtins: nada de processo por prompt.
 if set -q CLIOS_TERM; and set -q XDG_RUNTIME_DIR

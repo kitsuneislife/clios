@@ -1,4 +1,5 @@
 pub mod apps;
+pub mod battery;
 pub mod bg;
 pub mod completions;
 pub mod doctor;

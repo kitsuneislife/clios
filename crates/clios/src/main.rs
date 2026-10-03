@@ -204,13 +204,24 @@ enum Command {
         #[arg(long, hide = true)]
         wait: bool,
     },
-    /// Modo noturno: tela mais quente (hyprsunset).
+    /// Modo noturno: tela mais quente (hyprsunset). `clios night auto 20:30-06:45` agenda todo dia.
     Night {
         #[arg(value_enum, default_value = "toggle")]
-        switch: cmd::toggles::Switch,
+        switch: cmd::toggles::NightSwitch,
+        /// Com `auto`: o horário (início-fim, como 20:30-06:45) ou `off`.
+        #[arg(value_name = "HORÁRIO")]
+        when: Option<String>,
         /// Temperatura em kelvin (1000 a 10000).
         #[arg(long, short)]
         temp: Option<u32>,
+        /// Para o autostart: liga o agendado, se houver.
+        #[arg(long, hide = true)]
+        login: bool,
+    },
+    /// A saúde da bateria e o limite de carga (sem argumento, mostra).
+    Battery {
+        #[command(subcommand)]
+        command: Option<BatteryCommand>,
     },
     /// Não perturbe: silencia as notificações (as urgentes passam).
     Dnd {
@@ -367,6 +378,17 @@ enum AppsCommand {
         /// Mostra o comando e não executa.
         #[arg(long)]
         dry_run: bool,
+    },
+}
+
+#[derive(Subcommand)]
+enum BatteryCommand {
+    /// Mostra carga, saúde, ciclos e limite (o padrão).
+    Show,
+    /// Para a carga num ponto (50 a 100), também depois de reiniciar; `off` volta a 100%.
+    Limit {
+        #[arg(value_name = "PORCENTAGEM|off")]
+        value: String,
     },
 }
 
@@ -586,9 +608,19 @@ fn run() -> Result<bool> {
                 cmd::focus::run(&ctx, what.as_deref())?
             }
         }
-        Command::Night { switch, temp } => {
-            println!("noturno {}", cmd::toggles::state_word(cmd::toggles::night(&ctx, switch, temp)?))
+        Command::Night { login: true, .. } => cmd::toggles::night_login(&ctx)?,
+        Command::Night { switch: cmd::toggles::NightSwitch::Auto, when, .. } => {
+            cmd::toggles::night_auto(&mut ctx, when.as_deref().unwrap_or("20:30-06:45"))?
         }
+        Command::Night { switch, temp, when, .. } => {
+            anyhow::ensure!(when.is_none(), "o horário só vale com `auto` (clios night auto 20:30-06:45)");
+            let on = cmd::toggles::night(&ctx, switch.plain(), temp)?;
+            println!("noturno {}", cmd::toggles::state_word(on))
+        }
+        Command::Battery { command } => match command.unwrap_or(BatteryCommand::Show) {
+            BatteryCommand::Show => cmd::battery::show()?,
+            BatteryCommand::Limit { value } => cmd::battery::limit(&value)?,
+        },
         Command::Dnd { switch } => {
             println!("não perturbe {}", cmd::toggles::state_word(cmd::toggles::dnd(&ctx, switch)?))
         }

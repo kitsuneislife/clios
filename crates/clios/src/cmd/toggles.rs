@@ -31,6 +31,26 @@ impl Switch {
     }
 }
 
+/// O modo noturno tem um estado a mais: o agendado.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, ValueEnum)]
+pub enum NightSwitch {
+    On,
+    Off,
+    Toggle,
+    /// Todo dia, num horário (`clios night auto 20:30-06:45`, ou `off`).
+    Auto,
+}
+
+impl NightSwitch {
+    pub fn plain(self) -> Switch {
+        match self {
+            NightSwitch::On => Switch::On,
+            NightSwitch::Off => Switch::Off,
+            _ => Switch::Toggle,
+        }
+    }
+}
+
 pub const CAFFEINE: Bg = Bg { name: "caffeine", needle: "systemd-inhibit" };
 pub const NIGHT: Bg = Bg { name: "night", needle: "hyprsunset" };
 pub const REC: Bg = Bg { name: "rec", needle: "wf-recorder" };
@@ -79,8 +99,15 @@ pub fn night(ctx: &Ctx, sw: Switch, temp: Option<u32>) -> Result<bool> {
     if !(1000..=10000).contains(&temp) {
         bail!("temperatura {temp}K fora do intervalo (1000 a 10000)");
     }
-    let on = NIGHT.running(ctx);
+    let on = night_on(ctx);
     let next = sw.resolve(on);
+    // mexer à mão vale até o próximo login: o agendado sai de cena
+    let was_auto = auto_marker(ctx).exists();
+    let _ = fs::remove_file(auto_marker(ctx));
+    if was_auto && NIGHT.running(ctx) {
+        NIGHT.stop(ctx, "TERM")?;
+    }
+    let on = on && !was_auto;
     match (on, next) {
         (false, true) => {
             NIGHT.start(ctx, "hyprsunset", &["-t".into(), temp.to_string()])?;
@@ -92,6 +119,121 @@ pub fn night(ctx: &Ctx, sw: Switch, temp: Option<u32>) -> Result<bool> {
         _ => {}
     }
     Ok(next)
+}
+
+/// O horário do noturno agendado, em minutos do dia. Pode passar da meia-noite (`20:30-06:45`).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Window {
+    pub start: u32,
+    pub end: u32,
+}
+
+fn hhmm(s: &str) -> Option<u32> {
+    let (h, m) = s.trim().split_once(':')?;
+    let (h, m): (u32, u32) = (h.parse().ok()?, m.parse().ok()?);
+    (h < 24 && m < 60).then_some(h * 60 + m)
+}
+
+fn fmt_hhmm(m: u32) -> String {
+    format!("{:02}:{:02}", m / 60, m % 60)
+}
+
+impl Window {
+    pub fn parse(s: &str) -> Option<Self> {
+        let (a, b) = s.split_once('-')?;
+        let w = Window { start: hhmm(a)?, end: hhmm(b)? };
+        (w.start != w.end).then_some(w)
+    }
+
+    pub fn contains(self, minute: u32) -> bool {
+        if self.start < self.end {
+            (self.start..self.end).contains(&minute)
+        } else {
+            minute >= self.start || minute < self.end
+        }
+    }
+
+    pub fn label(self) -> String {
+        format!("{}-{}", fmt_hhmm(self.start), fmt_hhmm(self.end))
+    }
+
+    /// A config do hyprsunset: um perfil que esquenta no começo e outro que volta ao normal no fim.
+    pub fn hyprsunset_conf(self, temp: u32) -> String {
+        format!(
+            "# Gerado por `clios night auto {}`. O hyprsunset troca de perfil sozinho no horário.\n\n\
+             profile {{\n    time = {}\n    identity = true\n}}\n\n\
+             profile {{\n    time = {}\n    temperature = {temp}\n}}\n",
+            self.label(),
+            fmt_hhmm(self.end),
+            fmt_hhmm(self.start)
+        )
+    }
+}
+
+fn auto_marker(ctx: &Ctx) -> PathBuf {
+    ctx.paths.state.join("night-auto")
+}
+
+fn local_minute() -> Option<u32> {
+    let out = Command::new("date").arg("+%H:%M").output().ok()?;
+    hhmm(&String::from_utf8_lossy(&out.stdout))
+}
+
+/// A tela está mais quente agora? No agendado, o hyprsunset roda o dia todo, mas só esquenta no horário.
+pub fn night_on(ctx: &Ctx) -> bool {
+    if !NIGHT.running(ctx) {
+        return false;
+    }
+    if !auto_marker(ctx).exists() {
+        return true;
+    }
+    match (Window::parse(&ctx.state.night), local_minute()) {
+        (Some(w), Some(m)) => w.contains(m),
+        _ => true,
+    }
+}
+
+fn start_auto(ctx: &Ctx, w: Window) -> Result<()> {
+    let conf = ctx.paths.config.join("hypr/hyprsunset.conf");
+    clios_core::fsutil::write_atomic(&conf, w.hyprsunset_conf(NIGHT_TEMP).as_bytes())?;
+    if NIGHT.running(ctx) {
+        NIGHT.stop(ctx, "TERM")?;
+    }
+    NIGHT.start(ctx, "hyprsunset", &[])?;
+    clios_core::fsutil::write_atomic(&auto_marker(ctx), w.label().as_bytes())?;
+    Ok(())
+}
+
+/// `clios night auto 20:30-06:45` agenda; `off` desfaz.
+pub fn night_auto(ctx: &mut Ctx, spec: &str) -> Result<()> {
+    if matches!(spec, "off" | "desligar") {
+        ctx.state.night = "off".into();
+        ctx.save_state()?;
+        if auto_marker(ctx).exists() {
+            let _ = fs::remove_file(auto_marker(ctx));
+            if NIGHT.running(ctx) {
+                NIGHT.stop(ctx, "TERM")?;
+            }
+        }
+        println!("modo noturno só à mão (super + n)");
+        return Ok(());
+    }
+    let Some(w) = Window::parse(spec) else { bail!("horário {spec:?} inválido: use início-fim, como 20:30-06:45") };
+    ctx.state.night = w.label();
+    ctx.save_state()?;
+    if !ctx.sandboxed {
+        start_auto(ctx, w)?;
+    }
+    println!("a tela esquenta às {} e volta ao normal às {}, todo dia", fmt_hhmm(w.start), fmt_hhmm(w.end));
+    Ok(())
+}
+
+/// No login: liga o agendado, se houver.
+pub fn night_login(ctx: &Ctx) -> Result<()> {
+    match Window::parse(&ctx.state.night) {
+        Some(w) => start_auto(ctx, w),
+        None => Ok(()),
+    }
 }
 
 // ── não perturbe ──────────────────────────────────────────────────────────
@@ -281,7 +423,7 @@ pub fn all(ctx: &Ctx) -> All {
     All {
         net: status::net(),
         caffeine: CAFFEINE.running(ctx),
-        night: NIGHT.running(ctx),
+        night: night_on(ctx),
         dnd: dnd_on(ctx),
         rec: REC.running(ctx),
         focus: super::focus::remaining(ctx).unwrap_or(0),
@@ -342,6 +484,25 @@ mod tests {
         assert!(!dnd_on(&c));
         assert!(!dnd(&c, Switch::Off).unwrap());
         assert!(!dnd_on(&c));
+    }
+
+    #[test]
+    fn night_windows_cross_midnight() {
+        let w = Window::parse("20:30-06:45").unwrap();
+        assert!(w.contains(21 * 60) && w.contains(3 * 60) && !w.contains(12 * 60) && !w.contains(6 * 60 + 45));
+        let d = Window::parse("13:00-14:00").unwrap();
+        assert!(d.contains(13 * 60 + 30) && !d.contains(14 * 60));
+        assert_eq!(w.label(), "20:30-06:45");
+        for bad in ["", "20:30", "25:00-06:00", "20:30-20:30", "8-9", "ab:cd-01:00"] {
+            assert_eq!(Window::parse(bad), None, "{bad}");
+        }
+    }
+
+    #[test]
+    fn the_hyprsunset_config_has_a_warm_and_a_neutral_profile() {
+        let c = Window::parse("21:00-07:30").unwrap().hyprsunset_conf(3400);
+        assert!(c.contains("profile {\n    time = 07:30\n    identity = true\n}"), "{c}");
+        assert!(c.contains("profile {\n    time = 21:00\n    temperature = 3400\n}"), "{c}");
     }
 
     #[test]

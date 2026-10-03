@@ -137,6 +137,16 @@ bind = ["SUPER + period"]
 what = "fixar a janela em todas as workspaces"
 
 [[group.key]]
+keys = "super + o"
+bind = ["SUPER + O"]
+what = "foco no outro monitor"
+
+[[group.key]]
+keys = "super + shift + o / ctrl + o"
+bind = ["SUPER + SHIFT + O", "SUPER + CTRL + O"]
+what = "janela / workspace para o outro monitor"
+
+[[group.key]]
 keys = "super + arrastar"
 bind = ["SUPER + mouse:272", "SUPER + mouse:273"]
 what = "mover (esquerdo) ou redimensionar (direito)"

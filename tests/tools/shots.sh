@@ -23,6 +23,7 @@ H="$TMP/dark"
 "${CLIOS[@]}" --home "$H" hub --demo --snapshot 84x24 --query "ar" > "$TMP/a.ansi";         png "$TMP/a.ansi" "$OUT/hub-search.png"
 "${CLIOS[@]}" --home "$H" hub --demo --snapshot 84x24 --query ">acento" > "$TMP/a.ansi";    png "$TMP/a.ansi" "$OUT/hub-actions.png"
 "${CLIOS[@]}" --home "$H" hub --demo --snapshot 84x24 --query "+mus" > "$TMP/a.ansi";          png "$TMP/a.ansi" "$OUT/hub-install.png"
+"${CLIOS[@]}" --home "$H" hub --demo --snapshot 84x12 --query "= 5 km em milhas" > "$TMP/a.ansi"; png "$TMP/a.ansi" "$OUT/hub-calc.png"
 L="$TMP/light"
 "${CLIOS[@]}" --home "$L" theme set --mode light --accent azure >/dev/null
 "${CLIOS[@]}" --home "$L" hub --demo --snapshot 84x24 > "$TMP/a.ansi";                      png "$TMP/a.ansi" "$OUT/hub-light.png"

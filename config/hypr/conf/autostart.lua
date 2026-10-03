@@ -16,6 +16,9 @@ return function(_)
     hl.exec_cmd("wl-paste --type text --watch cliphist store")
     hl.exec_cmd("wl-paste --type image --watch cliphist store")
 
+    -- O modo noturno agendado (`clios night auto 20:30-06:45`), se houver.
+    hl.exec_cmd("clios night --login")
+
     -- Garante tema e terminais coerentes mesmo se o estado salvo mudou fora da sessão.
     hl.exec_cmd("clios theme apply --no-hooks")
 

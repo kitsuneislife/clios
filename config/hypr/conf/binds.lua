@@ -60,6 +60,11 @@ return function(_)
     bind(M .. " + SHIFT + " .. key, hl.dsp.window.move({ direction = dir }), "mover janela: " .. dir)
   end
 
+  -- monitores: O de "outro". Com um monitor só, não fazem nada.
+  bind(M .. " + O", hl.dsp.focus({ monitor = "+1" }), "foco no outro monitor")
+  bind(M .. " + SHIFT + O", hl.dsp.window.move({ monitor = "+1" }), "mandar a janela para o outro monitor")
+  bind(M .. " + CTRL + O", hl.dsp.workspace.move({ monitor = "+1" }), "mandar a workspace para o outro monitor")
+
   -- redimensionar: modo `resize` (SUPER + R), h j k l, Esc sai
   bind(M .. " + R", hl.dsp.submap("resize"), "modo redimensionar (h j k l, esc sai)")
   hl.define_submap("resize", function()

@@ -51,6 +51,8 @@ pub struct App {
     loaded: Vec<Scope>,
     /// Desliga as fontes do sistema (hyprctl, cliphist) nos testes.
     pub live_sources: bool,
+    /// A calculadora do escopo `=` (o fend; injetável nos testes).
+    pub calc: fn(&str) -> Option<String>,
 }
 
 fn unix_now() -> u64 {
@@ -81,6 +83,7 @@ impl App {
             clock: unix_now,
             loaded: Vec::new(),
             live_sources: true,
+            calc: sources::calc,
         };
         app.refresh(now);
         app
@@ -104,6 +107,22 @@ impl App {
             self.reveal_from = now; // a lista nova entra com a mesma coreografia
         }
         self.ensure_loaded(scope);
+        if scope == Scope::Calc {
+            // A conta não é busca: o resultado é a única linha, e muda a cada tecla.
+            self.items.retain(|i| i.kind != Kind::Calc);
+            self.hits.clear();
+            if let Some(r) = (!needle.trim().is_empty()).then(|| (self.calc)(needle.trim())).flatten() {
+                let copy = r.trim_start_matches("≈ ").to_string();
+                let mut item = Item::new(Kind::Calc, "calc", r, Action::Copy(copy));
+                item.hint = "enter copia".into();
+                self.items.push(item);
+                self.hits.push(Hit { index: self.items.len() - 1, score: 0, title_idx: Vec::new() });
+            }
+            self.sel = 0;
+            self.sel_from = 0;
+            self.adjust_scroll();
+            return;
+        }
         self.hits = self.ranker.rank(&self.items, scope, &needle, &self.history, (self.clock)());
         self.sel = self.sel.min(self.hits.len().saturating_sub(1));
         self.sel_from = self.sel;
@@ -118,7 +137,7 @@ impl App {
             Scope::Windows => (Kind::Window, sources::windows()),
             Scope::Keys => (Kind::Key, sources::keys()),
             Scope::Clipboard => (Kind::Clip, sources::clipboard()),
-            Scope::All | Scope::Actions | Scope::Install => return,
+            Scope::All | Scope::Actions | Scope::Install | Scope::Calc => return,
         };
         self.items.retain(|i| i.kind != kind);
         self.items.extend(fresh);
@@ -412,6 +431,27 @@ pub mod tests {
         for c in s.chars() {
             a.on_key(key(KeyCode::Char(c)), now);
         }
+    }
+
+    #[test]
+    fn equals_turns_the_hub_into_a_calculator_and_enter_copies() {
+        let now = Instant::now();
+        let mut a = app(now);
+        a.calc = |e| (e == "2^10").then(|| "1024".to_string());
+        type_str(&mut a, "=", now);
+        assert_eq!(a.scope, Scope::Calc);
+        assert!(a.hits.is_empty());
+        type_str(&mut a, "2^10", now);
+        assert_eq!(a.hits.len(), 1);
+        let item = a.selected_item().unwrap();
+        assert_eq!((item.title.as_str(), &item.action), ("1024", &Action::Copy("1024".into())));
+        type_str(&mut a, "+", now);
+        assert!(a.hits.is_empty(), "conta incompleta não mostra resultado velho");
+        a.on_key(key(KeyCode::Backspace), now);
+        assert!(matches!(a.on_key(key(KeyCode::Enter), now), Flow::Run(_)));
+        // fora do escopo, o resultado some da busca normal
+        a.set_query("1024", now);
+        assert!(a.hits.iter().all(|h| a.items[h.index].kind != Kind::Calc));
     }
 
     #[test]

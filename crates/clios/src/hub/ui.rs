@@ -163,6 +163,8 @@ fn render_rows(buf: &mut Buffer, app: &App, now: Instant, lay: &Layout, x0: u16,
             (Scope::Keys, true) => "nenhum atalho com descrição (o Hyprland está rodando?)",
             (Scope::Clipboard, true) => "histórico vazio (o cliphist está rodando?)",
             (Scope::Install, true) => "tudo do catálogo já está instalado",
+            (Scope::Calc, true) => "uma conta: 2^10, 18% de 230, 5 km em milhas, 3 dias em horas",
+            (Scope::Calc, false) => "não entendi a conta",
             (_, true) => "digite para buscar",
             (_, false) => "nada encontrado",
         };
@@ -266,7 +268,7 @@ fn render_footer(buf: &mut Buffer, app: &App, now: Instant, lay: &Layout, x0: u1
     }
 
     let mut x = put(buf, x0, y, "↵", style(t.dim, t.bg));
-    x = put(buf, x, y, " abrir   ", style(t.mute, t.bg));
+    x = put(buf, x, y, if app.scope == Scope::Calc { " copiar   " } else { " abrir   " }, style(t.mute, t.bg));
     x = put(buf, x, y, "esc", style(t.dim, t.bg));
     x = put(buf, x, y, " fechar   ", style(t.mute, t.bg));
     x = put(buf, x, y, "⇥", style(t.dim, t.bg));

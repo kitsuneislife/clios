@@ -49,6 +49,13 @@ pub fn plan(action: &Action, env: &Env) -> Option<Vec<String>> {
             v.extend(args.iter().cloned());
             detached(v)
         }
+        Action::Copy(text) => detached(vec![
+            s("sh"),
+            s("-c"),
+            s("printf %s \"$1\" | wl-copy && notify-send -a clios -u low copiado \"$1\""),
+            s("sh"),
+            text.clone(),
+        ]),
         Action::Clip(id) => {
             detached(vec![s("sh"), s("-c"), s("cliphist decode \"$1\" | wl-copy"), s("sh"), id.clone()])
         }
