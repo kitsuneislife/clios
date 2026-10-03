@@ -13,6 +13,7 @@ Gerado de `config/hypr/conf/binds.lua` por `tests/hypr/dump_keys.py`. No sistema
 | `super + Tab` | alternar para a workspace anterior |
 | `super + Return` | terminal |
 | `super + shift + Return` | terminal flutuante |
+| `super + ctrl + Return` | terminal na mesma pasta do que está em foco |
 | `super + S` | scratchpad: mostrar ou esconder |
 | `super + ctrl + S` | enviar janela ao scratchpad |
 | `super + E` | arquivos |
@@ -29,22 +30,25 @@ Gerado de `config/hypr/conf/binds.lua` por `tests/hypr/dump_keys.py`. No sistema
 | `super + T` | alternar flutuante |
 | `super + comma` | trocar direção da divisão |
 | `super + period` | fixar em todas as workspaces |
-| `super + j` | foco: down |
-| `super + shift + j` | mover janela: down |
-| `super + l` | foco: right |
-| `super + shift + l` | mover janela: right |
-| `super + h` | foco: left |
-| `super + shift + h` | mover janela: left |
 | `super + k` | foco: up |
 | `super + shift + k` | mover janela: up |
-| `super + down` | foco: down |
-| `super + shift + down` | mover janela: down |
-| `super + left` | foco: left |
-| `super + shift + left` | mover janela: left |
+| `super + h` | foco: left |
+| `super + shift + h` | mover janela: left |
+| `super + l` | foco: right |
+| `super + shift + l` | mover janela: right |
+| `super + j` | foco: down |
+| `super + shift + j` | mover janela: down |
 | `super + up` | foco: up |
 | `super + shift + up` | mover janela: up |
+| `super + left` | foco: left |
+| `super + shift + left` | mover janela: left |
+| `super + down` | foco: down |
+| `super + shift + down` | mover janela: down |
 | `super + right` | foco: right |
 | `super + shift + right` | mover janela: right |
+| `super + O` | foco no outro monitor |
+| `super + shift + O` | mandar a janela para o outro monitor |
+| `super + ctrl + O` | mandar a workspace para o outro monitor |
 | `super + R` | modo redimensionar (h j k l, esc sai) |
 | `super + 1` | ir para a workspace 1 |
 | `super + shift + 1` | enviar janela para a workspace 1 |

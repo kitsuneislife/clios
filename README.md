@@ -13,9 +13,12 @@ Preto no branco e branco no preto, mais um acento que você escolhe. Uma fonte s
 
 ## O que tem aqui
 
-- **`clios`**, um binário em Rust, com os comandos do sistema: `theme`, `hub`, `open`, `sync`, `shot`, `status`, `motion`, `doctor`, e, desde a V0.2, `welcome`, `wallpaper`, `apps`, `update`, `fetch`, `caffeine`, `night`, `dnd`, `rec`, `pick`, `power` e `saver`, e, na V0.3, `prompt`, `greet`, `play`, `focus`, `ocr`, `notifs`, `keys` e `self-update`.
+- **`clios`**, um binário em Rust, com os comandos do sistema: `theme`, `hub`, `open`, `sync`, `shot`, `status`, `motion`, `doctor`, e, desde a V0.2, `welcome`, `wallpaper`, `apps`, `update`, `fetch`, `caffeine`, `night`, `dnd`, `rec`, `pick`, `power` e `saver`, na V0.3, `prompt`, `greet`, `play`, `focus`, `ocr`, `notifs`, `keys` e `self-update`, e, na V0.4, `term`, `session`, `snap` e `battery`.
 - **Tokens de design** (`tokens/tokens.toml`) que controlam cor, movimento e tipografia. Hyprland, Quickshell, foot, helix, fish, btop, yazi, lazygit, mpv e a tela de bloqueio leem os mesmos valores. Trocar o acento ou o modo muda tudo junto, e os terminais abertos mudam na hora.
-- **O hub**, um lançador que roda dentro de um terminal (`SUPER + espaço`): apps, TUIs, ações, janelas abertas, atalhos e histórico da área de transferência numa busca só. Com `+`, ele mostra os apps curados que faltam e instala com Enter.
+- **O hub**, um lançador que roda dentro de um terminal (`SUPER + espaço`): apps, TUIs, ações, janelas abertas, atalhos e histórico da área de transferência numa busca só. Com `+`, ele mostra os apps curados que faltam e instala com Enter; com `=`, faz contas (`= 18% de 230`, `= 5 km em milhas`).
+- **A sessão volta no login**: cada terminal reabre na pasta e na workspace onde estava, com o editor que estava aberto. Num desktop onde quase tudo é terminal, isso funciona de um jeito que um desktop gráfico não consegue.
+- **Atualizar sem medo**: com a raiz em btrfs, cada atualização ganha uma fotografia antes e outra depois. `clios snap diff` mostra o que mudou e `clios snap undo` desfaz, com o sistema rodando.
+- **Até o diálogo de arquivo é um terminal**: abrir e salvar no Firefox abre o yazi numa janela flutuante.
 - **O guia de boas-vindas** (`clios welcome`, `SUPER + F10`): primeiros passos ao vivo, atalhos desenhados como teclas, o catálogo de apps, a central do sistema, dicas e o sobre. Abre sozinho no primeiro login.
 - **44 apps de terminal** curados, em dez categorias, com descrição e dica de uso; os essenciais já vêm, o resto instala sob demanda. A regra é um app por trabalho, e um teste a faz valer.
 - **Um terminal que se apresenta, mas só às vezes**: o resumo do sistema (fastfetch, com a marca) no primeiro terminal depois de ligar, duas linhas discretas na primeira vez que uma workspace vazia recebe um, e silêncio no resto do tempo. O prompt tem três estilos (`clios prompt`).
@@ -26,6 +29,8 @@ Preto no branco e branco no preto, mais um acento que você escolhe. Uma fonte s
 
 ![o hub](docs/img/hub.png)
 
+![a calculadora do hub](docs/img/hub-calc.png)
+
 ![o guia de boas-vindas](docs/img/welcome-inicio.png)
 
 ![os oito estilos de papel de parede](docs/img/wallpapers.png)
@@ -34,7 +39,7 @@ Preto no branco e branco no preto, mais um acento que você escolhe. Uma fonte s
 
 Leia isto antes de instalar.
 
-**Testado** (277 testes de Rust, mais os validadores abaixo, tudo rodando no CI):
+**Testado** (314 testes de Rust, mais os validadores abaixo, tudo rodando no CI):
 
 - Os tokens e o contraste: todo acento e toda cor de texto passa de 4.5:1 nos dois modos, e o build quebra se isso piorar.
 - Os templates de cada app renderizam em 48 combinações (modo × acento × nível de movimento), e JSON e TOML saem válidos.
@@ -47,6 +52,9 @@ Leia isto antes de instalar.
 - O leitor de notícias do Arch (feed de exemplo, datas RFC 2822, `.pacnew`) e os pequenos liga-desliga (pid, estado, argumentos).
 - O catálogo: ids únicos, descrições completas, pacotes do bootstrap e dos extras separados, instalação com aspas.
 - Os configs gerados valem para os programas de verdade: o `starship` aceita os três estilos de prompt, o `fastfetch` lê a config e o `nft` valida o firewall (o runner roda isso onde os programas estão instalados).
+- A sessão: o que é capturado de cada janela, o que volta a rodar e o que não volta, e o comando que o Hyprland recebe. A ficha do terminal e o aviso de comando longo rodaram no fish de verdade.
+- As fotografias: a lista e as mudanças no formato do snapper, os pares antes/depois, os pacotes que mudaram e a recusa quando a atualização trocou o kernel.
+- O diálogo de arquivo: o campo de nome (atalhos do shell, acentos, extensão) e o fluxo de salvar num pty.
 - Os scripts passam no `shellcheck`, e o `bootstrap.sh` tem `--dry-run`.
 
 **Nunca rodou de verdade**:
@@ -54,13 +62,14 @@ Leia isto antes de instalar.
 - Nenhuma peça foi executada dentro de uma sessão do Hyprland, nem o Quickshell (os módulos que falam com PipeWire, UPower, notificações e Hyprland só foram conferidos contra o código-fonte do Quickshell e com `qmllint`).
 - Os nomes dos pacotes do Arch foram conferidos por pesquisa, não por instalação. O bootstrap pula e avisa os que não existirem.
 - A ISO não foi montada. O perfil e o `build.sh` partem do `releng` oficial, mas esperam ajustes na primeira execução.
+- O snapper, o limine-snapper-sync e o portal de arquivos não rodaram de verdade: o formato da saída do snapper e os argumentos do portal foram conferidos no código-fonte de cada um.
 - Nada foi testado em hardware.
 
 Se você tentar e algo quebrar, o `clios doctor` diz o que falta, e uma issue com a saída dele ajuda muito.
 
 ## Instalação
 
-Em um Arch já instalado (`archinstall`, perfil *minimal*, `systemd-boot`):
+Em um Arch já instalado (`archinstall`, perfil *minimal*). Escolha **btrfs** com os subvolumes padrão para ter as fotografias do sistema (`clios snap`), e o **limine** como carregador de boot se quiser que elas apareçam no menu de boot; com o `systemd-boot` e ext4 tudo funciona, só sem fotografias:
 
 ```sh
 git clone https://github.com/kitsuneislife/clios
@@ -87,6 +96,8 @@ Para experimentar numa VM sem instalar, veja [`iso/`](iso/README.md).
 | `SUPER + h j k l` | foco; com `shift`, move a janela |
 | `SUPER + 1…0` / `SUPER + shift + 1…0` | ir para a workspace / mandar a janela para ela |
 | `SUPER + Q` | fechar a janela |
+| `SUPER + ctrl + Enter` | terminal na mesma pasta do que está em foco |
+| `SUPER + O` | o outro monitor; com `shift`, leva a janela; com `ctrl`, a workspace |
 | `SUPER + E / G / A / I` | arquivos / git / áudio / rede |
 | `Print` ou `SUPER + shift + S` | captura de região (salva, copia e avisa) |
 
@@ -110,6 +121,10 @@ clios focus 50                            # 50 minutos em silêncio, com contage
 clios ocr                                 # copia o texto de uma região da tela
 clios keys captura                        # os atalhos, no terminal
 clios self-update                         # atualiza o próprio CLIOS
+clios session                             # o que volta no próximo login (off: mesa limpa)
+clios snap                                # as fotografias do sistema; diff N e undo N
+clios night auto 20:30-06:45              # modo noturno todo dia, sozinho
+clios battery limit 80                    # a carga para em 80%, também depois de reiniciar
 ```
 
 Para mudar o catálogo do hub (as TUIs que aparecem), copie `config/clios/hub.toml` para `~/.config/clios/hub.toml`. Monitores e teclado ficam em `~/.config/hypr/user.lua` (há um `user.lua.example`).
@@ -137,7 +152,7 @@ tokens/        a fonte única de design
 templates/     um template (minijinja) por app, e o manifesto que os liga
 config/        dotfiles estáticos, ligados por symlink em ~/.config
 seed/          arquivos que o app reescreve (btop): copiados uma vez
-system/        arquivos de /etc (greetd, iwd, zram, sysctl, nftables)
+system/        arquivos de /etc (greetd, iwd, zram, sysctl, nftables, a política do Firefox)
 crates/        clios-core (tokens, tema, sync) e clios (a CLI e o hub)
 brand/         marca e wordmark em SVG, e o script que os gera
 site/          a página do projeto (GitHub Pages), gerada do catálogo, dos atalhos e do changelog
@@ -171,7 +186,8 @@ O runner executa `rustfmt`, `clippy`, os testes de Rust, os validadores de Lua e
 - Um instalador, para não depender do `archinstall`.
 - Papel de parede animado (o cursor da marca já pisca na proteção de tela; falta o fundo).
 - Tema para o Firefox (`userChrome.css` gerado dos tokens).
-- Atalhos para mover foco e janelas entre monitores (a API de monitor do Hyprland em Lua ainda não foi conferida).
+- Fotografias também da pasta pessoal, com o mesmo `diff` e `undo`.
+- A sessão lembrar o tamanho das janelas flutuantes e a ordem das colunas.
 
 ## Licença
 

@@ -10,8 +10,8 @@ keys = "super + espaço"
 
 [[tip]]
 title = "escopos do hub"
-body = "Um prefixo restringe a busca: @ janelas, ? atalhos, > ações, \" clipboard, + instalar apps que faltam."
-keys = "@  ?  >  \""
+body = "Um prefixo restringe a busca: @ janelas, ? atalhos, > ações, \" clipboard, + instalar apps que faltam, = contas."
+keys = "@  ?  >  \"  +  ="
 
 [[tip]]
 title = "instale sem sair do hub"
@@ -122,3 +122,33 @@ keys = "super + shift + r"
 title = "conta-gotas"
 body = "Pegue qualquer cor da tela: o hex vai direto para o clipboard."
 keys = "super + p"
+
+[[tip]]
+title = "contas no hub"
+body = "Comece com = e escreva a conta: porcentagem, unidades, datas. Aceita vírgula decimal e um pouco de português. Enter copia."
+keys = "= 18% de 230"
+
+[[tip]]
+title = "a sessão volta"
+body = "Desligou com tudo aberto? No próximo login, cada terminal volta na pasta e na workspace onde estava, com o editor aberto."
+keys = "clios session"
+
+[[tip]]
+title = "um terminal na mesma pasta"
+body = "Com um terminal em foco, abra outro já na pasta dele, sem cd."
+keys = "super + ctrl + enter"
+
+[[tip]]
+title = "atualizar sem medo"
+body = "Com a raiz em btrfs, cada atualização ganha uma fotografia antes e outra depois. Veja o que mudou e desfaça se precisar."
+keys = "clios snap"
+
+[[tip]]
+title = "copie só a saída"
+body = "No terminal, ctrl + shift + y copia a saída do último comando, sem o prompt e sem o resto da tela."
+keys = "ctrl + shift + y"
+
+[[tip]]
+title = "poupe a bateria"
+body = "Parar a carga em 80% faz a bateria durar anos a mais em quem vive na tomada. Vale também depois de reiniciar."
+keys = "clios battery limit 80"

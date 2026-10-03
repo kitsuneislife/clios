@@ -139,7 +139,7 @@ def stats(tui, n_keys_curated):
 
 
 # Imagens da documentação que o site reaproveita (o site/img/toys e o fetch.png saem de tests/tools/toyshots.sh).
-DOC_IMAGES = ["hub.png", "hub-light.png", "welcome-inicio.png", "welcome-sistema.png", "shell-dark.png", "wallpaper-picker.png", "wallpapers.png"]
+DOC_IMAGES = ["hub.png", "hub-light.png", "hub-calc.png", "welcome-inicio.png", "welcome-sistema.png", "shell-dark.png", "wallpaper-picker.png", "wallpapers.png"]
 
 
 def copy_images():
@@ -188,6 +188,8 @@ def build():
 
 
 if __name__ == "__main__":
+    if "--check" not in sys.argv:
+        copy_images()  # antes do build, que confere se cada imagem citada existe
     out = build()
     target = SITE / "index.html"
     if "--check" in sys.argv:
@@ -195,6 +197,5 @@ if __name__ == "__main__":
             sys.exit("site/index.html está desatualizado: rode site/build.py")
         print("site/index.html em dia")
     else:
-        copy_images()
         target.write_text(out)
         print(f"site/index.html: {len(out) // 1024} KiB")
